@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/theme/app_styles.dart';
 
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -29,11 +30,19 @@ class CustomTextField extends StatelessWidget {
       validator: validator,
       decoration: InputDecoration(
         labelText: label,
-        border: const OutlineInputBorder(),
+        hintStyle: AppStyles.textFieldHintStyle,
+        filled: true,
+        fillColor: AppStyles.textFieldBackground,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide.none,
+        ),
         suffixIcon: isPassword
             ? IconButton(
-                icon:
-                    Icon(obscureText ? Icons.visibility : Icons.visibility_off),
+                icon: Icon(
+                  obscureText ? Icons.visibility : Icons.visibility,
+                  color: Colors.grey,
+                ),
                 onPressed: onToggleObscure,
               )
             : null,

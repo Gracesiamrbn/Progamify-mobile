@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:progamify/core/theme/app_styles.dart';
+import '../../core/theme/app_styles.dart';
 
 class CustomButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -17,8 +17,9 @@ class CustomButton extends StatelessWidget {
       width: double.infinity,
       child: ElevatedButton(
         onPressed: onPressed,
-        style: AppStyles.buttonStyle,
-        child: Text(text, style: AppStyles.buttonTextStyle),
+        style: AppStyles.buttonPrimaryStyle, // Menggunakan buttonPrimaryStyle
+        child: Text(text,
+            style: AppStyles.buttonTextStyle), // Menggunakan buttonTextStyle
       ),
     );
   }

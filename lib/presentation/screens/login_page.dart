@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../widgets/text_field_style1.dart';
 import '../widgets/button_style1.dart';
-import 'package:progamify/core/theme/app_styles.dart';
+import '../../core/theme/app_styles.dart';
+import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -21,6 +22,11 @@ class LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Login successful!")),
       );
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const ProfilePage()),
+      );
     }
   }
 
@@ -29,7 +35,7 @@ class LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Form(
             key: _formKey,
             child: Column(
@@ -67,7 +73,7 @@ class LoginPageState extends State<LoginPage> {
                   },
                 ),
                 const SizedBox(height: 20),
-                CustomButton(onPressed: _login, text: 'Login'),
+                CustomButton(onPressed: _login, text: 'Sign In'),
                 const SizedBox(height: 10),
                 TextButton(
                   onPressed: () {},
