@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../widgets/text_field_style1.dart';
+import '../widgets/button_style1.dart';
+import 'package:progamify/core/theme/app_styles.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -11,12 +14,10 @@ class LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
   bool _isObscure = true;
 
   void _login() {
     if (_formKey.currentState!.validate()) {
-      // Implementasi login di sini
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Login successful!")),
       );
@@ -34,17 +35,11 @@ class LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  'Sign In',
-                  style: Theme.of(context).textTheme.headlineLarge,
-                ),
+                Text('Sign In', style: AppStyles.headingStyle),
                 const SizedBox(height: 20),
-                TextFormField(
+                CustomTextField(
                   controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(),
-                  ),
+                  label: 'Email',
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -54,23 +49,16 @@ class LoginPageState extends State<LoginPage> {
                   },
                 ),
                 const SizedBox(height: 10),
-                TextFormField(
+                CustomTextField(
                   controller: _passwordController,
+                  label: 'Password',
                   obscureText: _isObscure,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    border: const OutlineInputBorder(),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _isObscure ? Icons.visibility : Icons.visibility_off,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _isObscure = !_isObscure;
-                        });
-                      },
-                    ),
-                  ),
+                  isPassword: true,
+                  onToggleObscure: () {
+                    setState(() {
+                      _isObscure = !_isObscure;
+                    });
+                  },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your password';
@@ -79,18 +67,10 @@ class LoginPageState extends State<LoginPage> {
                   },
                 ),
                 const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _login,
-                    child: const Text('Login'),
-                  ),
-                ),
+                CustomButton(onPressed: _login, text: 'Login'),
                 const SizedBox(height: 10),
                 TextButton(
-                  onPressed: () {
-                    // Tambahkan navigasi ke halaman registrasi
-                  },
+                  onPressed: () {},
                   child: const Text('Don’t have an account? Sign up'),
                 ),
               ],
