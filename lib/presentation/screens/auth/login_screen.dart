@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import '../widgets/text_field_style1.dart';
-import '../widgets/button_style1.dart';
-import '../../core/theme/app_styles.dart';
-import 'home_page.dart';
+import '../../widgets/text_field_style1.dart';
+import '../../widgets/button_style1.dart';
+import '../../../core/theme/app_styles.dart';
+import '../profile/profile_screen.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
   @override
-  LoginPageState createState() => LoginPageState();
+  LoginScreenState createState() => LoginScreenState();
 }
 
-class LoginPageState extends State<LoginPage> {
+class LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -19,13 +19,13 @@ class LoginPageState extends State<LoginPage> {
 
   void _login() {
     if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Login successful!")),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(content: Text("Login successful!")),
+      // );
 
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const ProfilePage()),
+        MaterialPageRoute(builder: (context) => const ProfileScreen()),
       );
     }
   }
