@@ -11,7 +11,7 @@ class ProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverAppBar(
-      expandedHeight: 200,
+      expandedHeight: 172.5,
       pinned: true,
       automaticallyImplyLeading: false,
       flexibleSpace: FlexibleSpaceBar(

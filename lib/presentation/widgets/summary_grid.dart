@@ -12,33 +12,48 @@ class SummaryGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final achievements = items ?? List.generate(
-      4,
-      (index) => AchievementItem(
-        title: "Achievement ${index + 1}",
-        description: "Description ${index + 1}",
-      ),
-    );
+    final achievements = items ??
+        List.generate(
+          4,
+          (index) => AchievementItem(
+            title: "Achievement ${index + 1}",
+            description: "Description ${index + 1}",
+          ),
+        );
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          Center(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: 16),
           Text(
-            title,
+            'Achievement',
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
+              color: Colors.black87,
             ),
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              childAspectRatio: 3,
+              childAspectRatio:
+                  2, // Mengurangi perbandingan aspek untuk lebih rapat
               crossAxisSpacing: 8,
               mainAxisSpacing: 8,
             ),
@@ -52,14 +67,15 @@ class SummaryGrid extends StatelessWidget {
                 ),
                 alignment: Alignment.center,
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(
+                      4.0), // Mengurangi padding dalam item
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         item.title,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFF1F1F1F),
                           fontWeight: FontWeight.bold,
                         ),
                         textAlign: TextAlign.center,
@@ -67,7 +83,7 @@ class SummaryGrid extends StatelessWidget {
                       Text(
                         item.description,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFF1F1F1F),
                           fontSize: 12,
                         ),
                         textAlign: TextAlign.center,

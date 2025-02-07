@@ -21,7 +21,7 @@ class ProfileScreen extends StatelessWidget {
           SliverToBoxAdapter(
             child: Column(
               children: [
-                SizedBox(height: 16),
+                SizedBox(height: 20),
                 ProfileInfo(
                   name: "Enrico Sirait",
                   details: "11521034 | email@mail.com | 2021",

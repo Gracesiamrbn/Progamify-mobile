@@ -24,14 +24,17 @@ class BadgesSection extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment:
+            CrossAxisAlignment.center, // Menjaga konten tetap di tengah
         children: [
+          const SizedBox(height: 24), // Jarak di atas section
           Text(
             title,
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
+            textAlign: TextAlign.center, // Teks ter-align di tengah
           ),
           const SizedBox(height: 8),
           Row(
@@ -69,6 +72,7 @@ class BadgesSection extends StatelessWidget {
               );
             }).toList(),
           ),
+          const SizedBox(height: 16), // Jarak di bawah section
         ],
       ),
     );
