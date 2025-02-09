@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:progamify/presentation/screens/navigation/bottom_navigation.dart';
 import '../../widgets/text_field_style1.dart';
 import '../../widgets/button_style1.dart';
 import '../../../core/theme/app_styles.dart';
-import '../profile/profile_screen.dart';
+import '../navigation/bottom_navigation.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -25,7 +26,7 @@ class LoginScreenState extends State<LoginScreen> {
 
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const ProfileScreen()),
+        MaterialPageRoute(builder: (context) => const MainScreen()),
       );
     }
   }
@@ -41,7 +42,7 @@ class LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Sign In', style: AppStyles.headingStyle),
+                const Text('Sign In', style: AppStyles.headingStyle),
                 const SizedBox(height: 20),
                 CustomTextField(
                   controller: _emailController,
