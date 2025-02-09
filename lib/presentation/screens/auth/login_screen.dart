@@ -3,7 +3,6 @@ import 'package:progamify/presentation/screens/navigation/bottom_navigation.dart
 import '../../widgets/text_field_style1.dart';
 import '../../widgets/button_style1.dart';
 import '../../../core/theme/app_styles.dart';
-import '../navigation/bottom_navigation.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
