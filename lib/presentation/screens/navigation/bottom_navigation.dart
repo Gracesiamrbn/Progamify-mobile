@@ -19,7 +19,7 @@ class MainScreenState extends State<MainScreen> {
   final List<Widget> _screens = [
     TopicsScreen(),
     const QuestScreen(),
-    const LeaderboardScreen(),
+    LeaderboardScreen(),
     const ProfileScreen(),
   ];
 

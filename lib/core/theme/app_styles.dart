@@ -133,4 +133,25 @@ class AppStyles {
     fontWeight: FontWeight.w600,
     color: Colors.black87,
   );
+
+  // Color
+  static const Color lightBlueColor = Color(0xFFE0F7FA);
+
+  static const TextStyle title = TextStyle(
+    fontSize: 24,
+    fontWeight: FontWeight.bold,
+  );
+
+  static const TextStyle boldText = TextStyle(
+    fontWeight: FontWeight.bold,
+  );
+
+  static const TextStyle leaderboardRank = TextStyle(
+    fontWeight: FontWeight.bold,
+    fontSize: 18,
+  );
+
+  static const TextStyle medalStyle = TextStyle(
+    fontSize: 20,
+  );
 }

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_styles.dart';
+import 'setting_profile_screen.dart';
+import 'change_password_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -9,6 +12,7 @@ class SettingsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Settings'),
         backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -18,6 +22,12 @@ class SettingsScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 // Action for Profile
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SettingProfileScreen(),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.grey[300], // Light grey background
@@ -31,10 +41,7 @@ class SettingsScreen extends StatelessWidget {
                 alignment: Alignment.centerLeft, // Rata kiri
                 child: Text(
                   'Profile',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold, // Bold
-                  ),
+                  style: AppStyles.cardTitleStyle,
                 ),
               ),
             ),
@@ -44,6 +51,12 @@ class SettingsScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 // Action for Change Password
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ChangePasswordScreen(),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.grey[300], // Light grey background
@@ -57,10 +70,7 @@ class SettingsScreen extends StatelessWidget {
                 alignment: Alignment.centerLeft, // Rata kiri
                 child: Text(
                   'Change Password',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold, // Bold
-                  ),
+                  style: AppStyles.cardTitleStyle,
                 ),
               ),
             ),

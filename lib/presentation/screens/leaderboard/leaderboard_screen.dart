@@ -1,63 +1,130 @@
 import 'package:flutter/material.dart';
 import 'package:progamify/core/theme/app_styles.dart';
-// import 'package:google_fonts/google_fonts.dart';
+import '../../widgets/leaderboard.dart';
 
 class LeaderboardScreen extends StatelessWidget {
-  const LeaderboardScreen({super.key});
+  LeaderboardScreen({super.key});
+
+  final List<Map<String, dynamic>> leaderboard = [
+    {
+      'name': 'John Doe',
+      'xp': 273,
+      'avatar': 'assets/avatars/avatar_male_1.png'
+    },
+    {
+      'name': 'Jane Doe',
+      'xp': 270,
+      'avatar': 'assets/avatars/avatar_female_1.png'
+    },
+    {
+      'name': 'James Doe',
+      'xp': 262,
+      'avatar': 'assets/avatars/avatar_male_2.png'
+    },
+    {
+      'name': 'June Doe',
+      'xp': 250,
+      'avatar': 'assets/avatars/avatar_female_2.png'
+    },
+    {
+      'name': 'Jay Doe',
+      'xp': 249,
+      'avatar': 'assets/avatars/avatar_male_3.png'
+    },
+    {
+      'name': 'Jenny Doe',
+      'xp': 247,
+      'avatar': 'assets/avatars/avatar_female_3.png'
+    },
+    {
+      'name': 'Jammy Doe',
+      'xp': 240,
+      'avatar': 'assets/avatars/avatar_male_4.png'
+    },
+    {
+      'name': 'Joe Doe',
+      'xp': 240,
+      'avatar': 'assets/avatars/avatar_male_5.png'
+    },
+    {
+      'name': 'Jessy Doe',
+      'xp': 200,
+      'avatar': 'assets/avatars/avatar_female_2.png'
+    },
+    {
+      'name': 'Jerry Doe',
+      'xp': 109,
+      'avatar': 'assets/avatars/avatar_male_3.png'
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(top: 48),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.blue,
-              borderRadius: BorderRadius.circular(12),
+    return Scaffold(
+      backgroundColor: Colors.lightBlue[50],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 40),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildTopUser(leaderboard[1]['name'], '🥈',
+                      leaderboard[1]['avatar'], 60),
+                  const SizedBox(width: 20.0),
+                  _buildTopUser(leaderboard[0]['name'], '🥇',
+                      leaderboard[0]['avatar'], 70),
+                  const SizedBox(width: 20.0),
+                  _buildTopUser(leaderboard[2]['name'], '🥉',
+                      leaderboard[2]['avatar'], 50),
+                ],
+              ),
             ),
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Leaderboard',
-                  style: AppStyles.headingStyle,
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'SEE WHO IS ON TOP !',
-                  style: AppStyles.instructionStyle,
-                ),
-              ],
+            const SizedBox(height: 10),
+            const Text(
+              'Leaderboard',
+              style: AppStyles.title,
             ),
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: ListView.builder(
-              itemCount: 10, // Misalnya 10 pemain di leaderboard
-              itemBuilder: (context, index) {
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.blue.shade300,
-                    child: Text(
-                      '${index + 1}',
-                      style: AppStyles.boldWhite,
-                    ),
-                  ),
-                  title: Text(
-                    'Player ${index + 1}',
-                    style: AppStyles.bodyStyle,
-                  ),
-                  subtitle: Text('Points: ${1000 - (index * 100)}'),
-                );
-              },
+            const SizedBox(height: 10),
+            // Memastikan Leaderboard bisa scrollable dengan Expanded tetap berfungsi
+            SizedBox(
+              height: MediaQuery.of(context).size.height -
+                  200, // Sesuaikan tinggi agar konten lainnya tetap terlihat
+              child: Leaderboard(leaderboard: leaderboard),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildTopUser(
+      String? name, String medal, String? avatarPath, double avatarSize) {
+    return Column(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(10), // Mengatur sudut membulat
+          child: avatarPath != null
+              ? Image.asset(
+                  avatarPath,
+                  width: avatarSize,
+                  height: avatarSize,
+                  fit: BoxFit.cover, // Menjaga aspek gambar
+                )
+              : Container(
+                  width: avatarSize,
+                  height: avatarSize,
+                  color:
+                      Colors.grey[300], // Warna background jika avatar kosong
+                  child: const Icon(Icons.person, size: 40, color: Colors.grey),
+                ),
+        ),
+        const SizedBox(height: 5),
+        Text(name ?? 'Unknown', style: AppStyles.boldText),
+        Text(medal, style: AppStyles.medalStyle),
+      ],
     );
   }
 }
