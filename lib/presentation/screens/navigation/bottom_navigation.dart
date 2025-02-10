@@ -41,7 +41,7 @@ class MainScreenState extends State<MainScreen> {
       body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         selectedItemColor: Colors.blue,
-        backgroundColor: Colors.blue[100],
+        backgroundColor: Colors.blue[200],
         unselectedItemColor: Colors.grey,
         showUnselectedLabels: true,
         currentIndex: _currentIndex,
