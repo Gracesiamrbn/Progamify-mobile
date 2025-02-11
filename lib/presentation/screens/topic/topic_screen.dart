@@ -1,73 +1,53 @@
 import 'package:flutter/material.dart';
-import 'package:progamify/core/theme/app_styles.dart';
-
 import '../../widgets/topic_card.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'topic_detail_screen.dart';
 
 class TopicsScreen extends StatelessWidget {
-  TopicsScreen({super.key});
-
-  // Menambahkan completedSections dan totalSections ke dalam topics
-  final List<Map<String, dynamic>> topics = [
-    {
-      'title': 'Introduction',
-      'totalSection': '10 SECTION',
-      'completedSections': 5,
-      'totalSections': 10
-    },
-    {
-      'title': 'Data Types',
-      'totalSection': '10 SECTION',
-      'completedSections': 3,
-      'totalSections': 10
-    },
-    {
-      'title': 'Control Flows',
-      'totalSection': '10 SECTION',
-      'completedSections': 7,
-      'totalSections': 10
-    },
-    {
-      'title': 'Function',
-      'totalSection': '10 SECTION',
-      'completedSections': 6,
-      'totalSections': 10
-    },
-    {
-      'title': 'Object Oriented Programming',
-      'totalSection': '10 SECTION',
-      'completedSections': 8,
-      'totalSections': 10
-    },
-  ];
+  const TopicsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(top: 48),
+      padding: const EdgeInsets.symmetric(horizontal: 16)
+          .copyWith(top: 50, bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(30),
             decoration: BoxDecoration(
-              color: Colors.blue,
+              color: Colors.blue.shade500,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Column(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Topics', style: AppStyles.titleStyle),
-                SizedBox(height: 4),
-                Text('CHOOSE A TOPIC TO LEARN TODAY !', style: AppStyles.instructionStyle),
+                Text(
+                  'Topics',
+                  style: GoogleFonts.inter(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'CHOOSE A TOPIC TO LEARN TODAY !',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: Colors.white,
+                  ),
+                ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           Expanded(
             child: SingleChildScrollView(
               child: Column(
-                children: _buildTopicCards(),
+                children: _buildTopicCards(context),
               ),
             ),
           ),
@@ -76,14 +56,89 @@ class TopicsScreen extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildTopicCards() {
+  List<Widget> _buildTopicCards(BuildContext context) {
+    final topics = [
+      'Introduction',
+      'Data Types',
+      'Control Flows',
+      'Function',
+      'Object Oriented Programming',
+    ];
+
     return topics
-        .map((topic) => TopicCard(
-              topic: topic['title']!,
-              description: topic['totalSection']!,
-              completedSections: topic['completedSections']!,
-              totalSections: topic['totalSections']!,
-            ))
+        .map(
+          (topic) => GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TopicDetailScreen(topicTitle: topic),
+                ),
+              );
+            },
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 12, left: 12, right: 12),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade200,
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 5,
+                    spreadRadius: 2,
+                  )
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    topic,
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '10 SECTION',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Text(
+                        '5 of 10',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: LinearProgressIndicator(
+                            value: 0.5,
+                            backgroundColor: Colors.grey.shade300,
+                            color: Colors.blue.shade700,
+                            minHeight: 8,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        )
         .toList();
   }
 }
