@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:progamify/presentation/screens/topic/topic_course_screen.dart';
+import 'package:progamify/presentation/screens/topic/excercise_screen.dart';
 
 class TopicDetailScreen extends StatelessWidget {
   const TopicDetailScreen({super.key, required String topicTitle});
@@ -107,9 +108,9 @@ class TopicDetailScreen extends StatelessWidget {
   List<Widget> _buildTopicCards(BuildContext context) {
     final topics = [
       {'title': 'Introduction', 'exp': 10},
-      {'title': 'Exercise I', 'exp': 50, 'questions': 10},
+      {'title': 'Exercise I', 'exp': 50, 'questions': 1},
       {'title': 'History of Programming', 'exp': 10},
-      {'title': 'Exercise II', 'exp': 50, 'questions': 10},
+      {'title': 'Exercise II', 'exp': 50, 'questions': 1},
     ];
 
     return topics.map((topic) {
@@ -214,28 +215,28 @@ class TopicDetailScreen extends StatelessWidget {
   }
 }
 
-class ExerciseScreen extends StatelessWidget {
-  final String title;
-  const ExerciseScreen({super.key, required this.title});
+// class ExerciseScreen extends StatelessWidget {
+//   final String title;
+//   const ExerciseScreen({super.key, required this.title});
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(child: Text('Exercise Screen: $title')),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(title: Text(title)),
+//       body: Center(child: Text('Exercise Screen: $title')),
+//     );
+//   }
+// }
 
-class LessonScreen extends StatelessWidget {
-  final String title;
-  const LessonScreen({super.key, required this.title});
+// class LessonScreen extends StatelessWidget {
+//   final String title;
+//   const LessonScreen({super.key, required this.title});
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(child: Text('Lesson Screen: $title')),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(title: Text(title)),
+//       body: Center(child: Text('Lesson Screen: $title')),
+//     );
+//   }
+// }

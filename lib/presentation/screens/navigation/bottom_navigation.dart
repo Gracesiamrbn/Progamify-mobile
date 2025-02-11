@@ -17,7 +17,7 @@ class MainScreenState extends State<MainScreen> {
 
   // Daftar screens yang akan ditampilkan
   final List<Widget> _screens = [
-    TopicsScreen(),
+    const TopicsScreen(),
     const QuestScreen(),
     const LeaderboardScreen(),
     const ProfileScreen(),
