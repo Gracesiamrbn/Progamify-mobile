@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'discussion_reply_screen.dart'; // Import halaman reply
 
 class TopicCourseScreen extends StatefulWidget {
   final String topicTitle;
@@ -18,19 +19,25 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(_handleTabChange);
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(_handleTabChange);
     _tabController.dispose();
     super.dispose();
+  }
+
+  void _handleTabChange() {
+    setState(() {}); // Perbarui tampilan saat tab berubah
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue[300], // Warna AppBar biru muda
+        backgroundColor: Colors.blue[300],
         title: Text(
           widget.topicTitle,
           style: GoogleFonts.inter(
@@ -50,7 +57,7 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
         ),
       ),
       body: Container(
-        color: Colors.white70, // Background fragment warna putih transparan
+        color: Colors.white70,
         child: TabBarView(
           controller: _tabController,
           children: [
@@ -59,13 +66,15 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue[300],
-        onPressed: () {
-          // Aksi ketika tombol tambah diklik
-        },
-        child: const Icon(Icons.add, size: 32, color: Colors.white),
-      ),
+      floatingActionButton: _tabController.index == 1
+          ? FloatingActionButton(
+              backgroundColor: Colors.blue[300],
+              onPressed: () {
+                // Aksi ketika tombol tambah diklik
+              },
+              child: const Icon(Icons.add, size: 32, color: Colors.white),
+            )
+          : null, // Tidak menampilkan tombol di tab "Lesson"
     );
   }
 
@@ -152,6 +161,21 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
         "date": "29/08/24 10:00",
         "title": "Why so many programming language?",
       },
+      {
+        "name": "Boy Sitorus",
+        "date": "12/09/24 13:45",
+        "title": "How \"Hello World!\" become most iconic for coders?",
+      },
+      {
+        "name": "Emely Angel",
+        "date": "10/09/24 09:15",
+        "title": "Which better? Python or Java?",
+      },
+      {
+        "name": "Enrico Sirait",
+        "date": "30/08/24 23:11",
+        "title": "What programming language I should learn first?",
+      },
     ];
 
     return Padding(
@@ -176,7 +200,7 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey.shade300,
-                  foregroundColor: Colors.black, 
+                  foregroundColor: Colors.black,
                 ),
                 child: const Text('Filter Discussion'),
               ),
@@ -187,67 +211,95 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
             child: ListView.builder(
               itemCount: discussions.length,
               itemBuilder: (context, index) {
-                return Card(
-                  color: Colors.blue[50],
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  margin: const EdgeInsets.only(bottom: 10),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const CircleAvatar(
-                              backgroundColor: Colors.grey,
-                              radius: 10,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              discussions[index]['name']!,
-                              style: GoogleFonts.inter(
-                                fontWeight: FontWeight.bold,
+                return InkWell(
+                  onTap: () {
+                    // Navigasi ke DiscussionReplyScreen saat Card diklik
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DiscussionReplyScreen(
+                          discussionTitle: discussions[index]['title']!,
+                          author: discussions[index]['name']!,
+                          date: discussions[index]['date']!,
+                        ),
+                      ),
+                    );
+                  },
+                  child: Card(
+                    color: Colors.blue[50],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    margin: const EdgeInsets.only(bottom: 10),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const CircleAvatar(
+                                backgroundColor: Colors.grey,
+                                radius: 10,
                               ),
-                            ),
-                            const Spacer(),
-                            Text(
-                              discussions[index]['date']!,
-                              style: GoogleFonts.inter(
-                                  fontSize: 12, color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          discussions[index]['title']!,
-                          style: GoogleFonts.inter(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                              const SizedBox(width: 8),
+                              Text(
+                                discussions[index]['name']!,
+                                style: GoogleFonts.inter(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const Spacer(),
+                              Text(
+                                discussions[index]['date']!,
+                                style: GoogleFonts.inter(
+                                    fontSize: 12, color: Colors.grey),
+                              ),
+                            ],
                           ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...',
-                          style: GoogleFonts.inter(
-                              fontSize: 14, color: Colors.black87),
-                        ),
-                        const SizedBox(height: 8),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: ElevatedButton(
-                            onPressed: () {},
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.grey.shade300,
-                              foregroundColor: Colors.black,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 12),
+                          const SizedBox(height: 8),
+                          Text(
+                            discussions[index]['title']!,
+                            style: GoogleFonts.inter(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
                             ),
-                            child: const Text('Replies (3)'),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 6),
+                          Text(
+                            'Lorem ipsum dolor sit amet, consectetur adipiscing elit...',
+                            style: GoogleFonts.inter(
+                                fontSize: 14, color: Colors.black87),
+                          ),
+                          const SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                // Navigasi ke DiscussionReplyScreen saat button diklik
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => DiscussionReplyScreen(
+                                      discussionTitle: discussions[index]
+                                          ['title']!,
+                                      author: discussions[index]['name']!,
+                                      date: discussions[index]['date']!,
+                                    ),
+                                  ),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.grey.shade300,
+                                foregroundColor: Colors.black,
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 12),
+                              ),
+                              child: const Text('Replies (3)'),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );

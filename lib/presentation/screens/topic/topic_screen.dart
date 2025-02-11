@@ -69,14 +69,12 @@ class TopicsScreen extends StatelessWidget {
         .map(
           (topic) => GestureDetector(
             onTap: () {
-              if (topic == 'Introduction') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => TopicDetailScreen(topicTitle: topic),
-                  ),
-                );
-              }
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TopicDetailScreen(topicTitle: topic),
+                ),
+              );
             },
             child: Container(
               margin: const EdgeInsets.only(bottom: 12, left: 12, right: 12),
@@ -142,31 +140,5 @@ class TopicsScreen extends StatelessWidget {
           ),
         )
         .toList();
-  }
-}
-
-class ExerciseScreen extends StatelessWidget {
-  final String title;
-  const ExerciseScreen({super.key, required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(child: Text('Exercise Screen: $title')),
-    );
-  }
-}
-
-class LessonScreen extends StatelessWidget {
-  final String title;
-  const LessonScreen({super.key, required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(child: Text('Lesson Screen: $title')),
-    );
   }
 }

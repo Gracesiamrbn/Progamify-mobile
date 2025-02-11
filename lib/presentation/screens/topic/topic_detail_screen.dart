@@ -129,7 +129,7 @@ class TopicDetailScreen extends StatelessWidget {
               MaterialPageRoute(
                   builder: (context) => TopicCourseScreen(
                         courseTitle: topic['title'] as String? ?? '',
-                        topicTitle: 'Introduction',
+                        topicTitle: '',
                       )),
             );
           }
