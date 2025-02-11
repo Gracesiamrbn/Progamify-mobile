@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
+import 'package:progamify/presentation/screens/profile/achievement_screen.dart';
 
 class SummaryGrid extends StatelessWidget {
   final String title;
-  final List<AchievementItem>? items;
+  final List<Map<String, String>>? items;
 
   const SummaryGrid({
     super.key,
@@ -13,13 +15,25 @@ class SummaryGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final achievements = items ??
-        List.generate(
-          4,
-          (index) => AchievementItem(
-            title: "Achievement ${index + 1}",
-            description: "Description ${index + 1}",
-          ),
-        );
+        [
+          {
+            "title": "First Step",
+            "description": "Fully complete one Topic",
+          },
+          {
+            "title": "Badge Collector",
+            "description": "Earn your first Badge",
+          },
+          {
+            "title": "Avatar Explorer",
+            "description": "Unlock your first Avatar.",
+          },
+          {
+            "title": "Badge Hunter",
+            "description": "Collect 5 Badges.",
+          },
+          // Add more achievements as needed
+        ];
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -46,34 +60,45 @@ class SummaryGrid extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 4),
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              childAspectRatio:
-                  2, // Mengurangi perbandingan aspek untuk lebih rapat
+              childAspectRatio: 2,
               crossAxisSpacing: 8,
               mainAxisSpacing: 8,
             ),
             itemCount: achievements.length,
             itemBuilder: (context, index) {
-              final item = achievements[index];
+              final achievement = achievements[index];
               return Container(
                 decoration: BoxDecoration(
-                  color: Colors.grey[400],
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.grey.shade300,
+                      Colors.grey.shade500,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderRadius: BorderRadius.circular(12),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 12, // Bayangan yang lebih lembut dan besar
+                      offset: Offset(0, 6), // Posisi bayangan yang lebih halus
+                    ),
+                  ],
                 ),
                 alignment: Alignment.center,
                 child: Padding(
-                  padding: const EdgeInsets.all(
-                      4.0), // Mengurangi padding dalam item
+                  padding: const EdgeInsets.all(4.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        item.title,
+                        achievement["title"]!,
                         style: const TextStyle(
                           color: Color(0xFF1F1F1F),
                           fontWeight: FontWeight.bold,
@@ -81,7 +106,7 @@ class SummaryGrid extends StatelessWidget {
                         textAlign: TextAlign.center,
                       ),
                       Text(
-                        item.description,
+                        achievement["description"]!,
                         style: const TextStyle(
                           color: Color(0xFF1F1F1F),
                           fontSize: 12,
@@ -93,6 +118,29 @@ class SummaryGrid extends StatelessWidget {
                 ),
               );
             },
+          ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: RichText(
+              text: TextSpan(
+                text: 'see more...',
+                style: const TextStyle(
+                  color: Colors.blue,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.25,
+                ),
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const AchievementScreen()),
+                    );
+                  },
+              ),
+            ),
           ),
         ],
       ),

@@ -74,7 +74,7 @@ class SummaryBoxes extends StatelessWidget {
               );
             }).toList(),
           ),
-          const SizedBox(height: 24), // Jarak antara row dan bagian bawah
+          const SizedBox(height: 24),
         ],
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../screens/profile/setting_screen.dart';
+import '../screens/profile/market_screen.dart';
 
 class ProfileInfo extends StatelessWidget {
   final String name;
@@ -65,7 +66,14 @@ class ProfileInfo extends StatelessWidget {
           _buildIconButton(
             backgroundColor: const Color(0xFFFFF0F2), // Soft Pink
             iconPath: shopIconPath,
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MarketScreen(),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -90,7 +98,8 @@ class ProfileInfo extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2), // Shadow pertama lebih tajam
+                color:
+                    Colors.black.withOpacity(0.2), // Shadow pertama lebih tajam
                 blurRadius: 6,
                 offset: const Offset(2, 2),
               ),

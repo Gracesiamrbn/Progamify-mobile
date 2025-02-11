@@ -24,17 +24,16 @@ class BadgesSection extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.center, // Menjaga konten tetap di tengah
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const SizedBox(height: 24), // Jarak di atas section
+          const SizedBox(height: 24),
           Text(
             title,
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
-            textAlign: TextAlign.center, // Teks ter-align di tengah
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Row(
@@ -72,6 +71,30 @@ class BadgesSection extends StatelessWidget {
               );
             }).toList(),
           ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: RichText(
+              text: const TextSpan(
+                text: 'see more...',
+                style: TextStyle(
+                  color: Colors.blue,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.25,
+                ),
+                // recognizer: TapGestureRecognizer()
+                //   ..onTap = () {
+                //     Navigator.push(
+                //       context,
+                //       MaterialPageRoute(
+                //           builder: (context) => const QuestScreen()),
+                //     );
+                //   },
+              ),
+            ),
+          ),
+
           const SizedBox(height: 16), // Jarak di bawah section
         ],
       ),
