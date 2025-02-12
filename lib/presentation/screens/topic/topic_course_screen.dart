@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:progamify/presentation/screens/topic/write_discussion_screen.dart';
 import 'discussion_reply_screen.dart'; // Import halaman reply
 
 class TopicCourseScreen extends StatefulWidget {
@@ -71,6 +72,11 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
               backgroundColor: Colors.blue[300],
               onPressed: () {
                 // Aksi ketika tombol tambah diklik
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const WriteDiscussionScreen()),
+                );
               },
               child: const Icon(Icons.add, size: 32, color: Colors.white),
             )

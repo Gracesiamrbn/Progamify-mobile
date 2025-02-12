@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../profile/profile_screen.dart';
 import '../topic/topic_screen.dart';
 import '../leaderboard/leaderboard_screen.dart';
-import '../quest/quest_screen.dart';
+import '../quest/quest_menu_screen.dart';
 
 class MainScreen extends StatefulWidget {
   final int currentIndex;
