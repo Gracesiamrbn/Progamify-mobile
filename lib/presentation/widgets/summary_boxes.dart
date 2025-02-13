@@ -34,13 +34,28 @@ class SummaryBoxes extends StatelessWidget {
                   Stack(
                     alignment: Alignment.center,
                     children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: SvgPicture.asset(
-                          'assets/stats_container.svg',
-                          width: 80,
-                          height: 80,
-                          fit: BoxFit.cover,
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color:
+                                  Colors.black.withOpacity(0.3), 
+                              spreadRadius: 0,
+                              blurRadius:
+                                  5,
+                              offset: const Offset(0, 4), 
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: SvgPicture.asset(
+                            'assets/stats_container_alt1.svg',
+                            width: 80,
+                            height: 80,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                       Text(

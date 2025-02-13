@@ -70,6 +70,7 @@ flutter:
   assets:
     - assets/icons/setting_icon.png
     - assets/stats_container.svg
+    - assets/stats_container_alt1.svg
     - assets/icons/shop_icon.png
     - assets/icons/
     - assets/images/
