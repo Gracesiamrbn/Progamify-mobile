@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class ProfileHeader extends StatelessWidget {
   final String avatarPath;
@@ -18,16 +19,23 @@ class ProfileHeader extends StatelessWidget {
         background: Stack(
           alignment: Alignment.center,
           children: [
-            Container(
-              height: 200,
+            SvgPicture.asset(
+              avatarPath,
               width: double.infinity,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage(avatarPath),
-                  fit: BoxFit.cover,
-                ),
-              ),
+              height: 200,
+              fit: BoxFit.cover,
             ),
+
+            // Container(
+            //   height: 200,
+            //   width: double.infinity,
+            //   decoration: BoxDecoration(
+            //     image: DecorationImage(
+            //       image: AssetImage(avatarPath),
+            //       fit: BoxFit.cover,
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),

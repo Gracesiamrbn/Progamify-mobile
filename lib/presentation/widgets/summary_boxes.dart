@@ -38,10 +38,22 @@ class SummaryBoxes extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                         child: SvgPicture.asset(
                           'assets/stats_container.svg',
-                          width: 90,
-                          height: 90,
+                          width: 80,
+                          height: 80,
                           fit: BoxFit.cover,
                         ),
+                      ),
+                      Text(
+                        item.value,
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w900,
+                          foreground: Paint()
+                            ..style = PaintingStyle.stroke
+                            ..strokeWidth = 4
+                            ..color = const Color(0xFF8B5E3C),
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                       Text(
                         item.value,
