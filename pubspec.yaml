@@ -69,12 +69,15 @@ flutter:
 
   assets:
     - assets/icons/setting_icon.png
+    - assets/stats_container.svg
     - assets/icons/shop_icon.png
     - assets/icons/
     - assets/images/
     - assets/badges/
     - assets/nav/
     - assets/avatars/
+    - assets/leaderboard/
+    
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

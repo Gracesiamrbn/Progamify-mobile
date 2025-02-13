@@ -1,98 +1,99 @@
 import 'package:flutter/material.dart';
-import 'package:progamify/core/theme/app_styles.dart';
-import '../../widgets/leaderboard.dart';
 
-class LeaderboardScreen extends StatelessWidget {
-  LeaderboardScreen({super.key});
+import 'package:flutter_svg/flutter_svg.dart';
 
+class LeaderboardScreen extends StatefulWidget {
+  const LeaderboardScreen({super.key});
+
+  @override
+  LeaderboardScreenState createState() => LeaderboardScreenState();
+}
+
+class LeaderboardScreenState extends State<LeaderboardScreen>
+    with SingleTickerProviderStateMixin {
   final List<Map<String, dynamic>> leaderboard = [
     {
-      'name': 'John Doe',
+      'name': 'Enrico Sirait',
       'xp': 273,
-      'avatar': 'assets/avatars/avatar_male_1.png'
+      'avatar': 'assets/avatars/avatar_male_1.svg',
+      'hasTrophy': true,
     },
     {
-      'name': 'Jane Doe',
+      'name': 'Emely Angelica',
       'xp': 270,
-      'avatar': 'assets/avatars/avatar_female_1.png'
+      'avatar': 'assets/avatars/avatar_female_1.svg',
+      'hasTrophy': false,
     },
     {
-      'name': 'James Doe',
+      'name': 'Boy Sitorus',
       'xp': 262,
-      'avatar': 'assets/avatars/avatar_male_2.png'
+      'avatar': 'assets/avatars/avatar_male_2.svg',
+      'hasTrophy': false,
     },
     {
-      'name': 'June Doe',
+      'name': 'Tabitha Acquila',
       'xp': 250,
-      'avatar': 'assets/avatars/avatar_female_2.png'
+      'avatar': 'assets/avatars/avatar_female_2.svg',
+      'hasTrophy': false,
     },
     {
-      'name': 'Jay Doe',
+      'name': 'Benhard Yudha',
       'xp': 249,
-      'avatar': 'assets/avatars/avatar_male_3.png'
+      'avatar': 'assets/avatars/avatar_male_3.svg',
+      'hasTrophy': false,
     },
     {
-      'name': 'Jenny Doe',
+      'name': 'Tesalonika Aprisda',
       'xp': 247,
-      'avatar': 'assets/avatars/avatar_female_3.png'
+      'avatar': 'assets/avatars/avatar_female_3.svg',
+      'hasTrophy': false,
     },
     {
-      'name': 'Jammy Doe',
+      'name': 'Rafael Manurung',
       'xp': 240,
-      'avatar': 'assets/avatars/avatar_male_4.png'
+      'avatar': 'assets/avatars/avatar_male_4.svg',
+      'hasTrophy': false,
     },
     {
-      'name': 'Joe Doe',
+      'name': 'Gerry Bukit',
       'xp': 240,
-      'avatar': 'assets/avatars/avatar_male_5.png'
+      'avatar': 'assets/avatars/avatar_male_5.svg',
+      'hasTrophy': false,
     },
     {
-      'name': 'Jessy Doe',
+      'name': 'Icha Samosir',
       'xp': 200,
-      'avatar': 'assets/avatars/avatar_female_2.png'
+      'avatar': 'assets/avatars/avatar_female_4.svg',
+      'hasTrophy': false,
     },
     {
-      'name': 'Jerry Doe',
-      'xp': 109,
-      'avatar': 'assets/avatars/avatar_male_3.png'
+      'name': 'Agustina Butarbutar',
+      'xp': 200,
+      'avatar': 'assets/avatars/avatar_female_6.svg',
+      'hasTrophy': false,
     },
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.lightBlue[50],
-      body: SingleChildScrollView(
+      backgroundColor: const Color(0xFFEAF2FF),
+      body: SafeArea(
         child: Column(
           children: [
-            const SizedBox(height: 40),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildTopUser(leaderboard[1]['name'], '🥈',
-                      leaderboard[1]['avatar'], 60),
-                  const SizedBox(width: 20.0),
-                  _buildTopUser(leaderboard[0]['name'], '🥇',
-                      leaderboard[0]['avatar'], 70),
-                  const SizedBox(width: 20.0),
-                  _buildTopUser(leaderboard[2]['name'], '🥉',
-                      leaderboard[2]['avatar'], 50),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
+            _buildTopThreePodium(),
+            const SizedBox(height: 16),
             const Text(
               'Leaderboard',
-              style: AppStyles.title,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            const SizedBox(height: 10),
-            // Memastikan Leaderboard bisa scrollable dengan Expanded tetap berfungsi
-            SizedBox(
-              height: MediaQuery.of(context).size.height -
-                  200, // Sesuaikan tinggi agar konten lainnya tetap terlihat
-              child: Leaderboard(leaderboard: leaderboard),
+            const SizedBox(height: 16),
+            Expanded(
+              child: _buildLeaderboardList(),
             ),
           ],
         ),
@@ -100,31 +101,271 @@ class LeaderboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTopUser(
-      String? name, String medal, String? avatarPath, double avatarSize) {
-    return Column(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(10), // Mengatur sudut membulat
-          child: avatarPath != null
-              ? Image.asset(
-                  avatarPath,
-                  width: avatarSize,
-                  height: avatarSize,
-                  fit: BoxFit.cover, // Menjaga aspek gambar
-                )
-              : Container(
-                  width: avatarSize,
-                  height: avatarSize,
-                  color:
-                      Colors.grey[300], // Warna background jika avatar kosong
-                  child: const Icon(Icons.person, size: 40, color: Colors.grey),
+  Widget _buildTopThreePodium() {
+    return SizedBox(
+      height: 180,
+      child: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                _buildPodiumUser(
+                  leaderboard[1],
+                  size: 80,
+                  position: 2,
                 ),
+                _buildPodiumUser(
+                  leaderboard[0],
+                  size: 100,
+                  position: 1,
+                ),
+                _buildPodiumUser(
+                  leaderboard[2],
+                  size: 70,
+                  position: 3,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPodiumUser(Map<String, dynamic> user,
+      {required double size, required int position}) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.center,
+          children: [
+            Column(
+              children: [
+                Container(
+                  width: size,
+                  height: size,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    shape: BoxShape.circle,
+                  ),
+                  child: ClipOval(
+                    child: SvgPicture.asset(
+                      user['avatar'],
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  user['name'],
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+            if (position == 1)
+              Positioned(
+                top: 70,
+                child: Transform.scale(
+                  scale: 1.1,
+                  child: SvgPicture.asset(
+                    'assets/leaderboard/trophy_badge.svg',
+                    width: 42,
+                    height: 42,
+                  ),
+                ),
+              ),
+            if (position == 2)
+              Positioned(
+                top: 54,
+                left: 30,
+                child: Transform.scale(
+                  scale: 0.85,
+                  child: SvgPicture.asset(
+                    'assets/leaderboard/trophy_badge_2.svg',
+                    width: 42,
+                    height: 42,
+                  ),
+                ),
+              ),
+            if (position == 3)
+              Positioned(
+                top: 41,
+                left: 17.5,
+                child: Transform.scale(
+                  scale: 0.75,
+                  child: SvgPicture.asset(
+                    'assets/leaderboard/trophy_badge_3.svg',
+                    width: 42,
+                    height: 42,
+                  ),
+                ),
+              ),
+          ],
         ),
-        const SizedBox(height: 5),
-        Text(name ?? 'Unknown', style: AppStyles.boldText),
-        Text(medal, style: AppStyles.medalStyle),
+        const SizedBox(height: 8),
       ],
     );
+  }
+
+  Widget _buildLeaderboardList() {
+    return ListView.builder(
+      padding: EdgeInsets.zero,
+      itemCount: leaderboard.length,
+      itemBuilder: (context, index) {
+        final user = leaderboard[index];
+        return _buildLeaderboardItem(user, index + 1);
+      },
+    );
+  }
+
+  Widget _buildLeaderboardItem(Map<String, dynamic> user, int position) {
+    bool isFirstPlace = position == 1;
+    bool isSecondPlace = position == 2;
+    bool isThirdPlace = position == 3;
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          decoration: BoxDecoration(
+            color: _getItemColor(position),
+            borderRadius: BorderRadius.circular(12),
+            gradient: isFirstPlace
+                ? LinearGradient(
+                    colors: [
+                      Colors.amber[300]!,
+                      Colors.yellow[100]!,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                : isSecondPlace
+                    ? const LinearGradient(
+                        colors: [
+                          Color(0xFFD3D3D3),
+                          Color(0xFFF4F4F4),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
+                    : isThirdPlace
+                        ? const LinearGradient(
+                            colors: [
+                              Color(0xFFE6B8A2),
+                              Color(0xFFF5DEB3),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          )
+                        : null,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 30,
+                  child: position == 1
+                      ? const SizedBox()
+                      : Text(
+                          '#$position',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: position <= 3
+                                ? _getRankTextColor(position)
+                                : Colors.black87,
+                          ),
+                        ),
+                ),
+                const SizedBox(width: 12),
+                ClipOval(
+                  child: SvgPicture.asset(
+                    user['avatar'],
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    user['name'],
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: isFirstPlace
+                          ? Colors.amber[900]
+                          : isSecondPlace
+                              ? const Color(0xFF4682B4)
+                              : isThirdPlace
+                                  ? const Color(0xFF800000)
+                                  : Colors.black,
+                    ),
+                  ),
+                ),
+                Text(
+                  '${user['xp']} XP',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (isFirstPlace)
+          Positioned(
+            left: 5,
+            top: -5,
+            child: Image.asset(
+              'assets/leaderboard/trophy_gold.png',
+              width: 84,
+              height: 84,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Color _getItemColor(int position) {
+    switch (position) {
+      case 1:
+        return const Color(0xFFFFE4A1);
+      case 2:
+        return const Color(0xFFD3D3D3);
+      case 3:
+        return const Color(0xFFE6B8A2);
+      default:
+        return position % 2 == 0
+            ? const Color(0xFFFFFAF0)
+            : const Color(0xFFFDF5E6);
+    }
+  }
+
+  Color _getRankTextColor(int position) {
+    switch (position) {
+      case 1:
+        return Colors.amber[900]!;
+      case 2:
+        return Colors.grey[700]!;
+      case 3:
+        return Colors.brown[700]!;
+      default:
+        return Colors.black87;
+    }
   }
 }

@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 
 class QuestScreen extends StatefulWidget {
-  const QuestScreen({super.key});
+  final int initialTabIndex;
+  const QuestScreen({super.key, this.initialTabIndex = 1});
 
   @override
-  _QuestScreenState createState() => _QuestScreenState();
+  QuestScreenState createState() => QuestScreenState();
 }
 
-class _QuestScreenState extends State<QuestScreen> {
+class QuestScreenState extends State<QuestScreen> {
   double progress = 0.5;
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
+      initialIndex: widget.initialTabIndex,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Quests'),

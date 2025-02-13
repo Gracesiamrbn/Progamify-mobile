@@ -18,7 +18,7 @@ class LoginScreenState extends State<LoginScreen> {
   bool _isObscure = true;
 
   void _login() {
-    if (_formKey.currentState!.validate()) {
+    // if (_formKey.currentState!.validate()) {
       // ScaffoldMessenger.of(context).showSnackBar(
       //   const SnackBar(content: Text("Login successful!")),
       // );
@@ -27,7 +27,7 @@ class LoginScreenState extends State<LoginScreen> {
         context,
         MaterialPageRoute(builder: (context) => const MainScreen()),
       );
-    }
+    // }
   }
 
   @override

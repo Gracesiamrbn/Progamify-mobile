@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class SummaryBoxes extends StatelessWidget {
   final String title;
@@ -12,11 +13,12 @@ class SummaryBoxes extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final boxItems = items ?? [
-      BoxItem(color: Colors.orangeAccent, value: "1", label: "Quest Level"),
-      BoxItem(color: Colors.orangeAccent, value: "5", label: "Total XP"),
-      BoxItem(color: Colors.orangeAccent, value: "0", label: "Lesson Done"),
-    ];
+    final boxItems = items ??
+        [
+          BoxItem(value: "1", label: "Quest Level"),
+          BoxItem(value: "5", label: "Total XP"),
+          BoxItem(value: "0", label: "Lesson Done"),
+        ];
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -29,27 +31,19 @@ class SummaryBoxes extends StatelessWidget {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 90, 
-                    height: 90,
-                    decoration: BoxDecoration(
-                      color: item.color,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.5),
-                        width: 2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          spreadRadius: 1,
-                          blurRadius: 6,
-                          offset: const Offset(2, 2),
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: SvgPicture.asset(
+                          'assets/stats_container.svg',
+                          width: 90,
+                          height: 90,
+                          fit: BoxFit.cover,
                         ),
-                      ],
-                    ),
-                    child: Center(
-                      child: Text(
+                      ),
+                      Text(
                         item.value,
                         style: const TextStyle(
                           fontSize: 32,
@@ -58,9 +52,9 @@ class SummaryBoxes extends StatelessWidget {
                         ),
                         textAlign: TextAlign.center,
                       ),
-                    ),
+                    ],
                   ),
-                  const SizedBox(height: 4), // Jarak antara box dan judul
+                  const SizedBox(height: 4),
                   Text(
                     item.label,
                     style: const TextStyle(
@@ -82,12 +76,10 @@ class SummaryBoxes extends StatelessWidget {
 }
 
 class BoxItem {
-  final Color color;
   final String value;
   final String label;
 
   BoxItem({
-    required this.color,
     required this.value,
     required this.label,
   });

@@ -1,4 +1,8 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:progamify/presentation/screens/navigation/bottom_navigation.dart';
+
+import '../screens/quest/quest_screen.dart';
 
 class BadgesSection extends StatelessWidget {
   final String title;
@@ -44,10 +48,9 @@ class BadgesSection extends StatelessWidget {
                 height: 64,
                 decoration: BoxDecoration(
                   color: badge.color,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color:
-                        Colors.white.withOpacity(0.0), // Frame putih transparan
+                    color: Colors.white.withOpacity(0.0),
                     width: 3,
                   ),
                   boxShadow: [
@@ -61,7 +64,7 @@ class BadgesSection extends StatelessWidget {
                 ),
                 child: badge.iconPath != null
                     ? Padding(
-                        padding: const EdgeInsets.all(4.0),
+                        padding: const EdgeInsets.all(1.0),
                         child: Image.asset(
                           badge.iconPath!,
                           fit: BoxFit.contain,
@@ -75,22 +78,23 @@ class BadgesSection extends StatelessWidget {
           Align(
             alignment: Alignment.centerRight,
             child: RichText(
-              text: const TextSpan(
+              text: TextSpan(
                 text: 'see more...',
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.blue,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.25,
                 ),
-                // recognizer: TapGestureRecognizer()
-                //   ..onTap = () {
-                //     Navigator.push(
-                //       context,
-                //       MaterialPageRoute(
-                //           builder: (context) => const QuestScreen()),
-                //     );
-                //   },
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              const MainScreen(currentIndex: 1)),
+                    );
+                  },
               ),
             ),
           ),
