@@ -108,9 +108,9 @@ class TopicDetailScreen extends StatelessWidget {
   List<Widget> _buildTopicCards(BuildContext context) {
     final topics = [
       {'title': 'Introduction', 'exp': 10},
-      {'title': 'Exercise I', 'exp': 50, 'questions': 1},
+      {'title': 'Exercise I', 'exp': 50, 'questions': 10},
       {'title': 'History of Programming', 'exp': 10},
-      {'title': 'Exercise II', 'exp': 50, 'questions': 1},
+      {'title': 'Exercise II', 'exp': 50, 'questions': 10},
     ];
 
     return topics.map((topic) {
@@ -120,9 +120,7 @@ class TopicDetailScreen extends StatelessWidget {
           if (isExercise) {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                  builder: (context) =>
-                      ExerciseScreen(title: topic['title'] as String? ?? '')),
+              MaterialPageRoute(builder: (context) => ExerciseScreen()),
             );
           } else {
             Navigator.push(

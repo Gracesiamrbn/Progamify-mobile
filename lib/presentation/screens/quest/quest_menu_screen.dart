@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:progamify/presentation/screens/quest/quest_excercise_screen.dart';
 
 class QuestScreen extends StatefulWidget {
   final int initialTabIndex;
@@ -49,7 +50,7 @@ class QuestTab extends StatelessWidget {
         children: [
           _buildQuestHeader(),
           const SizedBox(height: 20),
-          _buildInstructionContainer(),
+          _buildInstructionContainer(context),
         ],
       ),
     );
@@ -143,7 +144,7 @@ class QuestTab extends StatelessWidget {
     );
   }
 
-  Widget _buildInstructionContainer() {
+  Widget _buildInstructionContainer(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -201,6 +202,13 @@ class QuestTab extends StatelessWidget {
                   const Icon(Icons.play_arrow, color: Colors.white, size: 30),
               onPressed: () {
                 // Implement the action for play button
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => QuestExcerciseScreen(
+                            title: '',
+                          )),
+                );
               },
             ),
           ),
@@ -262,7 +270,7 @@ class BadgeItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 9,
+      elevation: 4,
       child: Padding(
         padding: const EdgeInsets.all(15.0),
         child: Row(
