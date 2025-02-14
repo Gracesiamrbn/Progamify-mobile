@@ -18,13 +18,16 @@ class QuestScreenState extends State<QuestScreen> {
       length: 2,
       initialIndex: widget.initialTabIndex,
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Quests'),
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: 'Quests'),
-              Tab(text: 'Badges'),
-            ],
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(50), // Menyembunyikan space AppBar
+          child: AppBar(
+            automaticallyImplyLeading: false, // Menonaktifkan tombol back
+            bottom: const TabBar(
+              tabs: [
+                Tab(text: 'Quests'),
+                Tab(text: 'Badges'),
+              ],
+            ),
           ),
         ),
         body: const TabBarView(

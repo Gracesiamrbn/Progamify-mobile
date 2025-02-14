@@ -72,6 +72,12 @@ class LeaderboardScreenState extends State<LeaderboardScreen>
       'avatar': 'assets/avatars/avatar_female_6.svg',
       'hasTrophy': false,
     },
+    // {
+    //   'name': 'Dwi Paranggi Purba',
+    //   'xp': 199,
+    //   'avatar': 'assets/avatars/avatar_male_6.svg',
+    //   'hasTrophy': false,
+    // },
   ];
 
   @override

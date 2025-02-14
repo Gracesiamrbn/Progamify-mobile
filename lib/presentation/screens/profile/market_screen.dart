@@ -1,6 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
-class MarketScreen extends StatelessWidget {
+class MarketScreen extends StatefulWidget {
+  const MarketScreen({super.key});
+
+  @override
+  MarketScreenState createState() => MarketScreenState();
+}
+
+class MarketScreenState extends State<MarketScreen> {
+  int selectedAvatarIndex = -1;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -8,121 +18,120 @@ class MarketScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        // leading: IconButton(
-        //   icon: Icon(Icons.arrow_back, color: Colors.black),
-        //   // onPressed: () {},
-        // ),
+        title: const Text(
+          "Market",
+          style: TextStyle(color: Colors.black54, fontWeight: FontWeight.bold),
+        ),
         actions: const [
           Row(
             children: [
-              Text(
+              const Text(
                 '512',
                 style: TextStyle(
                   color: Colors.black,
-                  fontSize: 18,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(width: 4),
+              const SizedBox(width: 6),
               CircleAvatar(
                 radius: 12,
                 backgroundColor: Colors.amber,
                 child: Icon(
-                  Icons.star,
+                  Icons.monetization_on,
                   color: Colors.white,
                   size: 16,
                 ),
               ),
-              SizedBox(width: 16),
+              const SizedBox(width: 16),
             ],
           ),
         ],
       ),
       body: Column(
         children: [
-          // Header with image and background
+          // Tampilan Avatar Besar (Jumbotron)
           Container(
-            margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             height: 200,
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
-            ),
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: Container(
-                    color: Colors.lightBlue,
-                  ),
-                ),
-                const Positioned(
-                  top: 40,
-                  left: 24,
-                  child: Icon(
-                    Icons.landscape,
-                    size: 80,
-                    color: Colors.green,
-                  ),
-                ),
-                Positioned(
-                  top: 16,
-                  right: 16,
-                  child: CircleAvatar(
-                    radius: 40,
-                    backgroundColor: Colors.grey[300],
-                  ),
-                ),
-                Positioned(
-                  top: 120,
-                  left: 16,
-                  child: Container(
-                    height: 16,
-                    width: 16,
-                    decoration: BoxDecoration(
-                      color: Colors.yellow,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 6,
+                  spreadRadius: 1,
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),
-          ),
-
-          // Navigation dots
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(4, (index) {
-                return Container(
-                  margin: EdgeInsets.symmetric(horizontal: 8),
-                  width: 16,
-                  height: 16,
-                  decoration: BoxDecoration(
-                    color: index == 0 ? Colors.yellow : Colors.blue,
-                    shape: BoxShape.circle,
-                  ),
-                );
-              }),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: SvgPicture.asset(
+                "assets/avatars/avatar_jumbotron_1.svg",
+                fit: BoxFit.cover,
+                placeholderBuilder: (context) => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
             ),
           ),
 
-          // Grid items
+          // Grid Avatar untuk dipilih
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                physics: const BouncingScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 4,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 1,
                 ),
                 itemCount: 12,
                 itemBuilder: (context, index) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(8),
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        selectedAvatarIndex = index;
+                      });
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      decoration: BoxDecoration(
+                        color: selectedAvatarIndex == index
+                            ? Colors.blueAccent.withOpacity(0.2)
+                            : Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: selectedAvatarIndex == index
+                              ? Colors.blueAccent
+                              : Colors.grey[300]!,
+                          width: 2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(1.5),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: SvgPicture.asset(
+                            "assets/avatars/avatar_${index + 1}.svg",
+                            fit: BoxFit.contain,
+                            placeholderBuilder: (context) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   );
                 },
