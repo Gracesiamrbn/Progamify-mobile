@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:progamify/presentation/screens/navigation/bottom_navigation.dart';
 
-import '../screens/quest/quest_screen.dart';
+// import '../screens/quest/quest_screen.dart';
 
 class BadgesSection extends StatelessWidget {
   final String title;
