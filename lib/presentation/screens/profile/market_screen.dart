@@ -25,7 +25,7 @@ class MarketScreenState extends State<MarketScreen> {
         actions: const [
           Row(
             children: [
-              const Text(
+              Text(
                 '512',
                 style: TextStyle(
                   color: Colors.black,
@@ -33,7 +33,7 @@ class MarketScreenState extends State<MarketScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(width: 6),
+              SizedBox(width: 6),
               CircleAvatar(
                 radius: 12,
                 backgroundColor: Colors.amber,
@@ -43,7 +43,7 @@ class MarketScreenState extends State<MarketScreen> {
                   size: 16,
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16),
             ],
           ),
         ],
@@ -69,7 +69,9 @@ class MarketScreenState extends State<MarketScreen> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: SvgPicture.asset(
-                "assets/avatars/avatar_jumbotron_1.svg",
+                selectedAvatarIndex == -1
+                    ? "assets/avatars/avatar_jumbotron_1.svg"
+                    : "assets/avatars/avatar_jumbotron_${selectedAvatarIndex + 1}.svg",
                 fit: BoxFit.cover,
                 placeholderBuilder: (context) => const Center(
                   child: CircularProgressIndicator(),

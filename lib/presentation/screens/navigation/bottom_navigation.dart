@@ -1,3 +1,4 @@
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import '../profile/profile_screen.dart';
 import '../topic/topic_screen.dart';
@@ -18,10 +19,8 @@ class MainScreenState extends State<MainScreen> {
   // Daftar screens yang akan ditampilkan
   final List<Widget> _screens = [
     const TopicsScreen(),
-    const QuestScreen(
-      initialTabIndex: 0,
-    ),
-    LeaderboardScreen(),
+    const QuestScreen(initialTabIndex: 0),
+    const LeaderboardScreen(),
     const ProfileScreen(),
   ];
 
@@ -33,40 +32,29 @@ class MainScreenState extends State<MainScreen> {
 
   void _onItemTapped(int index) {
     setState(() {
-      _currentIndex = index; // Ubah tab yang aktif berdasarkan index
+      _currentIndex = index;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: _screens[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: Colors.blue,
-        backgroundColor: Colors.blue[200],
-        unselectedItemColor: Colors.grey,
-        showUnselectedLabels: true,
-        currentIndex: _currentIndex,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
+      bottomNavigationBar: CurvedNavigationBar(
+        backgroundColor: Colors.transparent,
+        color: const Color(0xFF6FBAFF),
+        buttonBackgroundColor: Colors.white.withOpacity(0.8),
+        animationDuration: const Duration(milliseconds: 700),
+        height: 60,
+        index: _currentIndex,
         items: [
-          BottomNavigationBarItem(
-            icon: Image.asset('assets/nav/topics_nav.png', width: 30),
-            label: 'Topics',
-          ),
-          BottomNavigationBarItem(
-            icon: Image.asset('assets/nav/quests_nav.png', width: 30),
-            label: 'Quests',
-          ),
-          BottomNavigationBarItem(
-            icon: Image.asset('assets/nav/leaderboard_nav.png', width: 30),
-            label: 'Leaderboard',
-          ),
-          BottomNavigationBarItem(
-            icon: Image.asset('assets/nav/profile_nav.png', width: 30),
-            label: 'Profile',
-          ),
+          Image.asset('assets/nav/topics_nav.png', width: 30),
+          Image.asset('assets/nav/quests_nav.png', width: 30),
+          Image.asset('assets/nav/leaderboard_nav.png', width: 30),
+          Image.asset('assets/nav/profile_nav.png', width: 30),
         ],
+        onTap: _onItemTapped,
       ),
     );
   }
