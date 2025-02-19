@@ -255,29 +255,3 @@ class TopicDetailScreen extends StatelessWidget {
     }).toList();
   }
 }
-
-// class ExerciseScreen extends StatelessWidget {
-//   final String title;
-//   const ExerciseScreen({super.key, required this.title});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(title: Text(title)),
-//       body: Center(child: Text('Exercise Screen: $title')),
-//     );
-//   }
-// }
-
-// class LessonScreen extends StatelessWidget {
-//   final String title;
-//   const LessonScreen({super.key, required this.title});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(title: Text(title)),
-//       body: Center(child: Text('Lesson Screen: $title')),
-//     );
-//   }
-// }

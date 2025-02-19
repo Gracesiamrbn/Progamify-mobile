@@ -42,7 +42,10 @@ class _QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               ),
               child: const Text(
                 '30:00',
-                style: TextStyle(color: Colors.black, fontSize: 13),
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold),
               ),
             ),
             const Spacer(),
