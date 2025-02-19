@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shimmer_animation/shimmer_animation.dart';
 
 class LeaderboardScreen extends StatefulWidget {
   const LeaderboardScreen({super.key});
@@ -72,6 +73,12 @@ class LeaderboardScreenState extends State<LeaderboardScreen>
       'avatar': 'assets/avatars/avatar_female_6.svg',
       'hasTrophy': false,
     },
+    // {
+    //   'name': 'Dwi Paranggi Purba',
+    //   'xp': 199,
+    //   'avatar': 'assets/avatars/avatar_male_6.svg',
+    //   'hasTrophy': false,
+    // },
   ];
 
   @override
@@ -171,44 +178,44 @@ class LeaderboardScreenState extends State<LeaderboardScreen>
                 ),
               ],
             ),
-            if (position == 1)
-              Positioned(
-                top: 70,
-                child: Transform.scale(
-                  scale: 1.1,
-                  child: SvgPicture.asset(
-                    'assets/leaderboard/trophy_badge.svg',
-                    width: 42,
-                    height: 42,
-                  ),
-                ),
-              ),
-            if (position == 2)
-              Positioned(
-                top: 54,
-                left: 30,
-                child: Transform.scale(
-                  scale: 0.85,
-                  child: SvgPicture.asset(
-                    'assets/leaderboard/trophy_badge_2.svg',
-                    width: 42,
-                    height: 42,
-                  ),
-                ),
-              ),
-            if (position == 3)
-              Positioned(
-                top: 41,
-                left: 17.5,
-                child: Transform.scale(
-                  scale: 0.75,
-                  child: SvgPicture.asset(
-                    'assets/leaderboard/trophy_badge_3.svg',
-                    width: 42,
-                    height: 42,
-                  ),
-                ),
-              ),
+            // if (position == 1)
+            //   Positioned(
+            //     top: 70,
+            //     child: Transform.scale(
+            //       scale: 1.1,
+            //       child: SvgPicture.asset(
+            //         'assets/leaderboard/trophy_badge.svg',
+            //         width: 42,
+            //         height: 42,
+            //       ),
+            //     ),
+            //   ),
+            // if (position == 2)
+            //   Positioned(
+            //     top: 54,
+            //     left: 30,
+            //     child: Transform.scale(
+            //       scale: 0.85,
+            //       child: SvgPicture.asset(
+            //         'assets/leaderboard/trophy_badge_2.svg',
+            //         width: 42,
+            //         height: 42,
+            //       ),
+            //     ),
+            //   ),
+            // if (position == 3)
+            //   Positioned(
+            //     top: 41,
+            //     left: 17.5,
+            //     child: Transform.scale(
+            //       scale: 0.75,
+            //       child: SvgPicture.asset(
+            //         'assets/leaderboard/trophy_badge_3.svg',
+            //         width: 42,
+            //         height: 42,
+            //       ),
+            //     ),
+            //   ),
           ],
         ),
         const SizedBox(height: 8),
@@ -229,101 +236,71 @@ class LeaderboardScreenState extends State<LeaderboardScreen>
 
   Widget _buildLeaderboardItem(Map<String, dynamic> user, int position) {
     bool isFirstPlace = position == 1;
-    bool isSecondPlace = position == 2;
-    bool isThirdPlace = position == 3;
 
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeInOut,
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          decoration: BoxDecoration(
-            color: _getItemColor(position),
-            borderRadius: BorderRadius.circular(12),
-            gradient: isFirstPlace
-                ? LinearGradient(
-                    colors: [
-                      Colors.amber[300]!,
-                      Colors.yellow[100]!,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  )
-                : isSecondPlace
-                    ? const LinearGradient(
-                        colors: [
-                          Color(0xFFD3D3D3),
-                          Color(0xFFF4F4F4),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      )
-                    : isThirdPlace
-                        ? const LinearGradient(
-                            colors: [
-                              Color(0xFFE6B8A2),
-                              Color(0xFFF5DEB3),
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          )
-                        : null,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 30,
-                  child: position == 1
-                      ? const SizedBox()
-                      : Text(
-                          '#$position',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: position <= 3
-                                ? _getRankTextColor(position)
-                                : Colors.black87,
-                          ),
-                        ),
-                ),
-                const SizedBox(width: 12),
-                ClipOval(
-                  child: SvgPicture.asset(
-                    user['avatar'],
-                    width: 40,
-                    height: 40,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    user['name'],
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: isFirstPlace
-                          ? Colors.amber[900]
-                          : isSecondPlace
-                              ? const Color(0xFF4682B4)
-                              : isThirdPlace
-                                  ? const Color(0xFF800000)
-                                  : Colors.black,
+        Shimmer(
+          duration: const Duration(seconds: 2), // Tambahkan durasi
+          colorOpacity: 0.3, // Tambahkan transparansi agar tidak hilang
+          enabled: isFirstPlace, // Hanya aktif untuk juara 1
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            decoration: BoxDecoration(
+              color: _getItemColor(position),
+              borderRadius: BorderRadius.circular(12),
+              gradient: isFirstPlace
+                  ? LinearGradient(
+                      colors: [Colors.amber[300]!, Colors.yellow[100]!],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    )
+                  : null, // Hanya untuk juara 1
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 30,
+                    child: Text(
+                      '#$position',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isFirstPlace ? Colors.amber[900] : Colors.black,
+                      ),
                     ),
                   ),
-                ),
-                Text(
-                  '${user['xp']} XP',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(width: 12),
+                  ClipOval(
+                    child: SvgPicture.asset(
+                      user['avatar'],
+                      width: 40,
+                      height: 40,
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      user['name'],
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isFirstPlace ? Colors.amber[900] : Colors.black,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '${user['xp']} XP',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
