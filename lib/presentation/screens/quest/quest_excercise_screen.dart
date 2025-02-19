@@ -50,9 +50,7 @@ class _QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
             ),
             const Spacer(),
             GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-              },
+              onTap: _showExitConfirmationDialog,
               child: Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
@@ -170,6 +168,34 @@ class _QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               onPressed: () {
                 Navigator.pop(context);
                 Navigator.pop(context);
+              },
+              child: const Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showExitConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Want to Exit?  '),
+          content: const Text(
+              'Your progress will not be saved and you will not get the XP'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context); // Tutup dialog
+                Navigator.pop(context); // Kembali ke halaman sebelumnya
               },
               child: const Text('Yes'),
             ),
