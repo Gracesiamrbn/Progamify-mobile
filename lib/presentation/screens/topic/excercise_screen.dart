@@ -164,25 +164,28 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                 scrollDirection: Axis.horizontal,
                 itemCount: questions.length,
                 itemBuilder: (context, index) {
-                  return Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 5),
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: index == currentQuestionIndex
-                          ? Colors.blue
-                          : Colors.grey[300],
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      '${index + 1}',
-                      style: TextStyle(
-                        fontSize: 18,
+                  return GestureDetector(
+                    onTap: () => _goToQuestion(index), // Tambahkan aksi klik
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 5),
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
                         color: index == currentQuestionIndex
-                            ? Colors.white
-                            : Colors.black,
-                        fontWeight: FontWeight.bold,
+                            ? Colors.blue
+                            : Colors.grey[300],
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        '${index + 1}',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: index == currentQuestionIndex
+                              ? Colors.white
+                              : Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   );
@@ -279,5 +282,13 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
         ),
       ),
     );
+  }
+
+  void _goToQuestion(int index) {
+    setState(() {
+      currentQuestionIndex = index;
+      selectedAnswer = null;
+    });
+    _scrollToCurrentQuestion();
   }
 }
