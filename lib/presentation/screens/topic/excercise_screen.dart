@@ -21,22 +21,30 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
         'Emely Angelica Lestari',
         'Alan Turing'
       ],
-      'correctAnswer': 3
+      'correctAnswer': 3,
+      'exp': 15,
+      'pts': 10
     },
     {
       'question': 'HTML is a programme language',
       'options': ['True', 'False'],
-      'correctAnswer': 2
+      'correctAnswer': 2,
+      'exp': 15,
+      'pts': 10
     },
     {
       'question': 'Flutter is developed by which company?',
       'options': ['Apple', 'Google', 'Microsoft', 'Amazon'],
-      'correctAnswer': 1
+      'correctAnswer': 1,
+      'exp': 15,
+      'pts': 10
     },
     {
       'question': 'Which planet is known as the Red Planet?',
       'options': ['Earth', 'Mars', 'Jupiter', 'Venus'],
-      'correctAnswer': 1
+      'correctAnswer': 1,
+      'exp': 15,
+      'pts': 10
     },
     {
       'question': 'What is the largest ocean on Earth?',
@@ -46,7 +54,9 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
         'Pacific Ocean',
         'Arctic Ocean'
       ],
-      'correctAnswer': 2
+      'correctAnswer': 2,
+      'exp': 15,
+      'pts': 10
     },
     {
       'question': 'Which is the longest river in the world?',
@@ -56,7 +66,9 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
         'Yangtze River',
         'Mississippi River'
       ],
-      'correctAnswer': 1
+      'correctAnswer': 1,
+      'exp': 15,
+      'pts': 10
     },
     {
       'question': 'Who discovered gravity?',
@@ -66,22 +78,30 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
         'Galileo Galilei',
         'Nikola Tesla'
       ],
-      'correctAnswer': 0
+      'correctAnswer': 0,
+      'exp': 15,
+      'pts': 10
     },
     {
       'question': 'What is the hardest natural substance on Earth?',
       'options': ['Gold', 'Iron', 'Diamond', 'Platinum'],
-      'correctAnswer': 2
+      'correctAnswer': 2,
+      'exp': 15,
+      'pts': 10
     },
     {
       'question': 'What is the chemical symbol for gold?',
       'options': ['Go', 'Au', 'Ag', 'Gd'],
-      'correctAnswer': 1
+      'correctAnswer': 1,
+      'exp': 15,
+      'pts': 10
     },
     {
       'question': 'Which gas do plants use for photosynthesis?',
       'options': ['Oxygen', 'Nitrogen', 'Carbon Dioxide', 'Hydrogen'],
-      'correctAnswer': 2
+      'correctAnswer': 2,
+      'exp': 15,
+      'pts': 10
     },
   ];
 
@@ -116,6 +136,8 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   @override
   Widget build(BuildContext context) {
     final question = questions[currentQuestionIndex];
+    int exp = question['exp'];
+    int pts = question['pts'];
 
     return Scaffold(
       appBar: AppBar(
@@ -125,28 +147,50 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
         title: Row(
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
               decoration: BoxDecoration(
-                color: Colors.yellow,
-                borderRadius: BorderRadius.circular(10),
+                color: Colors.deepPurple,
+                borderRadius: BorderRadius.circular(8),
               ),
-              child: const Text(
-                '10 XP',
-                style:
-                    TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+              child: Text(
+                '+$exp exp',
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontSize: 13),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+              decoration: BoxDecoration(
+                color: Colors.orangeAccent,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                '+$pts pts',
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontSize: 13),
               ),
             ),
             const Spacer(),
             Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: Colors.red,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: IconButton(
-                icon: const Icon(Icons.exit_to_app, color: Colors.white),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
+              child: const Row(
+                children: [
+                  Text(
+                    'Exit',
+                    style: TextStyle(color: Colors.white, fontSize: 17),
+                  ),
+                  SizedBox(width: 4),
+                  Icon(Icons.exit_to_app, color: Colors.white),
+                ],
               ),
             ),
           ],
@@ -164,25 +208,28 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                 scrollDirection: Axis.horizontal,
                 itemCount: questions.length,
                 itemBuilder: (context, index) {
-                  return Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 5),
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: index == currentQuestionIndex
-                          ? Colors.blue
-                          : Colors.grey[300],
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      '${index + 1}',
-                      style: TextStyle(
-                        fontSize: 18,
+                  return GestureDetector(
+                    onTap: () => _goToQuestion(index), // Tambahkan aksi klik
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 5),
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
                         color: index == currentQuestionIndex
-                            ? Colors.white
-                            : Colors.black,
-                        fontWeight: FontWeight.bold,
+                            ? Colors.blue
+                            : Colors.grey[300],
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        '${index + 1}',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: index == currentQuestionIndex
+                              ? Colors.white
+                              : Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   );
@@ -279,5 +326,13 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
         ),
       ),
     );
+  }
+
+  void _goToQuestion(int index) {
+    setState(() {
+      currentQuestionIndex = index;
+      selectedAnswer = null;
+    });
+    _scrollToCurrentQuestion();
   }
 }

@@ -107,10 +107,30 @@ class TopicDetailScreen extends StatelessWidget {
 
   List<Widget> _buildTopicCards(BuildContext context) {
     final topics = [
-      {'title': 'Introduction', 'exp': 10},
-      {'title': 'Exercise I', 'exp': 50, 'questions': 10},
-      {'title': 'History of Programming', 'exp': 10},
-      {'title': 'Exercise II', 'exp': 50, 'questions': 10},
+      {
+        'title': 'Introduction',
+        'exp': 10,
+        'icon': 'assets/icons/introduction_icon.png'
+      },
+      {
+        'title': 'Exercise I',
+        'exp': 50,
+        'pts': 10,
+        'questions': 10,
+        'icon': 'assets/icons/tasklist1_icon.png'
+      },
+      {
+        'title': 'History of Programming',
+        'exp': 10,
+        'icon': 'assets/icons/course2_icon.png'
+      },
+      {
+        'title': 'Exercise II',
+        'exp': 50,
+        'pts': 10,
+        'questions': 10,
+        'icon': 'assets/icons/tasklist1_icon.png'
+      },
     ];
 
     return topics.map((topic) {
@@ -143,7 +163,6 @@ class TopicDetailScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    // ignore: deprecated_member_use
                     color: Colors.black.withOpacity(0.1),
                     spreadRadius: 1,
                     blurRadius: 5,
@@ -153,7 +172,7 @@ class TopicDetailScreen extends StatelessWidget {
               child: Row(
                 children: [
                   Image.asset(
-                    'assets/icons/introduction_icon.png',
+                    topic['icon'] as String,
                     width: 60,
                     height: 60,
                   ),
@@ -162,20 +181,44 @@ class TopicDetailScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 4, horizontal: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.orangeAccent,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            '${topic['exp']} XP',
-                            style: GoogleFonts.inter(
-                              fontSize: 10,
-                              color: Colors.black,
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 4, horizontal: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.deepPurple[700],
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                '+${topic['exp']} xp',
+                                style: GoogleFonts.inter(
+                                  fontSize: 10,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
-                          ),
+                            if (isExercise) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 4, horizontal: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.orangeAccent,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  '+${topic['pts']} pts',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 10,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                         const SizedBox(height: 5),
                         Text(
@@ -212,29 +255,3 @@ class TopicDetailScreen extends StatelessWidget {
     }).toList();
   }
 }
-
-// class ExerciseScreen extends StatelessWidget {
-//   final String title;
-//   const ExerciseScreen({super.key, required this.title});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(title: Text(title)),
-//       body: Center(child: Text('Exercise Screen: $title')),
-//     );
-//   }
-// }
-
-// class LessonScreen extends StatelessWidget {
-//   final String title;
-//   const LessonScreen({super.key, required this.title});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(title: Text(title)),
-//       body: Center(child: Text('Lesson Screen: $title')),
-//     );
-//   }
-// }
