@@ -27,8 +27,10 @@ class _QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               ),
               child: const Text(
                 'Easy',
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15),
               ),
             ),
             const SizedBox(width: 10),
@@ -40,22 +42,39 @@ class _QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               ),
               child: const Text(
                 '30:00',
-                style: TextStyle(color: Colors.black),
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold),
               ),
             ),
             const Spacer(),
-            IconButton(
-              icon: const Icon(Icons.exit_to_app, color: Colors.red),
-              onPressed: () {
-                Navigator.pop(context);
-              },
+            GestureDetector(
+              onTap: _showExitConfirmationDialog,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Row(
+                  children: [
+                    Text(
+                      'Exit',
+                      style: TextStyle(color: Colors.white, fontSize: 17),
+                    ),
+                    SizedBox(width: 4),
+                    Icon(Icons.exit_to_app, color: Colors.white),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(
-            horizontal: 16, vertical: 20), // Tambahkan padding atas & bawah
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -82,9 +101,7 @@ class _QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                 style: TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
-            const SizedBox(
-                height:
-                    20), // Tambahkan padding bawah agar tidak mepet dengan layar bawah
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -151,6 +168,34 @@ class _QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               onPressed: () {
                 Navigator.pop(context);
                 Navigator.pop(context);
+              },
+              child: const Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showExitConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Want to Exit?  '),
+          content: const Text(
+              'Your progress will not be saved and you will not get the XP'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context); // Tutup dialog
+                Navigator.pop(context); // Kembali ke halaman sebelumnya
               },
               child: const Text('Yes'),
             ),

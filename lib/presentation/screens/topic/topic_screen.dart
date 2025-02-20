@@ -10,12 +10,42 @@ class TopicsScreen extends StatefulWidget {
 }
 
 class _TopicsScreenState extends State<TopicsScreen> {
-  final List<String> topics = [
-    'Introduction',
-    'Data Types',
-    'Control Flows',
-    'Function',
-    'Object Oriented Programming',
+  final List<Map<String, dynamic>> topics = [
+    {
+      'title': 'Introduction',
+      'sections': 8,
+      'completed': 3, //sudah selesai 3 dari 8
+    },
+    {
+      'title': 'Data Types',
+      'sections': 12,
+      'completed': 7,
+    },
+    {
+      'title': 'Control Flows',
+      'sections': 6,
+      'completed': 2,
+    },
+    {
+      'title': 'Function',
+      'sections': 10,
+      'completed': 5,
+    },
+    {
+      'title': 'Object Oriented Programming',
+      'sections': 15,
+      'completed': 9,
+    },
+    {
+      'title': 'Object Oriented Programming',
+      'sections': 15,
+      'completed': 9,
+    },
+    {
+      'title': 'Object Oriented Programming',
+      'sections': 15,
+      'completed': 15,
+    },
   ];
 
   @override
@@ -24,7 +54,8 @@ class _TopicsScreenState extends State<TopicsScreen> {
       backgroundColor: const Color(0xFFEAF2FF),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(top: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 16)
+              .copyWith(top: 20, bottom: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -76,13 +107,17 @@ class _TopicsScreenState extends State<TopicsScreen> {
     );
   }
 
-  Widget _buildTopicCard(String topic) {
+  Widget _buildTopicCard(Map<String, dynamic> topic) {
+    int totalSections = topic['sections'];
+    int completedSections = topic['completed'];
+    double progress = completedSections / totalSections;
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => TopicDetailScreen(topicTitle: topic),
+            builder: (context) => TopicDetailScreen(topicTitle: topic['title']),
           ),
         );
       },
@@ -100,7 +135,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              topic,
+              topic['title'],
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -109,7 +144,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
             ),
             const SizedBox(height: 6),
             Text(
-              '10 SECTION',
+              '$totalSections SECTION',
               style: GoogleFonts.inter(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
@@ -120,7 +155,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
             Row(
               children: [
                 Text(
-                  '5 of 10',
+                  '$completedSections of $totalSections',
                   style: GoogleFonts.inter(fontSize: 12, color: Colors.black87),
                 ),
                 const SizedBox(width: 8),
@@ -128,7 +163,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: LinearProgressIndicator(
-                      value: 0.5,
+                      value: progress,
                       backgroundColor: Colors.grey.shade300,
                       color: Colors.blue.shade700,
                       minHeight: 8,
