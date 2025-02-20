@@ -8,38 +8,47 @@ class AchievementScreen extends StatelessWidget {
     {
       "title": "First Step",
       "description": "Fully complete one Topic",
+      "icon": "",
     },
     {
       "title": "Badge Collector",
       "description": "Earn your first Badge",
+      "icon": "",
     },
     {
       "title": "Avatar Explorer",
       "description": "Unlock your first Avatar.",
+      "icon": "",
     },
     {
       "title": "Badge Hunter",
       "description": "Collect 5 Badges.",
+      "icon": "",
     },
     {
       "title": "Avatar Upgrader",
       "description": "Unlock 3 avatars",
+      "icon": "",
     },
     {
       "title": "Topic Conqueror",
       "description": "Fully complete 5 Topics.",
+      "icon": "",
     },
     {
       "title": "Perfectionist ",
       "description": "Achieve a perfect score (100%) in a Topic",
+      "icon": "",
     },
     {
       "title": "The Ultimate Badge Hunter",
       "description": "Collect all available Badges.",
+      "icon": "",
     },
     {
       "title": "The Final Boss",
       "description": "Complete every Topic & Exercise in the platform.",
+      "icon": "",
     },
   ];
 
@@ -56,7 +65,6 @@ class AchievementScreen extends StatelessWidget {
           },
         ),
       ),
-      backgroundColor: Colors.amber[50],
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: achievements.length,

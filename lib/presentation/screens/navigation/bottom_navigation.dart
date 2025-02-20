@@ -39,7 +39,6 @@ class MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBody: true,
       body: _screens[_currentIndex],
       bottomNavigationBar: CurvedNavigationBar(
         backgroundColor: Colors.transparent,

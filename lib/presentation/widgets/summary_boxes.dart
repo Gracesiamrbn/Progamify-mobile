@@ -15,9 +15,16 @@ class SummaryBoxes extends StatelessWidget {
   Widget build(BuildContext context) {
     final boxItems = items ??
         [
-          BoxItem(value: "1", label: "Quest Level"),
-          BoxItem(value: "5", label: "Total XP"),
-          BoxItem(value: "0", label: "Lesson Done"),
+          BoxItem(
+              value: "5",
+              label: "experience point",
+              icon: "assets/icons/exp_point.png"),
+          BoxItem(
+              value: "15",
+              label: "quest level",
+              icon: "assets/icons/treasure.png"),
+          BoxItem(
+              value: "4", label: "lesson done", icon: "assets/icons/topic.png"),
         ];
 
     return Padding(
@@ -31,65 +38,43 @@ class SummaryBoxes extends StatelessWidget {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color:
-                                  Colors.black.withOpacity(0.3), 
-                              spreadRadius: 0,
-                              blurRadius:
-                                  5,
-                              offset: const Offset(0, 4), 
-                            ),
-                          ],
+                  Container(
+                    width: 100,
+                    // height: 100,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFB2DAFF),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.black54),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          item.icon,
+                          width: 40,
+                          height: 40,
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: SvgPicture.asset(
-                            'assets/stats_container_alt1.svg',
-                            width: 80,
-                            height: 80,
-                            fit: BoxFit.cover,
+                        const SizedBox(height: 8),
+                        Text(
+                          item.value,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Inter',
+                            color: Colors.black,
                           ),
                         ),
-                      ),
-                      Text(
-                        item.value,
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w900,
-                          foreground: Paint()
-                            ..style = PaintingStyle.stroke
-                            ..strokeWidth = 4
-                            ..color = const Color(0xFF8B5E3C),
+                        Text(
+                          item.label,
+                          style: const TextStyle(
+                            fontSize: 8.5,
+                            fontFamily: 'Inter',
+                            color: Colors.black87,
+                          ),
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                      Text(
-                        item.value,
-                        style: const TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    item.label,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      ],
                     ),
-                    textAlign: TextAlign.center,
                   ),
                 ],
               );
@@ -105,9 +90,11 @@ class SummaryBoxes extends StatelessWidget {
 class BoxItem {
   final String value;
   final String label;
+  final String icon;
 
   BoxItem({
     required this.value,
     required this.label,
+    required this.icon,
   });
 }

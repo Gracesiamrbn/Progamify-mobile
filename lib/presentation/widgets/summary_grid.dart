@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:progamify/presentation/screens/profile/achievement_screen.dart';
 
 class SummaryGrid extends StatelessWidget {
@@ -19,20 +20,23 @@ class SummaryGrid extends StatelessWidget {
           {
             "title": "First Step",
             "description": "Fully complete one Topic",
+            "icon": "assets/achievement/walk_junior.svg",
           },
           {
             "title": "Badge Collector",
             "description": "Earn your first Badge",
+            "icon": "assets/achievement/badge_.svg",
           },
           {
             "title": "Avatar Explorer",
             "description": "Unlock your first Avatar.",
+            "icon": "assets/achievement/Beginner.svg",
           },
           {
             "title": "Badge Hunter",
             "description": "Collect 5 Badges.",
+            "icon": "assets/achievement/badge_junior.svg",
           },
-          // Add more achievements as needed
         ];
 
     return Padding(
@@ -60,61 +64,63 @@ class SummaryGrid extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
+          const SizedBox(height: 8),
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              childAspectRatio: 2,
+              childAspectRatio: 2.25,
               crossAxisSpacing: 8,
               mainAxisSpacing: 8,
             ),
             itemCount: achievements.length,
             itemBuilder: (context, index) {
               final achievement = achievements[index];
+
               return Container(
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.grey.shade300,
-                      Colors.grey.shade500,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  color: Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 12, // Bayangan yang lebih lembut dan besar
-                      offset: Offset(0, 6), // Posisi bayangan yang lebih halus
+                  border: Border.all(color: Colors.black26),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(50),
+                      child: SvgPicture.asset(
+                        achievement["icon"]!,
+                        width: 50,
+                        height: 50,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            achievement["title"]!,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          Text(
+                            achievement["description"]!,
+                            style: const TextStyle(
+                              fontSize: 8,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
-                ),
-                alignment: Alignment.center,
-                child: Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        achievement["title"]!,
-                        style: const TextStyle(
-                          color: Color(0xFF1F1F1F),
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      Text(
-                        achievement["description"]!,
-                        style: const TextStyle(
-                          color: Color(0xFF1F1F1F),
-                          fontSize: 12,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
                 ),
               );
             },
@@ -136,7 +142,8 @@ class SummaryGrid extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const AchievementScreen()),
+                        builder: (context) => const AchievementScreen(),
+                      ),
                     );
                   },
               ),
@@ -146,14 +153,4 @@ class SummaryGrid extends StatelessWidget {
       ),
     );
   }
-}
-
-class AchievementItem {
-  final String title;
-  final String description;
-
-  AchievementItem({
-    required this.title,
-    required this.description,
-  });
 }
