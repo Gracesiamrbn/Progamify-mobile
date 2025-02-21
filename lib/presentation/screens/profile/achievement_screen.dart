@@ -8,47 +8,47 @@ class AchievementScreen extends StatelessWidget {
     {
       "title": "First Step",
       "description": "Fully complete one Topic",
-      "icon": "",
+      "icon": "assets/achievement/walk_beginner.svg",
     },
     {
       "title": "Badge Collector",
       "description": "Earn your first Badge",
-      "icon": "",
+      "icon": "assets/achievement/badge_.svg",
     },
     {
       "title": "Avatar Explorer",
       "description": "Unlock your first Avatar.",
-      "icon": "",
+      "icon": "assets/achievement/Beginner.svg",
     },
     {
       "title": "Badge Hunter",
       "description": "Collect 5 Badges.",
-      "icon": "",
+      "icon": "assets/achievement/badge_junior.svg",
     },
     {
       "title": "Avatar Upgrader",
       "description": "Unlock 3 avatars",
-      "icon": "",
+      "icon": "assets/achievement/junior.svg",
     },
     {
       "title": "Topic Conqueror",
       "description": "Fully complete 5 Topics.",
-      "icon": "",
+      "icon": "assets/achievement/walk_junior.svg",
     },
     {
       "title": "Perfectionist ",
       "description": "Achieve a perfect score (100%) in a Topic",
-      "icon": "",
+      "icon": "assets/achievement/ok_.svg",
     },
     {
       "title": "The Ultimate Badge Hunter",
       "description": "Collect all available Badges.",
-      "icon": "",
+      "icon": "assets/achievement/badge_expert.svg",
     },
     {
       "title": "The Final Boss",
       "description": "Complete every Topic & Exercise in the platform.",
-      "icon": "",
+      "icon": "assets/achievement/verif_expert.svg",
     },
   ];
 

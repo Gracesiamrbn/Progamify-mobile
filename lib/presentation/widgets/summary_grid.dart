@@ -80,7 +80,7 @@ class SummaryGrid extends StatelessWidget {
 
               return Container(
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+                  color: const Color(0xFFF0F8FF),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.black26),
                 ),
