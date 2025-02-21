@@ -19,11 +19,16 @@ class QuestScreenState extends State<QuestScreen> {
       initialIndex: widget.initialTabIndex,
       child: Scaffold(
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(50), // Menyembunyikan space AppBar
+          preferredSize:
+              const Size.fromHeight(50), // Menyembunyikan space AppBar
           child: AppBar(
             automaticallyImplyLeading: false, // Menonaktifkan tombol back
-            bottom: const TabBar(
-              tabs: [
+            bottom: TabBar(
+              indicatorColor: Colors.black,
+              labelColor: Colors.black, // Warna teks tab yang aktif
+              unselectedLabelColor:
+                  Colors.grey, // Warna teks tab yang tidak aktif
+              tabs: const [
                 Tab(text: 'Quests'),
                 Tab(text: 'Badges'),
               ],
@@ -120,8 +125,8 @@ class QuestTab extends StatelessWidget {
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Column(
-              children: const [
+            child: const Column(
+              children: [
                 Text(
                   'Level',
                   style: TextStyle(
@@ -152,7 +157,7 @@ class QuestTab extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Colors.black26,
             blurRadius: 4,
@@ -208,7 +213,7 @@ class QuestTab extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => QuestExcerciseScreen(
+                      builder: (context) => const QuestExcerciseScreen(
                             title: '',
                           )),
                 );
@@ -226,93 +231,149 @@ class BadgesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(16.0),
-      children: const [
-        BadgeItem(
-            imagePath: 'assets/quest_beginner.png',
-            title: 'Quest Beginner',
-            subtitle: 'Complete 10 quests'),
-        BadgeItem(
-            imagePath: 'assets/task_tackler.png',
-            title: 'Task Tackler',
-            subtitle: 'Complete 50 quests'),
-        BadgeItem(
-            imagePath: 'assets/mission_veteran.png',
-            title: 'Mission Veteran',
-            subtitle: 'Complete 100 quests'),
-        BadgeItem(
-            imagePath: 'assets/starter_badge.png',
-            title: 'Starter Badge',
-            subtitle: 'Complete an easy quest'),
-        BadgeItem(
-            imagePath: 'assets/challenger_badge.png',
-            title: 'Challenger Badge',
-            subtitle: 'Complete a medium quest'),
-        BadgeItem(
-            imagePath: 'assets/master_badge.png',
-            title: 'Master Badge',
-            subtitle: 'Complete a hard quest'),
-      ],
-    );
-  }
-}
+    final List<BadgeItemData> badges = [
+      BadgeItemData(
+          imagePath: 'assets/badges/badge_1.png',
+          title: 'Quest Beginner',
+          subtitle: 'Complete 10 quests'),
+      BadgeItemData(
+          imagePath: 'assets/badges/badge_2.png',
+          title: 'Task Tackler',
+          subtitle: 'Complete 50 quests'),
+      BadgeItemData(
+          imagePath: 'assets/badges/badge_3.png',
+          title: 'Mission Veteran',
+          subtitle: 'Complete 100 quests'),
+      BadgeItemData(
+          imagePath: 'assets/badges/badge_3.png',
+          title: 'Starter Badge',
+          subtitle: 'Complete an easy quest'),
+      BadgeItemData(
+          imagePath: 'assets/badges/badge_2.png',
+          title: 'Challenger Badge',
+          subtitle: 'Complete a medium quest'),
+      BadgeItemData(
+          imagePath: 'assets/badges/badge_1.png',
+          title: 'Master Badge',
+          subtitle: 'Complete a hard quest'),
+      BadgeItemData(
+          imagePath: 'assets/badges/badge_1.png',
+          title: 'Quest Beginner',
+          subtitle: 'Complete 10 quests'),
+      BadgeItemData(
+          imagePath: 'assets/badges/badge_2.png',
+          title: 'Task Tackler',
+          subtitle: 'Complete 50 quests'),
+      BadgeItemData(
+          imagePath: 'assets/badges/badge_3.png',
+          title: 'Mission Veteran',
+          subtitle: 'Complete 100 quests'),
+      BadgeItemData(
+          imagePath: 'assets/badges/badge_3.png',
+          title: 'Starter Badge',
+          subtitle: 'Complete an easy quest'),
+      BadgeItemData(
+          imagePath: 'assets/badges/badge_2.png',
+          title: 'Challenger Badge',
+          subtitle: 'Complete a medium quest'),
+      BadgeItemData(
+          imagePath: 'assets/badges/badge_1.png',
+          title: 'Master Badge',
+          subtitle: 'Complete a hard quest'),
+      BadgeItemData(
+          imagePath: 'assets/badges/badge_1.png',
+          title: 'Quest Beginner',
+          subtitle: 'Complete 10 quests'),
+      BadgeItemData(
+          imagePath: 'assets/badges/badge_2.png',
+          title: 'Task Tackler',
+          subtitle: 'Complete 50 quests'),
+      BadgeItemData(
+          imagePath: 'assets/badges/badge_3.png',
+          title: 'Mission Veteran',
+          subtitle: 'Complete 100 quests'),
+      BadgeItemData(
+          imagePath: 'assets/badges/badge_3.png',
+          title: 'Starter Badge',
+          subtitle: 'Complete an easy quest'),
+      BadgeItemData(
+          imagePath: 'assets/badges/badge_2.png',
+          title: 'Challenger Badge',
+          subtitle: 'Complete a medium quest'),
+      BadgeItemData(
+          imagePath: 'assets/badges/badge_1.png',
+          title: 'Master Badge',
+          subtitle: 'Complete a hard quest'),
+    ];
 
-class BadgeItem extends StatelessWidget {
-  final String imagePath;
-  final String title;
-  final String subtitle;
-
-  const BadgeItem(
-      {super.key,
-      required this.imagePath,
-      required this.title,
-      required this.subtitle});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 4,
+    return Container(
+      color: Colors.orange[50], // Warna latar belakang
       child: Padding(
-        padding: const EdgeInsets.all(15.0),
-        child: Row(
-          children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                image: const DecorationImage(
-                  image: AssetImage('assets/icons/medal1_icon.png'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        padding: const EdgeInsets.all(16.0),
+        child: GridView.builder(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            childAspectRatio: 0.8,
+          ),
+          itemCount: badges.length,
+          itemBuilder: (context, index) {
+            return Column(
               children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 4,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.asset(
+                        badges[index].imagePath,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
                 Text(
-                  title,
+                  badges[index].title,
+                  textAlign: TextAlign.center,
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  subtitle,
+                  badges[index].subtitle,
+                  textAlign: TextAlign.center,
                   style: const TextStyle(
-                    fontSize: 14,
+                    fontSize: 12,
                     color: Colors.grey,
                   ),
                 ),
               ],
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
   }
+}
+
+class BadgeItemData {
+  final String imagePath;
+  final String title;
+  final String subtitle;
+
+  BadgeItemData(
+      {required this.imagePath, required this.title, required this.subtitle});
 }

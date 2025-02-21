@@ -34,6 +34,7 @@ class TopicDetailScreen extends StatelessWidget {
                       top: MediaQuery.of(context).size.height * 0.18,
                       left: MediaQuery.of(context).size.width * 0.07,
                       right: MediaQuery.of(context).size.width * 0.07,
+                      bottom: MediaQuery.of(context).size.width * 0.07,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                             vertical: 6, horizontal: 10),
@@ -107,6 +108,30 @@ class TopicDetailScreen extends StatelessWidget {
 
   List<Widget> _buildTopicCards(BuildContext context) {
     final topics = [
+      {
+        'title': 'Introduction',
+        'exp': 10,
+        'icon': 'assets/icons/introduction_icon.png'
+      },
+      {
+        'title': 'Exercise I',
+        'exp': 50,
+        'pts': 10,
+        'questions': 10,
+        'icon': 'assets/icons/tasklist1_icon.png'
+      },
+      {
+        'title': 'History of Programming',
+        'exp': 10,
+        'icon': 'assets/icons/course2_icon.png'
+      },
+      {
+        'title': 'Exercise II',
+        'exp': 50,
+        'pts': 10,
+        'questions': 10,
+        'icon': 'assets/icons/tasklist1_icon.png'
+      },
       {
         'title': 'Introduction',
         'exp': 10,

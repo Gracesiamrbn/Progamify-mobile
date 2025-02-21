@@ -176,21 +176,25 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
               ),
             ),
             const Spacer(),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.red,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Row(
-                children: [
-                  Text(
-                    'Exit',
-                    style: TextStyle(color: Colors.white, fontSize: 17),
-                  ),
-                  SizedBox(width: 4),
-                  Icon(Icons.exit_to_app, color: Colors.white),
-                ],
+            GestureDetector(
+              onTap: _showExitConfirmationDialog,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Row(
+                  children: [
+                    Text(
+                      'Exit',
+                      style: TextStyle(color: Colors.white, fontSize: 17),
+                    ),
+                    SizedBox(width: 4),
+                    Icon(Icons.exit_to_app, color: Colors.white),
+                  ],
+                ),
               ),
             ),
           ],
@@ -264,13 +268,18 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                 ElevatedButton.icon(
                   onPressed: currentQuestionIndex < questions.length - 1
                       ? _nextQuestion
-                      : null,
-                  icon: const Icon(Icons.arrow_forward),
-                  label: const Text('Next'),
+                      : _showSubmitDialog, // Panggil dialog jika soal terakhir
+                  icon: Icon(currentQuestionIndex < questions.length - 1
+                      ? Icons.arrow_forward
+                      : Icons
+                          .check), // Ubah ikon menjadi centang saat di soal terakhir
+                  label: Text(currentQuestionIndex < questions.length - 1
+                      ? 'Next'
+                      : 'Submit'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: currentQuestionIndex < questions.length - 1
                         ? Colors.blue[300]
-                        : Colors.grey[400],
+                        : Colors.green, // Ubah warna tombol saat submit
                   ),
                 ),
               ],
@@ -334,5 +343,63 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
       selectedAnswer = null;
     });
     _scrollToCurrentQuestion();
+  }
+
+  void _showSubmitDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Submit Quiz'),
+          content: const Text('Are you sure you want to submit your answers?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _submitQuiz(); // Panggil fungsi submit
+              },
+              child: const Text('Submit'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _submitQuiz() {
+    // Tambahkan logika submit, seperti menghitung skor atau pindah halaman
+    print("Quiz Submitted!");
+  }
+
+  void _showExitConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Want to Exit?  '),
+          content: const Text(
+              'Your progress will not be saved and you will not get the XP'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context); // Tutup dialog
+                Navigator.pop(context); // Kembali ke halaman sebelumnya
+              },
+              child: const Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
