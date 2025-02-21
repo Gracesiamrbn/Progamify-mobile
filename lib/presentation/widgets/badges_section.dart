@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:progamify/presentation/screens/navigation/bottom_navigation.dart';
 
 import '../screens/quest/quest_menu_screen.dart';
@@ -16,14 +17,24 @@ class BadgesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // final badges = items ??
+    //     List.generate(
+    //       4,
+    //       (index) => BadgeItem(
+    //         color: Colors.orange,
+    //         iconPath: "assets/badges/badge_${index + 1}.png",
+    //       ),
+    //     );
+
     final badges = items ??
-        List.generate(
-          4,
-          (index) => BadgeItem(
-            color: Colors.orange,
-            iconPath: "assets/badges/badge_${index + 1}.png",
-          ),
-        );
+        [
+          BadgeItem(badgePath: "assets/badges/task_tackler.svg"),
+          BadgeItem(badgePath: "assets/badges/quest_beginner.svg"),
+          BadgeItem(badgePath: "assets/badges/mission_veteran.svg"),
+          BadgeItem(
+              badgePath:
+                  "assets/badges/starter_badge.svg"), // Jika ada badge tambahan
+        ];
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -43,35 +54,14 @@ class BadgesSection extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: badges.map((badge) {
-              return Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: badge.color,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.0),
-                    width: 3,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      spreadRadius: 1,
-                      blurRadius: 5,
-                      offset: const Offset(2, 2),
-                    ),
-                  ],
-                ),
-                child: badge.iconPath != null
-                    ? Padding(
-                        padding: const EdgeInsets.all(1.0),
-                        child: Image.asset(
-                          badge.iconPath!,
-                          fit: BoxFit.contain,
-                        ),
-                      )
-                    : null,
-              );
+              return badge.badgePath != null
+                  ? SvgPicture.asset(
+                      badge.badgePath!,
+                      fit: BoxFit.contain,
+                      width: 80,
+                      height: 80,
+                    )
+                  : const SizedBox(width: 64, height: 64);
             }).toList(),
           ),
           const SizedBox(height: 8),
@@ -107,11 +97,9 @@ class BadgesSection extends StatelessWidget {
 }
 
 class BadgeItem {
-  final Color color;
-  final String? iconPath;
+  final String? badgePath;
 
   BadgeItem({
-    required this.color,
-    this.iconPath,
+    this.badgePath,
   });
 }
