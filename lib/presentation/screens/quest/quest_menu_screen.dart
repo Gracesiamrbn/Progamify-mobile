@@ -323,12 +323,14 @@ class BadgesTab extends StatelessWidget {
               children: [
                 Expanded(
                   child: Container(
+                    width: 80, // Ubah sesuai ukuran yang diinginkan
+                    height: 80, // Ukuran seragam
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: const [
                         BoxShadow(
                           color: Colors.black26,
-                          blurRadius: 4,
+                          blurRadius: 8,
                           offset: Offset(0, 2),
                         ),
                       ],

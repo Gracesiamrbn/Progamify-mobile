@@ -132,30 +132,6 @@ class TopicDetailScreen extends StatelessWidget {
         'questions': 10,
         'icon': 'assets/icons/tasklist1_icon.png'
       },
-      {
-        'title': 'Introduction',
-        'exp': 10,
-        'icon': 'assets/icons/introduction_icon.png'
-      },
-      {
-        'title': 'Exercise I',
-        'exp': 50,
-        'pts': 10,
-        'questions': 10,
-        'icon': 'assets/icons/tasklist1_icon.png'
-      },
-      {
-        'title': 'History of Programming',
-        'exp': 10,
-        'icon': 'assets/icons/course2_icon.png'
-      },
-      {
-        'title': 'Exercise II',
-        'exp': 50,
-        'pts': 10,
-        'questions': 10,
-        'icon': 'assets/icons/tasklist1_icon.png'
-      },
     ];
 
     return topics.map((topic) {
