@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 
+
 class LeaderboardScreen extends StatefulWidget {
   const LeaderboardScreen({super.key});
 
@@ -84,7 +85,8 @@ class LeaderboardScreenState extends State<LeaderboardScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFEAF2FF),
+      backgroundColor:
+          const Color.from(alpha: 1, red: 0.918, green: 0.949, blue: 1),
       body: SafeArea(
         child: Column(
           children: [
@@ -236,6 +238,8 @@ class LeaderboardScreenState extends State<LeaderboardScreen>
 
   Widget _buildLeaderboardItem(Map<String, dynamic> user, int position) {
     bool isFirstPlace = position == 1;
+    bool isSecondPlace = position == 2;
+    bool isThirdPlace = position == 3;
 
     return Stack(
       clipBehavior: Clip.none,
@@ -255,7 +259,7 @@ class LeaderboardScreenState extends State<LeaderboardScreen>
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     )
-                  : null, // Hanya untuk juara 1
+                  : null,
             ),
             child: Padding(
               padding: const EdgeInsets.all(12),
@@ -263,14 +267,20 @@ class LeaderboardScreenState extends State<LeaderboardScreen>
                 children: [
                   SizedBox(
                     width: 30,
-                    child: Text(
-                      '#$position',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: isFirstPlace ? Colors.amber[900] : Colors.black,
-                      ),
-                    ),
+                    child: !isFirstPlace
+                        ? Text(
+                            '#$position',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: isSecondPlace
+                                  ? const Color(0xFF4682B4)
+                                  : isThirdPlace
+                                      ? const Color(0xFF800000)
+                                      : Colors.black,
+                            ),
+                          )
+                        : null,
                   ),
                   const SizedBox(width: 12),
                   ClipOval(
@@ -288,17 +298,37 @@ class LeaderboardScreenState extends State<LeaderboardScreen>
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: isFirstPlace ? Colors.amber[900] : Colors.black,
+                        color: isFirstPlace
+                            ? Colors.amber[900]
+                            : isSecondPlace
+                                ? const Color(0xFF4682B4)
+                                : isThirdPlace
+                                    ? const Color(0xFF800000)
+                                    : Colors.black,
                       ),
                     ),
                   ),
-                  Text(
-                    '${user['xp']} XP',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        '${user['xp']}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF6B3FA0),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 2,
+                      ),
+                      Image.asset(
+                        'assets/icons/exp_point.png',
+                        width: 20,
+                        height: 20,
+                      )
+                    ],
+                  )
                 ],
               ),
             ),
@@ -327,22 +357,7 @@ class LeaderboardScreenState extends State<LeaderboardScreen>
       case 3:
         return const Color(0xFFE6B8A2);
       default:
-        return position % 2 == 0
-            ? const Color(0xFFFFFAF0)
-            : const Color(0xFFFDF5E6);
-    }
-  }
-
-  Color _getRankTextColor(int position) {
-    switch (position) {
-      case 1:
-        return Colors.amber[900]!;
-      case 2:
-        return Colors.grey[700]!;
-      case 3:
-        return Colors.brown[700]!;
-      default:
-        return Colors.black87;
+        return const Color(0xFFC8E2F3);
     }
   }
 }

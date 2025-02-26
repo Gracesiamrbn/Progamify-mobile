@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:lottie/lottie.dart';
 
 class AchievementItem extends StatelessWidget {
   final Map<String, String> achievement;
@@ -90,118 +91,90 @@ class AchievementItem extends StatelessWidget {
   }
 }
 
-// ===================== POPUP SCREEN =====================
-class _PopupScreen extends StatefulWidget {
+class _PopupScreen extends StatelessWidget {
   final Map<String, String> achievement;
 
   const _PopupScreen({required this.achievement});
 
   @override
-  State<_PopupScreen> createState() => _PopupScreenState();
-}
-
-class _PopupScreenState extends State<_PopupScreen>
-    with SingleTickerProviderStateMixin {
-  double _opacity = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    Future.delayed(const Duration(milliseconds: 50), () {
-      setState(() {
-        _opacity = 1;
-      });
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black.withOpacity(0.5), 
-      body: GestureDetector(
-        onTap: () => Navigator.pop(context),
-        child: Center(
-          child: AnimatedOpacity(
-            duration: const Duration(milliseconds: 300),
-            opacity: _opacity,
-            child: Stack(
-              children: [
-                // Kontainer utama popup
-                Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  padding: const EdgeInsets.all(24),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
-                    ),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Hero(
-                        tag: widget.achievement["icon"]!,
-                        child: SvgPicture.asset(
-                          widget.achievement["icon"]!,
-                          width: 210,
-                          height: 210,
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Judul
-                      Text(
-                        widget.achievement["title"]!,
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      // Deskripsi
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Text(
-                          widget.achievement["description"]!,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.black54,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                
-                Positioned(
-                  top: 40, // Jarak dari atas
-                  right: 20, // Jarak dari kanan
-                  child: GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.grey.withOpacity(0.2),
-                      ),
-                      child: const Icon(Icons.close,
-                          size: 30, color: Colors.black54),
-                    ),
-                  ),
-                ),
-              ],
+      backgroundColor: Colors.white,
+      body: Stack(
+        fit: StackFit.expand,
+        alignment: Alignment.center,
+        children: [
+          Positioned(
+            left: -100,
+            right: -100,
+            child: Center(
+              child: Lottie.asset(
+                'assets/animation/Animation - 1740191982184.json',
+                fit: BoxFit.cover,
+                width: MediaQuery.of(context).size.width + 200,
+              ),
             ),
           ),
-        ),
+
+          // Content
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Hero(
+                    tag: achievement["icon"]!,
+                    child: SvgPicture.asset(
+                      achievement["icon"]!,
+                      width: 210,
+                      height: 210,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    achievement["title"]!,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Text(
+                      achievement["description"]!,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.black54,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Close Button
+          Positioned(
+            top: 40,
+            right: 20,
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withOpacity(0.8),
+                ),
+                child: const Icon(Icons.close, size: 30, color: Colors.black54),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
