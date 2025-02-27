@@ -93,7 +93,8 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               const SizedBox(height: 16),
               Expanded(
                 child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                   itemCount: topics.length,
                   itemBuilder: (context, index) {
                     int nextIndex = index + 1;
@@ -123,6 +124,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   Widget _buildStepCard(
       BuildContext context, Map<String, dynamic> topic, int index) {
     bool isClicked = clickedSteps.contains(index); // Cek apakah sudah diklik
+    bool isCompleted = topic['isCompleted'] ?? false;
 
     return GestureDetector(
       onTap: () {
@@ -137,25 +139,47 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 13),
               child: Column(
                 children: [
-                  if (index != 0)
-                    Expanded(
+                  Expanded(
+                    child: Visibility(
+                      visible: index !=
+                          0, // Hilangkan divider atas pada langkah pertama
                       child: VerticalDivider(
-                        color: isClicked ? Colors.blue : Colors.grey,
+                        color: isClicked ? Colors.blue : Colors.grey[350],
                         thickness: 5,
                       ),
                     ),
-                  Icon(
-                    Icons.circle,
-                    color: isClicked ? Colors.blue : Colors.grey,
-                    size: 20,
                   ),
-                  if (index != topics.length - 1)
-                    Expanded(
+                  Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isClicked ? Colors.blue : Colors.grey[350],
+                    ),
+                    child: Center(
+                      child: isClicked
+                          ? const Icon(Icons.check,
+                              color: Colors.white, size: 18)
+                          : Text(
+                              '${index + 1}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Visibility(
+                      visible: index !=
+                          topics.length -
+                              1, // Hilangkan divider bawah pada langkah terakhir
                       child: VerticalDivider(
-                        color: isClicked ? Colors.blue : Colors.grey,
+                        color: isClicked ? Colors.blue : Colors.grey[350],
                         thickness: 5,
                       ),
                     ),
+                  ),
                 ],
               ),
             ),
