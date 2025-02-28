@@ -190,8 +190,6 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
                     "img": Style(
                       width: Width(300),
                       height: Height(300),
-                      padding: const EdgeInsets.all(10),
-                      alignment: Alignment.center,
                     ),
                   },
                 )
