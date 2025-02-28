@@ -111,7 +111,7 @@ class ProfileInfo extends StatelessWidget {
             ],
           ),
           padding: const EdgeInsets.all(8),
-          child: SvgPicture.asset(
+          child: Image.asset(
             iconPath,
             width: 32,
             height: 32,
