@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:progamify/api/auth_service.dart';
 import 'topic_detail_screen.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class TopicsScreen extends StatefulWidget {
   const TopicsScreen({super.key});
@@ -10,43 +14,54 @@ class TopicsScreen extends StatefulWidget {
 }
 
 class _TopicsScreenState extends State<TopicsScreen> {
-  final List<Map<String, dynamic>> topics = [
-    {
-      'title': 'Introduction',
-      'sections': 8,
-      'completed': 3, //sudah selesai 3 dari 8
-    },
-    {
-      'title': 'Data Types',
-      'sections': 12,
-      'completed': 7,
-    },
-    {
-      'title': 'Control Flows',
-      'sections': 6,
-      'completed': 2,
-    },
-    {
-      'title': 'Function',
-      'sections': 10,
-      'completed': 5,
-    },
-    {
-      'title': 'Object Oriented Programming',
-      'sections': 15,
-      'completed': 9,
-    },
-    {
-      'title': 'Object Oriented Programming',
-      'sections': 15,
-      'completed': 9,
-    },
-    {
-      'title': 'Object Oriented Programming',
-      'sections': 15,
-      'completed': 15,
-    },
-  ];
+  List<Map<String, dynamic>> topics = [];
+
+  final AuthService _authService = AuthService();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchTopics();
+  }
+
+  Future<void> _fetchTopics() async {
+    final String? _authToken = await _authService.getToken();
+
+    try {
+      final String baseUrl =
+          dotenv.env["BASE_URL_API"] ?? "http://10.0.0.2/api";
+      final response = await http.get(
+        Uri.parse('$baseUrl/topics'),
+        headers: {
+          'Authorization': 'Bearer $_authToken',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> topicsList = json.decode(response.body);
+
+        setState(() {
+          topics = topicsList
+              .map((topic) => {
+                    'id': topic['id'],
+                    'title': topic['name'] ?? 'Untitled Topic',
+                    'sections':
+                        topic['total_lessons'] + topic['total_exercises'],
+                    'completed': topic['total_take_lessons'] +
+                        topic['total_take_exercises'],
+                    'total_lessons': topic['total_lessons'],
+                    'total_exercises': topic['total_exercises']
+                  })
+              .toList();
+        });
+      } else {
+        setState(() {});
+      }
+    } catch (e) {
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,14 +125,20 @@ class _TopicsScreenState extends State<TopicsScreen> {
   Widget _buildTopicCard(Map<String, dynamic> topic) {
     int totalSections = topic['sections'];
     int completedSections = topic['completed'];
-    double progress = completedSections / totalSections;
+    double progress =
+        totalSections == 0 ? 0 : completedSections / totalSections;
 
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => TopicDetailScreen(topicTitle: topic['title']),
+            builder: (context) => TopicDetailScreen(
+              topicId: topic['id'],
+              topicTitle: topic['title'],
+              totalLesson: topic['total_lessons'],
+              totalExercise: topic['total_exercises'],
+            ),
           ),
         );
       },

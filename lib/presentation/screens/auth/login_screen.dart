@@ -3,6 +3,7 @@ import 'package:progamify/presentation/screens/navigation/bottom_navigation.dart
 import '../../widgets/text_field_style1.dart';
 import '../../widgets/button_style1.dart';
 import '../../../core/theme/app_styles.dart';
+import 'package:progamify/api/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,18 +17,44 @@ class LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isObscure = true;
+  final AuthService _authService = AuthService();
 
-  void _login() {
-    // if (_formKey.currentState!.validate()) {
-    // ScaffoldMessenger.of(context).showSnackBar(
-    //   const SnackBar(content: Text("Login successful!")),
-    // );
+  @override
+  void initState() {
+    super.initState();
+    _checkLogin();
+  }
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const MainScreen()),
-    );
-    // }
+  Future<void> _checkLogin() async {
+    String? token = await _authService.getToken();
+    print("TOKEN : $token");
+    if (token != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MainScreen()),
+      );
+    }
+  }
+
+  Future<void> _login() async {
+    bool success = await _authService.login(
+        _emailController.text, _passwordController.text);
+
+    if (success) {
+      await _authService.getToken();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Login successful!")),
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MainScreen()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Login Failed, Email or Password Wrong!")),
+      );
+    }
   }
 
   @override

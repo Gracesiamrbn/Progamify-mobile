@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:progamify/presentation/screens/auth/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AuthService {
-  final String baseUrl = "http://10.0.2.2:8080/api";
+  final String baseUrl = dotenv.env["BASE_URL_API"] ?? "http://10.0.2.2/api";
 
   Future<bool> login(String email, String password) async {
     final response = await http.post(
@@ -17,7 +18,7 @@ class AuthService {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       if (data["user"] != null) {
-        // print("Raw Response: ${response.body}");
+        print("Raw Response: ${response.body}");
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', data['token']);
         return true;

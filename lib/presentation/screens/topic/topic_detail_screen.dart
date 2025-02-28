@@ -4,14 +4,25 @@ import 'package:progamify/presentation/screens/topic/topic_course_screen.dart';
 import 'package:progamify/presentation/screens/topic/excercise_screen.dart';
 
 class TopicDetailScreen extends StatefulWidget {
-  const TopicDetailScreen({super.key, required String topicTitle});
+  final int topicId;
+  final String topicTitle;
+  final int totalLesson;
+  final int totalExercise;
+
+  const TopicDetailScreen(
+      {super.key,
+      required this.topicId,
+      required this.topicTitle,
+      required this.totalLesson,
+      required this.totalExercise});
+
   @override
-  _TopicDetailScreenState createState() => _TopicDetailScreenState();
+  State<TopicDetailScreen> createState() => _TopicDetailScreenState();
 }
 
 class _TopicDetailScreenState extends State<TopicDetailScreen> {
-  final Set<int> clickedSteps =
-      {}; // Menyimpan indeks langkah yang sudah diklik
+  final Set<int> clickedSteps = {};
+  late Future<Map<String, dynamic>> futureTopic;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +40,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                   alignment: Alignment.center,
                   children: [
                     Text(
-                      'Introduction',
+                      "${widget.topicTitle} ",
                       style: GoogleFonts.inter(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -64,7 +75,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                                 const Icon(Icons.book,
                                     color: Colors.red, size: 18),
                                 const SizedBox(width: 3),
-                                Text('5 Lessons',
+                                Text('${widget.totalLesson} Lessons',
                                     style: GoogleFonts.inter(
                                         color: Colors.black,
                                         fontSize: 16,
@@ -76,7 +87,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                                 const Icon(Icons.assignment,
                                     color: Colors.blue, size: 18),
                                 const SizedBox(width: 3),
-                                Text('5 Exercises',
+                                Text('${widget.totalExercise} Exercises',
                                     style: GoogleFonts.inter(
                                         color: Colors.black,
                                         fontSize: 16,
