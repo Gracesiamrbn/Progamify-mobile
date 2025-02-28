@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+// import 'package:flutter_svg/flutter_svg.dart';
 
 class SummaryBoxes extends StatelessWidget {
   final String title;
   final List<BoxItem>? items;
+  final int exp;
 
   const SummaryBoxes({
     super.key,
     this.title = "Boxes",
+    required this.exp,
     this.items,
   });
 
@@ -16,7 +18,7 @@ class SummaryBoxes extends StatelessWidget {
     final boxItems = items ??
         [
           BoxItem(
-              value: "5",
+              value: "$exp",
               label: "experience point",
               icon: "assets/icons/exp_point.png"),
           BoxItem(

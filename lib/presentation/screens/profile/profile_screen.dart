@@ -1,39 +1,66 @@
 import 'package:flutter/material.dart';
+import 'package:progamify/api/user_service.dart';
 import '../../widgets/profile_header.dart';
 import '../../widgets/profile_info.dart';
 import '../../widgets/summary_boxes.dart';
 import '../../widgets/summary_grid.dart';
 import '../../widgets/badges_section.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  late Future<Map<String, dynamic>> futureUser;
+
+  @override
+  void initState() {
+    super.initState();
+    futureUser = UserService().getCurrentUser();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Color(0xFFF0F4FA),
-      body: CustomScrollView(
-        slivers: [
-          ProfileHeader(
-            avatarPath: 'assets/images/avatar_jumbotron_1.svg',
-          ),
-          SliverToBoxAdapter(
-            child: Column(
-              children: [
-                SizedBox(height: 20),
-                ProfileInfo(
-                  name: "Enrico Sirait",
-                  details: "11521034 | email@mail.com | 2021",
-                  settingIconPath: "assets/icons/setting_icon.svg",
-                  shopIconPath: "assets/icons/shop_icon.svg",
+    return Scaffold(
+      backgroundColor: const Color(0xFFF0F4FA),
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: UserService().getCurrentUser(), // Fetch current user data
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else {
+            final user = snapshot.data!;
+            return CustomScrollView(
+              slivers: [
+                const ProfileHeader(
+                  avatarPath: 'assets/images/avatar_jumbotron.svg',
                 ),
-                SummaryBoxes(),
-                SummaryGrid(),
-                BadgesSection(),
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      ProfileInfo(
+                        name: user['name'], // Use dynamic user name
+                        details:
+                            "${user['nim']} | ${user['email']} | ${user['angkatan']}",
+                        settingIconPath: "assets/icons/setting_icon.svg",
+                        shopIconPath: "assets/icons/shop_icon.svg",
+                      ),
+                      SummaryBoxes(exp: user["total_exp"]),
+                      const SummaryGrid(),
+                      const BadgesSection(),
+                    ],
+                  ),
+                ),
               ],
-            ),
-          ),
-        ],
+            );
+          }
+        },
       ),
     );
   }
