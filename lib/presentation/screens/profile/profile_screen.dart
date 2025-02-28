@@ -15,7 +15,7 @@ class ProfileScreen extends StatelessWidget {
       body: CustomScrollView(
         slivers: [
           ProfileHeader(
-            avatarPath: 'assets/images/avatar_jumbotron.svg',
+            avatarPath: 'assets/images/avatar_jumbotron_1.svg',
           ),
           SliverToBoxAdapter(
             child: Column(

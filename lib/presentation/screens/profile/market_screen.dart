@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../../widgets/market_app_bar.dart';
+import '../../widgets/market_tab_selector.dart';
+import '../../widgets/market_item_grid.dart';
+import '../../widgets/market_selected_item.dart';
+import '../../widgets/market_purchase_button.dart';
 
 class MarketScreen extends StatefulWidget {
   const MarketScreen({super.key});
@@ -9,137 +14,54 @@ class MarketScreen extends StatefulWidget {
 }
 
 class MarketScreenState extends State<MarketScreen> {
-  int selectedAvatarIndex = -1;
+  int selectedTabIndex = 0;
+  int selectedAvatarIndex = 0;
+  int selectedGiftIndex = 0;
 
   @override
   Widget build(BuildContext context) {
+    // int currentSelectedIndex =
+    //     selectedTabIndex == 0 ? selectedAvatarIndex : selectedGiftIndex;
     return Scaffold(
-      backgroundColor: Colors.blue[50],
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          "Market",
-          style: TextStyle(color: Colors.black54, fontWeight: FontWeight.bold),
-        ),
-        actions: const [
-          Row(
-            children: [
-              Text(
-                '512',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(width: 6),
-              CircleAvatar(
-                radius: 12,
-                backgroundColor: Colors.amber,
-                child: Icon(
-                  Icons.monetization_on,
-                  color: Colors.white,
-                  size: 16,
-                ),
-              ),
-              SizedBox(width: 16),
-            ],
-          ),
-        ],
-      ),
+      backgroundColor: const Color(0xFFEAF2FF),
+      appBar: marketAppBar(context),
       body: Column(
         children: [
-          // Tampilan Avatar Besar (Jumbotron)
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            height: 200,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 6,
-                  spreadRadius: 1,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: SvgPicture.asset(
-                selectedAvatarIndex == -1
-                    ? "assets/avatars/avatar_jumbotron_1.svg"
-                    : "assets/avatars/avatar_jumbotron_${selectedAvatarIndex + 1}.svg",
-                fit: BoxFit.cover,
-                placeholderBuilder: (context) => const Center(
-                  child: CircularProgressIndicator(),
-                ),
-              ),
-            ),
+          MarketSelectedItem(
+            selectedIndex:
+                selectedTabIndex == 0 ? selectedAvatarIndex : selectedGiftIndex,
+            selectedTabIndex: selectedTabIndex,
           ),
-
-          // Grid Avatar untuk dipilih
+          MarketTabSelector(
+            selectedTabIndex: selectedTabIndex,
+            onTabSelected: (index) {
+              setState(() {
+                selectedTabIndex = index;
+              });
+            },
+          ),
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: GridView.builder(
-                physics: const BouncingScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  childAspectRatio: 1,
-                ),
-                itemCount: 12,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedAvatarIndex = index;
-                      });
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      decoration: BoxDecoration(
-                        color: selectedAvatarIndex == index
-                            ? Colors.blueAccent.withOpacity(0.2)
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: selectedAvatarIndex == index
-                              ? Colors.blueAccent
-                              : Colors.grey[300]!,
-                          width: 2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(1.5),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: SvgPicture.asset(
-                            "assets/avatars/avatar_${index + 1}.svg",
-                            fit: BoxFit.contain,
-                            placeholderBuilder: (context) => const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
+            child: MarketItemGrid(
+              selectedTabIndex: selectedTabIndex,
+              selectedIndex: selectedTabIndex == 0
+                  ? selectedAvatarIndex
+                  : selectedGiftIndex,
+              onItemSelected: (index) {
+                setState(() {
+                  if (selectedTabIndex == 0) {
+                    selectedAvatarIndex = index;
+                  } else {
+                    selectedGiftIndex = index;
+                  }
+                });
+              },
             ),
           ),
+          MarketPurchaseButton(
+            selectedIndex:
+                selectedTabIndex == 0 ? selectedAvatarIndex : selectedGiftIndex,
+          ),
+          const SizedBox(height: 8),
         ],
       ),
     );
