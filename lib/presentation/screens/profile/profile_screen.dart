@@ -24,8 +24,8 @@ class ProfileScreen extends StatelessWidget {
                 ProfileInfo(
                   name: "Enrico Sirait",
                   details: "11521034 | email@mail.com | 2021",
-                  settingIconPath: "assets/icons/setting_icon.svg",
-                  shopIconPath: "assets/icons/shop_icon.svg",
+                  settingIconPath: "assets/icons/gear.png",
+                  shopIconPath: "assets/icons/shopping-cart.png",
                 ),
                 SummaryBoxes(),
                 SummaryGrid(),
