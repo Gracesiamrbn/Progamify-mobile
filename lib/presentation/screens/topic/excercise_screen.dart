@@ -17,109 +17,120 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
 
   final List<Map<String, dynamic>> questions = [
     {
-      'question': 'Who invented Turing Machine?',
+      'question':
+          'Paradigma pemrograman manakah yang paling sesuai dengan konsep "menyusun fungsi-fungsi kecil yang dapat digunakan kembali tanpa memodifikasi data langsung"?',
       'options': [
-        'Enrico Hezkiel Sirait',
-        'Boy Martahan Sitorus',
-        'Emely Angelica Lestari',
-        'Alan Turing'
+        'Prosedural',
+        'Fungsional',
+        'Berorientasi Objek',
+        'Deklaratif',
       ],
-      'correctAnswer': 3,
-      'explanation': 'Iron is the answer',
+      'correctAnswer': 1,
+      'explanation':
+          'Paradigma fungsional berfokus pada fungsi matematika dan menghindari perubahan langsung pada data, sehingga kode lebih bersih dan minim bug.',
       'exp': 15,
       'pts': 10,
       'type': 'multiple_choice'
     },
     {
       'question':
-          'Jelaskan sejarah dan manfaat Flutter dalam pengembangan aplikasi mobile!',
+          'Jelaskan perbedaan utama antara paradigma pemrograman prosedural dan berorientasi objek!',
       'type': 'essay',
       'explanation':
-          'Flutter adalah framework open-source yang dikembangkan oleh Google...',
+          'Paradigma prosedural berfokus pada instruksi yang dieksekusi secara berurutan, seperti langkah-langkah dalam resep masakan. Kode tersusun dalam bentuk fungsi yang dipanggil sesuai kebutuhan. Paradigma berorientasi objek mengorganisir kode ke dalam objek yang memiliki atribut (data) dan perilaku (metode). Ini memungkinkan kode lebih modular dan mudah dikelola..',
       'exp': 15,
       'pts': 10,
     },
     {
-      'question': 'HTML is a programme language',
+      'question':
+          'Sebutkan satu bahasa pemrograman yang mendukung paradigma deklaratif!',
+      'type': 'shortAnswer',
+      'correctAnswer': 'Prolog',
+      'explanation':
+          'Prolog adalah contoh bahasa pemrograman deklaratif, di mana programmer hanya menyatakan "apa" yang diinginkan tanpa harus mendefinisikan "bagaimana" cara mencapainya.',
+      'exp': 15,
+      'pts': 10,
+    },
+    {
+      'question':
+          'SQL adalah contoh bahasa pemrograman yang menggunakan paradigma deklaratif.',
       'options': ['True', 'False'],
-      'correctAnswer': 2,
-      'explanation': 'Iron is the answer',
+      'correctAnswer': 0,
+      'explanation':
+          'SQL bekerja dengan cara mendeklarasikan hasil yang diinginkan (misalnya, menampilkan data dari tabel) tanpa perlu menjelaskan bagaimana cara sistem mengambil data tersebut.',
       'exp': 15,
       'pts': 10,
       'type': 'true_false'
     },
     {
-      'question': 'Which of the following are programming languages?',
-      'options': ['Python', 'HTML', 'Java', 'CSS'],
-      'correctAnswers': [0, 2], // Index dari jawaban benar
-      'explanation': 'Python dan Java adalah bahasa pemrograman',
+      'question':
+          'Manakah bahasa pemrograman berikut yang mendukung paradigma berorientasi objek? (Pilih lebih dari satu)',
+      'options': ['Python', 'Fortran', 'Java', 'C++'],
+      'correctAnswers': [0, 2, 3], // Index dari jawaban benar
+      'explanation':
+          'Java, Python, dan C++ adalah bahasa yang mendukung paradigma berorientasi objek (OOP). Fortran lebih dikenal sebagai bahasa dengan paradigma prosedural.',
       'exp': 15,
       'pts': 10,
       'type': 'multiple_answer'
     },
     {
       'question':
-          'Jelaskan sejarah dan manfaat Flutter dalam pengembangan aplikasi mobile!',
-      'type': 'shortAnswer',
+          'Paradigma pemrograman yang cocok untuk pengolahan data besar dan berbasis AI adalah...',
+      'options': ['Prosedural', 'Fungsional', 'Deklaratif', 'Konkuren'],
+      'correctAnswer': 2,
       'explanation':
-          'Flutter adalah framework open-source yang dikembangkan oleh Google...',
+          'Paradigma deklaratif seperti Prolog sering digunakan dalam AI dan database, karena programmer hanya perlu mendeklarasikan aturan dan sistem akan menyelesaikan masalah secara otomatis.',
+      'exp': 15,
+      'pts': 10,
+      'type': 'multiple_choice'
+    },
+    {
+      'question':
+          'Mengapa paradigma konkuren penting dalam pengembangan sistem modern seperti server web dan game multiplayer?',
+      'type': 'essay',
+      'correctAnswer':
+          'Paradigma konkuren memungkinkan eksekusi banyak tugas secara bersamaan, meningkatkan efisiensi dan kecepatan sistem. Dalam server web dan game multiplayer, banyak permintaan harus diproses serentak agar pengguna tidak mengalami keterlambatan.',
+      'explanation':
+          'Paradigma konkuren memungkinkan eksekusi banyak tugas secara bersamaan, meningkatkan efisiensi dan kecepatan sistem. Dalam server web dan game multiplayer, banyak permintaan harus diproses serentak agar pengguna tidak mengalami keterlambatan.',
       'exp': 15,
       'pts': 10,
     },
     {
-      'question': 'Which is the longest river in the world?',
-      'options': [
-        'Amazon River',
-        'Nile River',
-        'Yangtze River',
-        'Mississippi River'
-      ],
+      'question': 'Apa yang dimaksud dengan paradigma pemrograman prosedural?',
+      'type': 'essay',
+      'correctAnswer':
+          'Paradigma pemrograman prosedural adalah metode penulisan kode yang berfokus pada instruksi langkah demi langkah secara berurutan untuk menyelesaikan suatu masalah.',
+      'explanation':
+          'Paradigma pemrograman prosedural adalah metode penulisan kode yang berfokus pada instruksi langkah demi langkah secara berurutan untuk menyelesaikan suatu masalah.',
+      'exp': 15,
+      'pts': 10,
+    },
+    {
+      'question':
+          'Bahasa pemrograman Pascal hanya mendukung paradigma berorientasi objek.',
+      'options': ['True', 'False'],
       'correctAnswer': 1,
-      'explanation': 'Iron is the answer',
+      'explanation':
+          'Pascal awalnya merupakan bahasa prosedural, tetapi versi yang lebih baru (seperti Object Pascal) juga mendukung paradigma berorientasi objek.',
       'exp': 15,
       'pts': 10,
-      'type': 'multiple_choice'
+      'type': 'true_false'
     },
     {
-      'question': 'Who discovered gravity?',
+      'question':
+          'Mana saja kelebihan paradigma fungsional dalam pemrograman? (Pilih lebih dari satu)',
       'options': [
-        'Isaac Newton',
-        'Albert Einstein',
-        'Galileo Galilei',
-        'Nikola Tesla'
+        ' Kode lebih bersih dan mudah dipahami',
+        'Minim bug karena tidak mengubah data langsung',
+        'Lebih efisien daripada prosedural dalam semua kasus',
+        'Dapat digunakan kembali tanpa efek samping'
       ],
-      'correctAnswer': 0,
-      'explanation': 'Iron is the answer',
+      'correctAnswers': [0, 1, 3], // Index dari jawaban benar
+      'explanation':
+          'Java, Python, dan C++ adalah bahasa yang mendukung paradigma berorientasi objek (OOP). Fortran lebih dikenal sebagai bahasa dengan paradigma prosedural.',
       'exp': 15,
       'pts': 10,
-      'type': 'multiple_choice'
-    },
-    {
-      'question': 'What is the hardest natural substance on Earth?',
-      'options': ['Gold', 'Iron', 'Diamond', 'Platinum'],
-      'correctAnswer': 2,
-      'explanation': 'Iron is the answer',
-      'exp': 15,
-      'pts': 10,
-      'type': 'multiple_choice'
-    },
-    {
-      'question': 'What is the chemical symbol for gold?',
-      'options': ['Go', 'Au', 'Ag', 'Gd'],
-      'correctAnswer': 1,
-      'explanation': 'Iron is the answer',
-      'exp': 15,
-      'pts': 10,
-      'type': 'multiple_choice'
-    },
-    {
-      'question': 'Which gas do plants use for photosynthesis?',
-      'options': ['Oxygen', 'Nitrogen', 'Carbon Dioxide', 'Hydrogen'],
-      'correctAnswer': 2,
-      'explanation': 'Iron is the answer',
-      'exp': 15,
-      'pts': 10,
-      'type': 'multiple_choice'
+      'type': 'multiple_answer'
     },
   ];
 
@@ -510,7 +521,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
           ),
         ),
       );
-    }   
+    }
 
     if (options.isEmpty) {
       return const Text("No options available",
@@ -525,10 +536,15 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
         }),
       );
     } else if (type == 'multiple_answer') {
-      return Column(
-        children: List.generate(options.length, (index) {
-          return _buildCheckboxOption(index, options[index]);
-        }),
+      return SizedBox(
+        height: MediaQuery.of(context).size.height *
+            0.5, // Maksimal 50% tinggi layar
+        child: ListView.builder(
+          itemCount: options.length,
+          itemBuilder: (context, index) {
+            return _buildCheckboxOption(index, options[index]);
+          },
+        ),
       );
     } else {
       return Column(
@@ -581,9 +597,17 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
               },
             ),
             const SizedBox(width: 10),
-            Text(
-              text,
-              style: const TextStyle(fontSize: 16),
+            Expanded(
+              child: Center(
+                // Membuat teks berada di tengah
+                child: Text(
+                  text,
+                  style: const TextStyle(fontSize: 16),
+                  softWrap: true, // Agar teks tetap turun ke bawah jika panjang
+                  overflow:
+                      TextOverflow.visible, // Teks tetap terlihat jika panjang
+                ),
+              ),
             ),
           ],
         ),
