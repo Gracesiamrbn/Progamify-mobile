@@ -48,8 +48,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         name: user['name'], // Use dynamic user name
                         details:
                             "${user['nim']} | ${user['email']} | ${user['angkatan']}",
-                        settingIconPath: "assets/icons/setting_icon.svg",
-                        shopIconPath: "assets/icons/shop_icon.svg",
+                        settingIconPath: "assets/icons/gear.png",
+                        shopIconPath: "assets/icons/shopping-cart.png",
                       ),
                       SummaryBoxes(exp: user["total_exp"]),
                       const SummaryGrid(),
