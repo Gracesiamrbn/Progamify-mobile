@@ -25,17 +25,6 @@ class ProfileHeader extends StatelessWidget {
               height: 200,
               fit: BoxFit.cover,
             ),
-
-            // Container(
-            //   height: 200,
-            //   width: double.infinity,
-            //   decoration: BoxDecoration(
-            //     image: DecorationImage(
-            //       image: AssetImage(avatarPath),
-            //       fit: BoxFit.cover,
-            //     ),
-            //   ),
-            // ),
           ],
         ),
       ),
