@@ -24,12 +24,11 @@ class LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    _checkLogin();
+    // _checkLogin();
   }
 
   Future<void> _checkLogin() async {
     String? token = await _authService.getToken();
-    print("TOKEN : $token");
     if (token != null) {
       Navigator.pushReplacement(
         context,

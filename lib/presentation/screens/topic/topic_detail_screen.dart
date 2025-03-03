@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+// import 'package:flutter_svg/svg.dart';
+// import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:progamify/api/topic_service.dart';
 import 'package:progamify/presentation/screens/topic/topic_course_screen.dart';
@@ -137,6 +139,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                         final List<dynamic> lessonTaken =
                             data['lessons_taken_in_this_topic'] ?? [];
                         final List<Map<String, dynamic>> lessons = [];
+                        bool isLocked = false;
 
                         for (int i = 0; i < topic['lessons'].length; i++) {
                           var lesson = topic['lessons'][i];
@@ -149,8 +152,13 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                             'title': lesson['name'],
                             'exp': int.parse("${lesson['exp']}"),
                             'icon': 'assets/icons/introduction_icon.png',
-                            'isCompleted': isCompleted
+                            'isCompleted': isCompleted,
+                            'isLocked': isLocked
                           };
+
+                          if (!isCompleted && !isLocked) {
+                            isLocked = true;
+                          }
 
                           lessons.add(newLesson);
 
@@ -179,8 +187,13 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                                 'pts': totalPoint,
                                 'questions': totalQuestions,
                                 'icon': 'assets/icons/tasklist1_icon.png',
-                                'isCompleted': false
+                                'isCompleted': false,
+                                'isLocked': isLocked,
                               };
+
+                              if (!newExercise["isCompleted"] && !isLocked) {
+                                isLocked = true;
+                              }
 
                               lessons.add(newExercise);
                             }
@@ -291,27 +304,30 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   Widget _buildTopicCard(BuildContext context, Map<String, dynamic> topic,
       bool isClicked, int index) {
     bool isExercise = topic.containsKey('questions');
+    bool isLocked = topic['isLocked'];
     return GestureDetector(
       onTap: () {
-        setState(() {
-          clickedSteps.add(index); // Update state saat card diklik
-        });
+        if (!isLocked) {
+          setState(() {
+            clickedSteps.add(index); // Update state saat card diklik
+          });
 
-        if (isExercise) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const ExerciseScreen()),
-          );
-        } else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => TopicCourseScreen(
-                      lessonId: topic['id'],
-                      courseTitle: topic['title'] as String? ?? '',
-                      topicTitle: topic['title'] as String? ?? '',
-                    )),
-          );
+          if (isExercise) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ExerciseScreen()),
+            );
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => TopicCourseScreen(
+                        lessonId: topic['id'],
+                        courseTitle: topic['title'] as String? ?? '',
+                        topicTitle: topic['title'] as String? ?? '',
+                      )),
+            );
+          }
         }
       },
       child: Stack(
@@ -320,7 +336,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             margin: const EdgeInsets.only(bottom: 12, left: 1),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isClicked
+              color: !topic["isLocked"]
                   ? Colors.white
                   : Colors.grey[350], // Warna berubah jika diklik
               borderRadius: BorderRadius.circular(12),
@@ -412,6 +428,23 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               ],
             ),
           ),
+          // if (isLocked) ...[
+          //   Positioned.fill(
+          //     child: Container(
+          //       decoration: BoxDecoration(
+          //         color: Colors.black.withOpacity(0.5),
+          //         borderRadius: BorderRadius.circular(12),
+          //       ),
+          //       child: Center(
+          //         child: SvgPicture.asset(
+          //           'assets/icons/lock-svgrepo-com.svg', // Path to your SVG lock icon
+          //           width: 40,
+          //           height: 40,
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          // ],
         ],
       ),
     );

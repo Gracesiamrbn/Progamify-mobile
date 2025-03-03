@@ -48,6 +48,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         name: user['name'], // Use dynamic user name
                         details:
                             "${user['nim']} | ${user['email']} | ${user['angkatan']}",
+                        // name: "Boy Martahan Sitorus", // Use dynamic user name
+                        // details: "11S21025 | sitorusboy0123@gmail.com | 2021",
                         settingIconPath: "assets/icons/gear.png",
                         shopIconPath: "assets/icons/shopping-cart.png",
                       ),
