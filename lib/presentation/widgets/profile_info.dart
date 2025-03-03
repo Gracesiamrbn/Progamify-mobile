@@ -6,15 +6,15 @@ import '../screens/profile/market_screen.dart';
 class ProfileInfo extends StatelessWidget {
   final String name;
   final String details;
-  final String settingIconPath;
-  final String shopIconPath;
+  final String? settingIconPath; // Ubah menjadi nullable (?)
+  final String? shopIconPath; // Ubah menjadi nullable (?)
 
   const ProfileInfo({
     super.key,
     required this.name,
     required this.details,
-    required this.settingIconPath,
-    required this.shopIconPath,
+    this.settingIconPath, // Tidak required lagi
+    this.shopIconPath, // Tidak required lagi
   });
 
   @override
@@ -49,32 +49,39 @@ class ProfileInfo extends StatelessWidget {
               ],
             ),
           ),
-          _buildIconButton(
-            backgroundColor: const Color(0xFFEFEFEF), // Soft Grey
-            iconPath: settingIconPath,
-            onPressed: () {
-              // Navigasi ke halaman SettingsScreen ketika setting diklik
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const SettingsScreen(),
-                ),
-              );
-            },
-          ),
-          const SizedBox(width: 8),
-          _buildIconButton(
-            backgroundColor: const Color(0xFFFFF0F2), // Soft Pink
-            iconPath: shopIconPath,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => MarketScreen(),
-                ),
-              );
-            },
-          ),
+          // Tampilkan tombol setting hanya jika iconPath tidak null
+          if (settingIconPath != null && settingIconPath!.isNotEmpty)
+            _buildIconButton(
+              backgroundColor: const Color(0xFFEFEFEF), // Soft Grey
+              iconPath: settingIconPath!,
+              onPressed: () {
+                // Navigasi ke halaman SettingsScreen ketika setting diklik
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SettingsScreen(),
+                  ),
+                );
+              },
+            ),
+          // Tambahkan jarak hanya jika kedua icon tidak null
+          if (settingIconPath != null && settingIconPath!.isNotEmpty && 
+              shopIconPath != null && shopIconPath!.isNotEmpty)
+            const SizedBox(width: 8),
+          // Tampilkan tombol shop hanya jika iconPath tidak null
+          if (shopIconPath != null && shopIconPath!.isNotEmpty)
+            _buildIconButton(
+              backgroundColor: const Color(0xFFFFF0F2), // Soft Pink
+              iconPath: shopIconPath!,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MarketScreen(),
+                  ),
+                );
+              },
+            ),
         ],
       ),
     );
@@ -111,7 +118,7 @@ class ProfileInfo extends StatelessWidget {
             ],
           ),
           padding: const EdgeInsets.all(8),
-          child: SvgPicture.asset(
+          child: Image.asset(
             iconPath,
             width: 32,
             height: 32,

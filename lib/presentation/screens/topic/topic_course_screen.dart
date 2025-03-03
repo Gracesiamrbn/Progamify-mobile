@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:progamify/api/lesson_service.dart';
 import 'package:progamify/presentation/screens/topic/write_discussion_screen.dart';
-import 'discussion_reply_screen.dart'; // Import halaman reply
+import 'discussion_reply_screen.dart';
+import 'package:flutter_html/flutter_html.dart';
 
 class TopicCourseScreen extends StatefulWidget {
   final String topicTitle;
+  final int lessonId;
   const TopicCourseScreen(
-      {super.key, required this.topicTitle, required String courseTitle});
+      {super.key,
+      required this.lessonId,
+      required this.topicTitle,
+      required String courseTitle});
 
   @override
   _TopicCourseScreenState createState() => _TopicCourseScreenState();
@@ -15,12 +22,14 @@ class TopicCourseScreen extends StatefulWidget {
 class _TopicCourseScreenState extends State<TopicCourseScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late Future<Map<String, dynamic>> futureLesson;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(_handleTabChange);
+    futureLesson = LessonService().getLesson(widget.lessonId);
   }
 
   @override
@@ -84,64 +93,115 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
     );
   }
 
+  // Widget _buildLessonContent() {
+  //   return SingleChildScrollView(
+  //     padding: const EdgeInsets.symmetric(horizontal: 20)
+  //         .copyWith(top: 30, bottom: 20),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Text(
+  //           'Introduction of Programming',
+  //           style: GoogleFonts.inter(
+  //             fontSize: 24,
+  //             fontWeight: FontWeight.bold,
+  //           ),
+  //         ),
+  //         const SizedBox(height: 10),
+  //         Text(
+  //           'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+  //           style: GoogleFonts.inter(fontSize: 14, color: Colors.black87),
+  //         ),
+  //         const Text(
+  //           '',
+  //         ),
+  //         Text(
+  //           'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+  //           style: GoogleFonts.inter(fontSize: 14, color: Colors.black87),
+  //         ),
+  //         const SizedBox(height: 16),
+  //         Container(
+  //           padding: const EdgeInsets.all(12),
+  //           decoration: BoxDecoration(
+  //             color: Colors.grey.shade200,
+  //             borderRadius: BorderRadius.circular(10),
+  //           ),
+  //           child: Column(
+  //             children: [
+  //               Image.asset(
+  //                 'assets/icons/media_icon.png',
+  //                 height: 150,
+  //                 width: 350,
+  //               ),
+  //               const SizedBox(height: 10),
+  //               Text(
+  //                 'Programming Basics',
+  //                 style: GoogleFonts.inter(
+  //                   fontSize: 16,
+  //                   fontWeight: FontWeight.bold,
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //         const SizedBox(height: 16),
+  //         Text(
+  //           'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+  //           style: GoogleFonts.inter(fontSize: 14, color: Colors.black87),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
   Widget _buildLessonContent() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 20)
-          .copyWith(top: 30, bottom: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Introduction of Programming',
-            style: GoogleFonts.inter(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-            style: GoogleFonts.inter(fontSize: 14, color: Colors.black87),
-          ),
-          const Text(
-            '',
-          ),
-          Text(
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-            style: GoogleFonts.inter(fontSize: 14, color: Colors.black87),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(10),
-            ),
+    return FutureBuilder<Map<String, dynamic>>(
+      future: futureLesson, // The future that fetches lesson data
+      builder:
+          (BuildContext context, AsyncSnapshot<Map<String, dynamic>> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        if (snapshot.hasData) {
+          var lessonData = snapshot.data;
+
+          String content = lessonData?['content'] ?? 'No content available';
+          double screenWidth = MediaQuery.of(context).size.width;
+          // var content = parse(html);
+
+          // print(content);
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20)
+                .copyWith(top: 30, bottom: 20),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Image.asset(
-                  'assets/icons/media_icon.png',
-                  height: 150,
-                  width: 350,
-                ),
                 const SizedBox(height: 10),
-                Text(
-                  'Programming Basics',
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                Html(data: content, style: {
+                  "body": Style(
+                    fontSize: FontSize(14.0),
+                    color: Colors.black87,
                   ),
-                ),
+                  "img": Style(
+                    width: Width(screenWidth * 0.6),
+                    height: Height(screenWidth * 0.6),
+                    display: Display.block,
+                    margin: Margins.symmetric(horizontal: screenWidth * 0.15),
+                  )
+                })
               ],
             ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-            style: GoogleFonts.inter(fontSize: 14, color: Colors.black87),
-          ),
-        ],
-      ),
+          );
+        }
+
+        return const Center(child: Text('No data available'));
+      },
     );
   }
 

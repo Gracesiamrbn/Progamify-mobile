@@ -1,17 +1,39 @@
 import 'package:flutter/material.dart';
+// import 'package:flutter_svg/svg.dart';
+// import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:progamify/api/topic_service.dart';
 import 'package:progamify/presentation/screens/topic/topic_course_screen.dart';
 import 'package:progamify/presentation/screens/topic/excercise_screen.dart';
+import 'package:logger/logger.dart';
 
 class TopicDetailScreen extends StatefulWidget {
-  const TopicDetailScreen({super.key, required String topicTitle});
+  final int topicId;
+  final String topicTitle;
+  final int totalLesson;
+  final int totalExercise;
+
+  const TopicDetailScreen(
+      {super.key,
+      required this.topicId,
+      required this.topicTitle,
+      required this.totalLesson,
+      required this.totalExercise});
+
   @override
-  _TopicDetailScreenState createState() => _TopicDetailScreenState();
+  State<TopicDetailScreen> createState() => _TopicDetailScreenState();
 }
 
 class _TopicDetailScreenState extends State<TopicDetailScreen> {
-  final Set<int> clickedSteps =
-      {}; // Menyimpan indeks langkah yang sudah diklik
+  final Set<int> clickedSteps = {};
+  late Future<Map<String, dynamic>> futureTopic;
+  final logger = Logger();
+
+  @override
+  void initState() {
+    super.initState();
+    futureTopic = TopicService().getTopic(widget.topicId);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +51,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                   alignment: Alignment.center,
                   children: [
                     Text(
-                      'Introduction',
+                      "${widget.topicTitle} ",
                       style: GoogleFonts.inter(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -64,7 +86,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                                 const Icon(Icons.book,
                                     color: Colors.red, size: 18),
                                 const SizedBox(width: 3),
-                                Text('5 Lessons',
+                                Text('${widget.totalLesson} Lessons',
                                     style: GoogleFonts.inter(
                                         color: Colors.black,
                                         fontSize: 16,
@@ -76,7 +98,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                                 const Icon(Icons.assignment,
                                     color: Colors.blue, size: 18),
                                 const SizedBox(width: 3),
-                                Text('5 Exercises',
+                                Text('${widget.totalExercise} Exercises',
                                     style: GoogleFonts.inter(
                                         color: Colors.black,
                                         fontSize: 16,
@@ -92,20 +114,107 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               ),
               const SizedBox(height: 16),
               Expanded(
-                child: ListView.builder(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                  itemCount: topics.length,
-                  itemBuilder: (context, index) {
-                    int nextIndex = index + 1;
-                    bool nextOneDone = true;
-                    if (nextIndex < topics.length) {
-                      nextOneDone = topics[nextIndex]['isCompleted'] ?? false;
-                    }
-                    return _buildStepCard(context, topics[index], index);
-                  },
-                ),
-              ),
+                  child: FutureBuilder(
+                      future: TopicService().getTopic(widget.topicId),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        } else if (snapshot.hasError) {
+                          return Center(
+                              child: Text('Error: ${snapshot.error}'));
+                        } else if (!snapshot.hasData) {
+                          return const Center(child: Text('No data available'));
+                        }
+
+                        final data = snapshot.data!;
+                        if (snapshot.hasData) {
+                          final data = snapshot.data!;
+                          logger.d('Data topic: $data'); // debug log
+                          logger.i(
+                              'Lessons taken: ${data['lessons_taken_in_this_topic']}'); // info log
+                        }
+                        final topic = data['topic'];
+                        final List<dynamic> lessonTaken =
+                            data['lessons_taken_in_this_topic'] ?? [];
+                        final List<Map<String, dynamic>> lessons = [];
+                        bool isLocked = false;
+
+                        for (int i = 0; i < topic['lessons'].length; i++) {
+                          var lesson = topic['lessons'][i];
+
+                          bool isCompleted = lessonTaken
+                              .any((les) => les['lesson_id'] == lesson['ID']);
+
+                          Map<String, dynamic> newLesson = {
+                            'id': int.parse("${lesson['ID']}"),
+                            'title': lesson['name'],
+                            'exp': int.parse("${lesson['exp']}"),
+                            'icon': 'assets/icons/introduction_icon.png',
+                            'isCompleted': isCompleted,
+                            'isLocked': isLocked
+                          };
+
+                          if (!isCompleted && !isLocked) {
+                            isLocked = true;
+                          }
+
+                          lessons.add(newLesson);
+
+                          if (lesson['exercises'] != null) {
+                            for (int j = 0;
+                                j < lesson['exercises'].length;
+                                j++) {
+                              var exercise = lesson['exercises'][j];
+                              var totalQuestions = exercise['questions'] != null
+                                  ? exercise['questions'].length
+                                  : 0;
+                              int totalPoint = 0;
+                              int totalExp = 0;
+
+                              if (totalQuestions > 0) {
+                                exercise['questions'].forEach((item) {
+                                  totalPoint += int.parse("${item['point']}");
+                                  totalExp += int.parse("${item['exp']}");
+                                });
+                              }
+
+                              Map<String, dynamic> newExercise = {
+                                'id': int.parse("${exercise['ID']}"),
+                                'title': exercise['title'],
+                                'exp': totalExp,
+                                'pts': totalPoint,
+                                'questions': totalQuestions,
+                                'icon': 'assets/icons/tasklist1_icon.png',
+                                'isCompleted': false,
+                                'isLocked': isLocked,
+                              };
+
+                              if (!newExercise["isCompleted"] && !isLocked) {
+                                isLocked = true;
+                              }
+
+                              lessons.add(newExercise);
+                            }
+                          }
+                        }
+
+                        return ListView.builder(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 20),
+                            itemCount: lessons.length,
+                            itemBuilder: (context, index) {
+                              int nextIndex = index + 1;
+                              bool nextOneDone = true;
+                              if (nextIndex < lessons.length) {
+                                nextOneDone =
+                                    lessons[nextIndex]['isCompleted'] ?? false;
+                              }
+                              return _buildStepCard(
+                                  context, lessons[index], index);
+                            });
+                      }))
             ],
           ),
           Positioned(
@@ -123,8 +232,8 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   Widget _buildStepCard(
       BuildContext context, Map<String, dynamic> topic, int index) {
-    bool isClicked = clickedSteps.contains(index); // Cek apakah sudah diklik
-    bool isCompleted = topic['isCompleted'] ?? false;
+    // bool isClicked = clickedSteps.contains(index);
+    bool isClicked = topic['isCompleted'] ?? false;
 
     return GestureDetector(
       onTap: () {
@@ -195,26 +304,30 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   Widget _buildTopicCard(BuildContext context, Map<String, dynamic> topic,
       bool isClicked, int index) {
     bool isExercise = topic.containsKey('questions');
+    bool isLocked = topic['isLocked'];
     return GestureDetector(
       onTap: () {
-        setState(() {
-          clickedSteps.add(index); // Update state saat card diklik
-        });
+        if (!isLocked) {
+          setState(() {
+            clickedSteps.add(index); // Update state saat card diklik
+          });
 
-        if (isExercise) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => ExerciseScreen()),
-          );
-        } else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => TopicCourseScreen(
-                      courseTitle: topic['title'] as String? ?? '',
-                      topicTitle: '',
-                    )),
-          );
+          if (isExercise) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ExerciseScreen()),
+            );
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => TopicCourseScreen(
+                        lessonId: topic['id'],
+                        courseTitle: topic['title'] as String? ?? '',
+                        topicTitle: topic['title'] as String? ?? '',
+                      )),
+            );
+          }
         }
       },
       child: Stack(
@@ -223,7 +336,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             margin: const EdgeInsets.only(bottom: 12, left: 1),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isClicked
+              color: !topic["isLocked"]
                   ? Colors.white
                   : Colors.grey[350], // Warna berubah jika diklik
               borderRadius: BorderRadius.circular(12),
@@ -315,6 +428,23 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               ],
             ),
           ),
+          // if (isLocked) ...[
+          //   Positioned.fill(
+          //     child: Container(
+          //       decoration: BoxDecoration(
+          //         color: Colors.black.withOpacity(0.5),
+          //         borderRadius: BorderRadius.circular(12),
+          //       ),
+          //       child: Center(
+          //         child: SvgPicture.asset(
+          //           'assets/icons/lock-svgrepo-com.svg', // Path to your SVG lock icon
+          //           width: 40,
+          //           height: 40,
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          // ],
         ],
       ),
     );

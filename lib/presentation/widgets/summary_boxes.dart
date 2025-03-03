@@ -1,22 +1,50 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shimmer_animation/shimmer_animation.dart';
+// import 'package:flutter_svg/flutter_svg.dart';
 
-class SummaryBoxes extends StatelessWidget {
+class SummaryBoxes extends StatefulWidget {
   final String title;
   final List<BoxItem>? items;
+  final int exp;
 
   const SummaryBoxes({
     super.key,
     this.title = "Boxes",
+    required this.exp,
     this.items,
   });
 
   @override
+  _SummaryBoxesState createState() => _SummaryBoxesState();
+}
+
+class _SummaryBoxesState extends State<SummaryBoxes> {
+  List<bool> isVisibleList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    isVisibleList = List.generate(widget.items?.length ?? 3, (index) => false);
+    _startAnimation();
+  }
+
+  void _startAnimation() async {
+    for (int i = 0; i < isVisibleList.length; i++) {
+      await Future.delayed(Duration(milliseconds: i * 300)); // Delay per box
+      if (mounted) {
+        setState(() {
+          isVisibleList[i] = true;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final boxItems = items ??
+    final boxItems = widget.items ??
         [
           BoxItem(
-              value: "5",
+              value: '${widget.exp}',
               label: "experience point",
               icon: "assets/icons/exp_point.png"),
           BoxItem(
@@ -34,49 +62,62 @@ class SummaryBoxes extends StatelessWidget {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: boxItems.map((item) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 100,
-                    // height: 100,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFB2DAFF),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.black54),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset(
-                          item.icon,
-                          width: 40,
-                          height: 40,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          item.value,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Inter',
-                            color: Colors.black,
+            children: boxItems.asMap().entries.map((entry) {
+              int index = entry.key;
+              BoxItem item = entry.value;
+
+              return AnimatedOpacity(
+                duration: const Duration(milliseconds: 500),
+                opacity: isVisibleList[index] ? 1.0 : 0.0,
+                child: AnimatedScale(
+                  scale: isVisibleList[index] ? 1.0 : 0.8,
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.easeOutBack,
+                  child: Shimmer(
+                    duration: const Duration(seconds: 2),
+                    color: Colors.white,
+                    colorOpacity: 0.3,
+                    enabled: true,
+                    child: Container(
+                      width: 105,
+                      height: 105,
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFB2DAFF),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.black54),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            item.icon,
+                            width: 40,
+                            height: 40,
                           ),
-                        ),
-                        Text(
-                          item.label,
-                          style: const TextStyle(
-                            fontSize: 8.5,
-                            fontFamily: 'Inter',
-                            color: Colors.black87,
+                          const SizedBox(height: 8),
+                          Text(
+                            item.value,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Inter',
+                              color: Colors.black,
+                            ),
                           ),
-                        ),
-                      ],
+                          Text(
+                            item.label,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontFamily: 'Inter',
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ],
+                ),
               );
             }).toList(),
           ),

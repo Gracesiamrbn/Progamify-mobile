@@ -82,7 +82,7 @@ class BadgesSection extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                           builder: (context) =>
-                              const MainScreen(currentIndex: 1)),
+                              const MainScreen(currentIndex: 1, tabIndex: 1)),
                     );
                   },
               ),

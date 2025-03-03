@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:progamify/api/auth_service.dart';
 import '../../../core/theme/app_styles.dart';
 import 'setting_profile_screen.dart';
 import 'change_password_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
+
+  static AuthService get authService => AuthService();
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +82,7 @@ class SettingsScreen extends StatelessWidget {
             // Sign Out Button
             ElevatedButton(
               onPressed: () {
-                // Action for Sign Out
+                authService.logout(context);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red, // Red background
