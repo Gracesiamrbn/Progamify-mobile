@@ -273,102 +273,106 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
           ],
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: 50,
-              child: ListView.builder(
-                controller: _scrollController,
-                scrollDirection: Axis.horizontal,
-                itemCount: questions.length,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () => _goToQuestion(index), // Tambahkan aksi klik
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 5),
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: index == currentQuestionIndex
-                            ? Color(0xFF6FBAFF)
-                            : Colors.grey[300],
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        '${index + 1}',
-                        style: TextStyle(
-                          fontSize: 18,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 50,
+                child: ListView.builder(
+                  controller: _scrollController,
+                  scrollDirection: Axis.horizontal,
+                  itemCount: questions.length,
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () => _goToQuestion(index), // Tambahkan aksi klik
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 5),
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
                           color: index == currentQuestionIndex
-                              ? Colors.white
-                              : Colors.black,
-                          fontWeight: FontWeight.bold,
+                              ? const Color(0xFF6FBAFF)
+                              : Colors.grey[300],
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '${index + 1}',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: index == currentQuestionIndex
+                                ? Colors.white
+                                : Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                question['question'],
+                style: const TextStyle(
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(height: 20),
+              _buildOptions(),
+              // const Spacer(),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed:
+                        currentQuestionIndex > 0 ? _previousQuestion : null,
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: Color(0xFFFFFFFF),
                     ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              question['question'],
-              style: const TextStyle(
-                fontSize: 18,
-              ),
-            ),
-            const SizedBox(height: 20),
-            _buildOptions(),
-            const Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ElevatedButton.icon(
-                  onPressed:
-                      currentQuestionIndex > 0 ? _previousQuestion : null,
-                  icon: const Icon(
-                    Icons.arrow_back,
-                    color: Color(0xFFFFFFFF),
+                    label: const Text(
+                      'Previous',
+                      style: TextStyle(color: Color(0xFFFFFFFF)),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: currentQuestionIndex > 0
+                          ? const Color(0xFF6FBAFF)
+                          : Colors.grey[400],
+                    ),
                   ),
-                  label: const Text(
-                    'Previous',
-                    style: TextStyle(color: Color(0xFFFFFFFF)),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: currentQuestionIndex > 0
-                        ? Color(0xFF6FBAFF)
-                        : Colors.grey[400],
-                  ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: currentQuestionIndex < questions.length - 1
-                      ? _nextQuestion
-                      : _showSubmitDialog, // Panggil dialog jika soal terakhir
-                  icon: Icon(
+                  ElevatedButton.icon(
+                    onPressed: currentQuestionIndex < questions.length - 1
+                        ? _nextQuestion
+                        : _showSubmitDialog, // Panggil dialog jika soal terakhir
+                    icon: Icon(
+                        currentQuestionIndex < questions.length - 1
+                            ? Icons.arrow_forward
+                            : Icons.check,
+                        color: const Color(
+                            0xFFFFFFFF)), // Ubah ikon menjadi centang saat di soal terakhir
+                    label: Text(
                       currentQuestionIndex < questions.length - 1
-                          ? Icons.arrow_forward
-                          : Icons.check,
-                      color: const Color(
-                          0xFFFFFFFF)), // Ubah ikon menjadi centang saat di soal terakhir
-                  label: Text(
-                    currentQuestionIndex < questions.length - 1
-                        ? 'Next'
-                        : 'Submit',
-                    style: const TextStyle(color: Color(0xFFFFFFFF)),
+                          ? 'Next'
+                          : 'Submit',
+                      style: const TextStyle(color: Color(0xFFFFFFFF)),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          currentQuestionIndex < questions.length - 1
+                              ? const Color(0xFF6FBAFF)
+                              : Colors.green, // Ubah warna tombol saat submit
+                    ),
                   ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: currentQuestionIndex < questions.length - 1
-                        ? Color(0xFF6FBAFF)
-                        : Colors.green, // Ubah warna tombol saat submit
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-          ],
+                ],
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
@@ -421,14 +425,13 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     );
   }
 
-void _saveUserAnswer(int index, String answer) {
-  if (userAnswers.length <= index) {
-    userAnswers.add({'questionIndex': index, 'answer': answer});
-  } else {
-    userAnswers[index] = {'questionIndex': index, 'answer': answer};
+  void _saveUserAnswer(int index, String answer) {
+    if (userAnswers.length <= index) {
+      userAnswers.add({'questionIndex': index, 'answer': answer});
+    } else {
+      userAnswers[index] = {'questionIndex': index, 'answer': answer};
+    }
   }
-}
-
 
   void _goToQuestion(int index) {
     setState(() {
@@ -507,7 +510,9 @@ void _saveUserAnswer(int index, String answer) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => ExerciseResultScreen(userAnswers: [],)),
+                      builder: (context) => ExerciseResultScreen(
+                            userAnswers: [],
+                          )),
                 );
               },
               child: const Text(
@@ -734,8 +739,8 @@ void _saveUserAnswer(int index, String answer) {
         });
       },
       child: Container(
-        width: 165, // Ukuran kartu biar pas berdampingan
-        height: 165,
+        width: 142, // Ukuran kartu biar pas berdampingan
+        height: 142,
         margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         decoration: BoxDecoration(
           color: isSelected ? Colors.blue.withOpacity(0.7) : Colors.white,

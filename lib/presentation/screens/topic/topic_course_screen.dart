@@ -173,8 +173,9 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
           String content = lessonData?['content'] ?? 'No content available';
           double screenWidth = MediaQuery.of(context).size.width;
           // var content = parse(html);
+          print(content);
 
-          // print(content);
+          // double screenWidth = MediaQuery.of(context).size.width;
 
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 20)
@@ -183,18 +184,20 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 10),
-                Html(data: content, style: {
-                  "body": Style(
-                    fontSize: FontSize(14.0),
-                    color: Colors.black87,
-                  ),
-                  "img": Style(
-                    width: Width(screenWidth * 0.6),
-                    height: Height(screenWidth * 0.6),
-                    display: Display.block,
-                    margin: Margins.symmetric(horizontal: screenWidth * 0.15),
-                  )
-                })
+                Html(
+                  data: content,
+                  style: {
+                    "body": Style(
+                      fontSize: FontSize(14.0),
+                      color: Colors.black87,
+                    ),
+                    "p": Style(textAlign: TextAlign.justify),
+                    "img": Style(
+                        width: Width(screenWidth),
+                        height: Height(250),
+                        alignment: Alignment.center),
+                  },
+                )
               ],
             ),
           );
