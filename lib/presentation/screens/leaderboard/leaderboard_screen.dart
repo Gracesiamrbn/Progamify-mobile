@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 
+import '../profile/public_profile_screen.dart';
+
 class LeaderboardScreen extends StatefulWidget {
   const LeaderboardScreen({super.key});
 
@@ -262,120 +264,140 @@ class LeaderboardScreenState extends State<LeaderboardScreen>
             : isThirdPlace
                 ? const Duration(milliseconds: 1000)
                 : Duration.zero;
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PublicProfileScreen(user: user),
+          ),
+        );
+      },
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          FutureBuilder(
+            future:
+                Future.delayed(shimmerDelay), // Tambahkan delay sesuai posisi
+            builder: (context, snapshot) {
+              bool shimmerEnabled =
+                  snapshot.connectionState == ConnectionState.done;
 
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        FutureBuilder(
-          future: Future.delayed(shimmerDelay), // Tambahkan delay sesuai posisi
-          builder: (context, snapshot) {
-            bool shimmerEnabled =
-                snapshot.connectionState == ConnectionState.done;
-
-            return Shimmer(
-              duration: const Duration(seconds: 2),
-              colorOpacity: 0.3,
-              enabled: shimmerEnabled &&
-                  (isFirstPlace || isSecondPlace || isThirdPlace),
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                decoration: BoxDecoration(
-                  color: _getItemColor(position),
-                  borderRadius: BorderRadius.circular(12),
-                  gradient: isFirstPlace
-                      ? LinearGradient(
-                          colors: [Colors.amber[300]!, Colors.yellow[100]!],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        )
-                      : null,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 30,
-                        child: !isFirstPlace
-                            ? Text(
-                                '#$position',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: isSecondPlace
+              return Shimmer(
+                duration: const Duration(seconds: 2),
+                colorOpacity: 0.3,
+                enabled: shimmerEnabled &&
+                    (isFirstPlace || isSecondPlace || isThirdPlace),
+                child: Container(
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: _getItemColor(position),
+                    borderRadius: BorderRadius.circular(12),
+                    gradient: isFirstPlace
+                        ? LinearGradient(
+                            colors: [Colors.amber[300]!, Colors.yellow[100]!],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          )
+                        : null,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 30,
+                          child: !isFirstPlace
+                              ? Text(
+                                  '#$position',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: isSecondPlace
+                                        ? const Color(0xFF4682B4)
+                                        : isThirdPlace
+                                            ? const Color(0xFF800000)
+                                            : Colors.black,
+                                  ),
+                                )
+                              : null,
+                        ),
+                        const SizedBox(width: 12),
+                        ClipOval(
+                          // child: SvgPicture.asset(
+                          //   user['avatar'],
+                          //   width: 40,
+                          //   height: 40,
+                          //   fit: BoxFit.cover,
+                          // ),
+                          child: Hero(
+                            tag: user['name'], // Tag unik untuk animasi
+                            child: SvgPicture.asset(
+                              user['avatar'],
+                              width: 40,
+                              height: 40,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            user['name'],
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: isFirstPlace
+                                  ? Colors.amber[900]
+                                  : isSecondPlace
                                       ? const Color(0xFF4682B4)
                                       : isThirdPlace
                                           ? const Color(0xFF800000)
                                           : Colors.black,
-                                ),
-                              )
-                            : null,
-                      ),
-                      const SizedBox(width: 12),
-                      ClipOval(
-                        child: SvgPicture.asset(
-                          user['avatar'],
-                          width: 40,
-                          height: 40,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          user['name'],
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: isFirstPlace
-                                ? Colors.amber[900]
-                                : isSecondPlace
-                                    ? const Color(0xFF4682B4)
-                                    : isThirdPlace
-                                        ? const Color(0xFF800000)
-                                        : Colors.black,
-                          ),
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            '${user['xp']}',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w900,
-                              color: Color(0xFF6B3FA0),
                             ),
                           ),
-                          const SizedBox(
-                            width: 2,
-                          ),
-                          Image.asset(
-                            'assets/icons/exp_point.png',
-                            width: 20,
-                            height: 20,
-                          )
-                        ],
-                      )
-                    ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(
+                              '${user['xp']}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFF6B3FA0),
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 2,
+                            ),
+                            Image.asset(
+                              'assets/icons/exp_point.png',
+                              width: 20,
+                              height: 20,
+                            )
+                          ],
+                        )
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
-        ),
-        if (isFirstPlace)
-          Positioned(
-            left: 5,
-            top: -5,
-            child: Image.asset(
-              'assets/leaderboard/trophy_gold.png',
-              width: 84,
-              height: 84,
-            ),
+              );
+            },
           ),
-      ],
+          if (isFirstPlace)
+            Positioned(
+              left: 5,
+              top: -5,
+              child: Image.asset(
+                'assets/leaderboard/trophy_gold.png',
+                width: 84,
+                height: 84,
+              ),
+            ),
+        ],
+      ),
     );
   }
 

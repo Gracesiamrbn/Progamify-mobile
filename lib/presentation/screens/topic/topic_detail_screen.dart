@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 // import 'package:flutter_svg/svg.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+// import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:progamify/api/topic_service.dart';
 import 'package:progamify/presentation/screens/topic/topic_course_screen.dart';
 import 'package:progamify/presentation/screens/topic/excercise_screen.dart';
+import 'package:logger/logger.dart';
 
 class TopicDetailScreen extends StatefulWidget {
   final int topicId;
@@ -26,6 +27,7 @@ class TopicDetailScreen extends StatefulWidget {
 class _TopicDetailScreenState extends State<TopicDetailScreen> {
   final Set<int> clickedSteps = {};
   late Future<Map<String, dynamic>> futureTopic;
+  final logger = Logger();
 
   @override
   void initState() {
@@ -127,9 +129,15 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                         }
 
                         final data = snapshot.data!;
+                        if (snapshot.hasData) {
+                          final data = snapshot.data!;
+                          logger.d('Data topic: $data'); // debug log
+                          logger.i(
+                              'Lessons taken: ${data['lessons_taken_in_this_topic']}'); // info log
+                        }
                         final topic = data['topic'];
                         final List<dynamic> lessonTaken =
-                            data['lessons_taken_in_this_topic'];
+                            data['lessons_taken_in_this_topic'] ?? [];
                         final List<Map<String, dynamic>> lessons = [];
                         bool isLocked = false;
 

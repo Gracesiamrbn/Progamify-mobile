@@ -7,7 +7,9 @@ import '../quest/quest_menu_screen.dart';
 
 class MainScreen extends StatefulWidget {
   final int currentIndex;
-  const MainScreen({super.key, this.currentIndex = 0});
+  final int? tabIndex;
+
+  const MainScreen({super.key, this.currentIndex = 0, this.tabIndex});
 
   @override
   MainScreenState createState() => MainScreenState();
@@ -15,31 +17,44 @@ class MainScreen extends StatefulWidget {
 
 class MainScreenState extends State<MainScreen> {
   late int _currentIndex;
-
-  // Daftar screens yang akan ditampilkan
-  final List<Widget> _screens = [
-    const TopicsScreen(),
-    const QuestScreen(initialTabIndex: 0),
-    const LeaderboardScreen(),
-    const ProfileScreen(),
-  ];
+  late int _tabIndex; // Gunakan late agar diinisialisasi di initState()
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.currentIndex;
+    _tabIndex = widget.tabIndex ?? 0; // Gunakan tabIndex dari widget jika ada
+  }
+
+  // Method untuk mendapatkan screen berdasarkan index
+  Widget getScreen(int index) {
+    switch (index) {
+      case 0:
+        return const TopicsScreen();
+      case 1:
+        return QuestScreen(initialTabIndex: _tabIndex);
+      case 2:
+        return const LeaderboardScreen();
+      case 3:
+        return const ProfileScreen();
+      default:
+        return const TopicsScreen();
+    }
   }
 
   void _onItemTapped(int index) {
     setState(() {
       _currentIndex = index;
+      if (index == 1) {
+        _tabIndex = 0; // Reset tab ke default (tab "Badge") setiap kali QuestScreen dibuka
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_currentIndex],
+      body: getScreen(_currentIndex),
       bottomNavigationBar: CurvedNavigationBar(
         backgroundColor: Colors.transparent,
         color: const Color(0xFF6FBAFF),
