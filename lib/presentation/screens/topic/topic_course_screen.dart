@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:progamify/api/lesson_service.dart';
 import 'package:progamify/presentation/screens/topic/write_discussion_screen.dart';
@@ -170,8 +171,10 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
           var lessonData = snapshot.data;
 
           String content = lessonData?['content'] ?? 'No content available';
+          double screenWidth = MediaQuery.of(context).size.width;
           // var content = parse(html);
-          print(content);
+
+          // print(content);
 
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 20)
@@ -180,19 +183,18 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 10),
-                Html(
-                  data: content,
-                  style: {
-                    "body": Style(
-                      fontSize: FontSize(14.0),
-                      color: Colors.black87,
-                    ),
-                    "img": Style(
-                      width: Width(300),
-                      height: Height(300),
-                    ),
-                  },
-                )
+                Html(data: content, style: {
+                  "body": Style(
+                    fontSize: FontSize(14.0),
+                    color: Colors.black87,
+                  ),
+                  "img": Style(
+                    width: Width(screenWidth * 0.6),
+                    height: Height(screenWidth * 0.6),
+                    display: Display.block,
+                    margin: Margins.symmetric(horizontal: screenWidth * 0.15),
+                  )
+                })
               ],
             ),
           );
