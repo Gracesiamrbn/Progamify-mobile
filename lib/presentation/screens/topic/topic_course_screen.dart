@@ -173,6 +173,8 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
           // var content = parse(html);
           print(content);
 
+          double screenWidth = MediaQuery.of(context).size.width;
+
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 20)
                 .copyWith(top: 30, bottom: 20),
@@ -187,10 +189,11 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
                       fontSize: FontSize(14.0),
                       color: Colors.black87,
                     ),
+                    "p": Style(textAlign: TextAlign.justify),
                     "img": Style(
-                      width: Width(300),
-                      height: Height(300),
-                    ),
+                        width: Width(screenWidth),
+                        height: Height(250),
+                        alignment: Alignment.center),
                   },
                 )
               ],
