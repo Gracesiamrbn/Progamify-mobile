@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:progamify/presentation/screens/topic/exercise_result_page.dart';
 
 class ExerciseScreen extends StatefulWidget {
   const ExerciseScreen({super.key});
@@ -14,6 +15,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   List<int> selectedAnswers = []; // Simpan jawaban user untuk multiple_answer
   final TextEditingController _essayController = TextEditingController();
   final TextEditingController _shortAnswerController = TextEditingController();
+  List<Map<String, dynamic>> userAnswers = [];
 
   final List<Map<String, dynamic>> questions = [
     {
@@ -379,6 +381,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
       onTap: () {
         setState(() {
           selectedAnswer = index;
+          _saveUserAnswer(currentQuestionIndex, text); // Simpan jawaban user
         });
       },
       child: Container(
@@ -418,6 +421,15 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     );
   }
 
+void _saveUserAnswer(int index, String answer) {
+  if (userAnswers.length <= index) {
+    userAnswers.add({'questionIndex': index, 'answer': answer});
+  } else {
+    userAnswers[index] = {'questionIndex': index, 'answer': answer};
+  }
+}
+
+
   void _goToQuestion(int index) {
     setState(() {
       currentQuestionIndex = index;
@@ -431,19 +443,78 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Submit Quiz'),
-          content: const Text('Are you sure you want to submit your answers?'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: const Center(
+            child: Text(
+              'Submit',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 10),
+              Image.asset(
+                'assets/icons/exit_icon.png',
+                height: 80,
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Are you sure to submit the answer?',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
+          actionsAlignment: MainAxisAlignment.spaceEvenly,
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.grey[300],
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               onPressed: () {
-                Navigator.pop(context);
-                _submitQuiz(); // Panggil fungsi submit
+                Navigator.of(context).pop();
               },
-              child: const Text('Submit'),
+              child: const Text(
+                'Cancel',
+                style:
+                    TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () {
+                if (selectedAnswer != null) {
+                  _saveUserAnswer(
+                    currentQuestionIndex,
+                    questions[currentQuestionIndex]['options'][selectedAnswer],
+                  );
+                }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ExerciseResultScreen(userAnswers: [],)),
+                );
+              },
+              child: const Text(
+                'Yes, Quit',
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         );
@@ -451,36 +522,74 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     );
   }
 
-  void _submitQuiz() {
-    if (questions[currentQuestionIndex]['type'] == 'essay') {
-      print("Jawaban Essay: ${_essayController.text}");
-    } else if (questions[currentQuestionIndex]['type'] == 'shortAnswer') {
-      print("Jawaban Short Answer: ${_shortAnswerController.text}");
-    } else
-      print("Quiz Submitted!");
-  }
-
   void _showExitConfirmationDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Want to Exit?  '),
-          content: const Text(
-              'Your progress will not be saved and you will not get the XP'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: const Center(
+            child: Text(
+              'Want to Quit ?',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 10),
+              Image.asset(
+                'assets/icons/exit_icon.png',
+                height: 80,
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Your progress will not be saved and you will not get the XP',
+                textAlign: TextAlign.left,
+                style: TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
+          actionsAlignment: MainAxisAlignment.spaceEvenly,
           actions: [
             TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.grey[300],
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Cancel'),
+              child: const Text(
+                'Cancel',
+                style:
+                    TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+              ),
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               onPressed: () {
                 Navigator.pop(context); // Tutup dialog
                 Navigator.pop(context); // Kembali ke halaman sebelumnya
               },
-              child: const Text('Yes'),
+              child: const Text(
+                'Yes, Quit',
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         );
