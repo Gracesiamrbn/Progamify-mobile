@@ -739,8 +739,8 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
         });
       },
       child: Container(
-        width: 165, // Ukuran kartu biar pas berdampingan
-        height: 165,
+        width: 142, // Ukuran kartu biar pas berdampingan
+        height: 142,
         margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         decoration: BoxDecoration(
           color: isSelected ? Colors.blue.withOpacity(0.7) : Colors.white,
