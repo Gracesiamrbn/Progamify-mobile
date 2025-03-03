@@ -172,6 +172,7 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
 
           String content = lessonData?['content'] ?? 'No content available';
           double screenWidth = MediaQuery.of(context).size.width;
+          double screenHeight = MediaQuery.of(context).size.height;
           // var content = parse(html);
           print(content);
 
@@ -184,20 +185,22 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 10),
-                Html(
-                  data: content,
-                  style: {
-                    "body": Style(
-                      fontSize: FontSize(14.0),
-                      color: Colors.black87,
-                    ),
-                    "p": Style(textAlign: TextAlign.justify),
-                    "img": Style(
-                        width: Width(screenWidth),
-                        height: Height(250),
-                        alignment: Alignment.center),
-                  },
-                )
+                Center(
+                  child: Html(
+                    data: content,
+                    style: {
+                      "body": Style(
+                        fontSize: FontSize(14.0),
+                        color: Colors.black87,
+                      ),
+                      "p": Style(textAlign: TextAlign.justify),
+                      "img": Style(
+                          width: Width(screenWidth * 0.7),
+                          height: Height(screenHeight * 0.3),
+                          margin: Margins(left: Margin(screenWidth * 0.05))),
+                    },
+                  ),
+                ),
               ],
             ),
           );
