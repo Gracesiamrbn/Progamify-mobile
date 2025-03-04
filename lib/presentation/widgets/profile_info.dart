@@ -64,14 +64,12 @@ class ProfileInfo extends StatelessWidget {
                 );
               },
             ),
-          // Tambahkan jarak hanya jika kedua icon tidak null
           if (settingIconPath != null && settingIconPath!.isNotEmpty && 
               shopIconPath != null && shopIconPath!.isNotEmpty)
             const SizedBox(width: 8),
-          // Tampilkan tombol shop hanya jika iconPath tidak null
           if (shopIconPath != null && shopIconPath!.isNotEmpty)
             _buildIconButton(
-              backgroundColor: const Color(0xFFFFF0F2), // Soft Pink
+              backgroundColor: const Color(0xFFFFF0F2),
               iconPath: shopIconPath!,
               onPressed: () {
                 Navigator.push(

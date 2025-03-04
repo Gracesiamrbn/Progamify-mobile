@@ -54,10 +54,10 @@ class PublicProfileScreen extends StatelessWidget {
               children: [
                 const SizedBox(height: 20),
                 ProfileInfo(
-                  name: user['name'], // Gunakan nama dari leaderboard
-                  details: "XP: ${user['xp']}",
+                  name: user['name'],
+                  details: "${user['nim']} | ${user['email']} | ${user['angkatan']}",
                 ),
-                SummaryBoxes(exp: user['xp']), // Gunakan XP dari leaderboard
+                SummaryBoxes(exp: user['total_exp']),
                 const SummaryGrid(),
                 const BadgesSection(),
               ],
