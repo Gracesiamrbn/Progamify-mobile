@@ -14,10 +14,11 @@ class ExerciseScreen extends StatefulWidget {
 
 class ExerciseScreenState extends State<ExerciseScreen> {
   int currentQuestionIndex = 0;
-  int? selectedAnswer;
+  dynamic selectedAnswer;
   final ScrollController _scrollController = ScrollController();
-  List<int> selectedAnswers = []; // Simpan jawaban user untuk multiple_answer
+  List<int> selectedAnswers = [];
   List<Map<String, dynamic>> userAnswers = [];
+  Map<int, dynamic> jawabanUser = {};
 
   late Future<Map<String, dynamic>> _questionsFuture;
 
@@ -33,7 +34,13 @@ class ExerciseScreenState extends State<ExerciseScreen> {
     if (currentQuestionIndex < questions.length - 1) {
       setState(() {
         currentQuestionIndex++;
-        selectedAnswer = null;
+
+        if (jawabanUser[currentQuestionIndex] != null) {
+          selectedAnswer = jawabanUser[currentQuestionIndex]["index_jawaban"];
+        } else {
+          selectedAnswer = null;
+        }
+
         _scrollToCurrentQuestion();
       });
     }
@@ -43,7 +50,12 @@ class ExerciseScreenState extends State<ExerciseScreen> {
     if (currentQuestionIndex > 0) {
       setState(() {
         currentQuestionIndex--;
-        selectedAnswer = null;
+
+        if (jawabanUser[currentQuestionIndex] != null) {
+          selectedAnswer = jawabanUser[currentQuestionIndex]["index_jawaban"];
+        } else {
+          selectedAnswer = null;
+        }
         _scrollToCurrentQuestion();
       });
     }
@@ -85,11 +97,13 @@ class ExerciseScreenState extends State<ExerciseScreen> {
         for (int i = 0; i < questionsData.length; i++) {
           var question = questionsData[i];
           if (question["type"] == "multiple_choice") {
-            List<String> options = [];
+            List<Map<String, dynamic>> options = [];
             question["answers"].forEach((answer) {
-              options.add(answer['content']);
+              var option = {"id": answer["ID"], "text": answer["content"]};
+              options.add(option);
             });
             var q = {
+              'id': question["ID"],
               'question': question["content"],
               'options': options,
               'correctAnswer': 1,
@@ -101,6 +115,7 @@ class ExerciseScreenState extends State<ExerciseScreen> {
             questions.add(q);
           } else if (question["type"] == "true_false") {
             var q = {
+              'id': question["ID"],
               'question': question["content"],
               'options': ["True", "False"],
               'correctAnswer': 0,
@@ -112,6 +127,7 @@ class ExerciseScreenState extends State<ExerciseScreen> {
             questions.add(q);
           } else if (question["type"] == "essay") {
             var q = {
+              'id': question["ID"],
               'question': question["content"],
               'correctAnswer': 0,
               'explanation': question["feedback"],
@@ -120,8 +136,38 @@ class ExerciseScreenState extends State<ExerciseScreen> {
               'type': question["type"]
             };
             questions.add(q);
+          } else if (question["type"] == "short_answer") {
+            var q = {
+              'id': question["ID"],
+              'question': question["content"],
+              'correctAnswer': '-',
+              'explanation': question["feedback"],
+              'exp': question["exp"],
+              'pts': question["point"],
+              'type': 'shortAnswer'
+            };
+            questions.add(q);
+          } else if (question["type"] == "multiple_answer") {
+            List<Map<String, dynamic>> options = [];
+            question["answers"].forEach((answer) {
+              var option = {"id": answer["ID"], "text": answer["content"]};
+              options.add(option);
+            });
+            var q = {
+              'id': question["ID"],
+              'question': question["content"],
+              'options': options,
+              'correctAnswer': 1,
+              'explanation': question["feedback"],
+              'exp': question["exp"],
+              'pts': question["point"],
+              'type': "multiple_answer"
+            };
+            questions.add(q);
           }
         }
+
+        // logger.i(questions);
 
         final question = questions[currentQuestionIndex];
 
@@ -238,7 +284,7 @@ class ExerciseScreenState extends State<ExerciseScreen> {
                         fontSize: FontSize(18), textAlign: TextAlign.justify),
                   }),
                   // Text(
-                  //   question['question'],
+                  //   "${question['id']}",
                   //   style: const TextStyle(
                   //     fontSize: 18,
                   //   ),
@@ -300,14 +346,14 @@ class ExerciseScreenState extends State<ExerciseScreen> {
     );
   }
 
-  Widget _buildOptionCard(int index, String text) {
+  Widget _buildOptionCard(dynamic question, int index, String text) {
     bool isSelected = selectedAnswer == index;
 
     return GestureDetector(
       onTap: () {
         setState(() {
           selectedAnswer = index;
-          _saveUserAnswer(currentQuestionIndex, text); // Simpan jawaban user
+          _saveUserAnswer(currentQuestionIndex, text, index, question);
         });
       },
       child: Container(
@@ -353,18 +399,62 @@ class ExerciseScreenState extends State<ExerciseScreen> {
     );
   }
 
-  void _saveUserAnswer(int index, String answer) {
-    if (userAnswers.length <= index) {
-      userAnswers.add({'questionIndex': index, 'answer': answer});
-    } else {
-      userAnswers[index] = {'questionIndex': index, 'answer': answer};
+  void _saveUserAnswer(
+      int indexSoal, String answer, int indexJawaban, dynamic question) {
+    // jawabanUser[indexSoal] = answer;
+
+    if (question["type"] == "multiple_choice") {
+      Map<String, dynamic> detailJawaban = {
+        "question_id": question["id"],
+        "answer_id": question["options"][indexJawaban]["id"],
+        "answer_text": question["options"][indexJawaban]["text"],
+        "index_jawaban": indexJawaban
+      };
+      jawabanUser[indexSoal] = detailJawaban;
+    } else if (question["type"] == "true_false") {
+      Map<String, dynamic> detailJawaban = {
+        "question_id": question["id"],
+        "answer_text": question["options"][indexJawaban],
+        "index_jawaban": indexJawaban
+      };
+      jawabanUser[indexSoal] = detailJawaban;
+    } else if (question["type"] == "essay" ||
+        question["type"] == "shortAnswer") {
+      Map<String, dynamic> detailJawaban = {
+        "question_id": question["id"],
+        "index_jawaban": answer,
+      };
+      jawabanUser[indexSoal] = detailJawaban;
+    } else if (question["type"] == "multiple_answer") {
+      List<Map<String, dynamic>> answers = [];
+      if (selectedAnswers.isNotEmpty) {
+        selectedAnswers.forEach((ans) {
+          answers.add({
+            "answer_id": question["options"][ans]["id"],
+            "answer_text": question["options"][ans]["text"],
+          });
+        });
+      }
+      Map<String, dynamic> detailJawaban = {
+        "question_id": question["id"],
+        "answers": answers,
+        "index_jawaban": selectedAnswers
+      };
+      jawabanUser[indexSoal] = detailJawaban;
     }
+
+    logger.i(jawabanUser);
   }
 
   void _goToQuestion(int index) {
     setState(() {
       currentQuestionIndex = index;
-      selectedAnswer = null;
+
+      if (jawabanUser[currentQuestionIndex] != null) {
+        selectedAnswer = jawabanUser[currentQuestionIndex]["index_jawaban"];
+      } else {
+        selectedAnswer = null;
+      }
     });
     _scrollToCurrentQuestion();
   }
@@ -430,15 +520,15 @@ class ExerciseScreenState extends State<ExerciseScreen> {
               ),
               onPressed: () {
                 if (selectedAnswer != null) {
-                  _saveUserAnswer(
-                    currentQuestionIndex,
-                    questions[currentQuestionIndex]['options'][selectedAnswer],
-                  );
+                  // _saveUserAnswer(
+                  //   currentQuestionIndex,
+                  //   questions[currentQuestionIndex]['options'][selectedAnswer],
+                  // );
                 }
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => ExerciseResultScreen(
+                      builder: (context) => const ExerciseResultScreen(
                             userAnswers: [],
                           )),
                 );
@@ -536,24 +626,42 @@ class ExerciseScreenState extends State<ExerciseScreen> {
     final options = question['options'] ?? []; // Pastikan options tidak null
 
     if (type == 'essay') {
+      TextEditingController textController = TextEditingController();
+
+      if (selectedAnswer != null) {
+        textController.text = selectedAnswer;
+      }
+
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),
         child: TextField(
-          maxLines: 5, // Biar textarea lebih besar
+          controller: textController,
+          maxLines: 5,
           decoration: InputDecoration(
             hintText: "Masukkan jawaban Anda...",
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
             ),
           ),
+          onChanged: (value) {
+            selectedAnswer = value;
+            _saveUserAnswer(currentQuestionIndex, selectedAnswer, 0, question);
+          },
         ),
       );
     }
 
     if (type == 'shortAnswer') {
+      TextEditingController textController = TextEditingController();
+
+      if (selectedAnswer != null) {
+        textController.text = selectedAnswer;
+      }
+
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),
         child: TextField(
+          controller: textController,
           maxLines: 1, // Biar textarea lebih besar
           decoration: InputDecoration(
             hintText: "Masukkan jawaban Anda...",
@@ -561,6 +669,10 @@ class ExerciseScreenState extends State<ExerciseScreen> {
               borderRadius: BorderRadius.circular(10),
             ),
           ),
+          onChanged: (value) {
+            selectedAnswer = value;
+            _saveUserAnswer(currentQuestionIndex, selectedAnswer, 0, question);
+          },
         ),
       );
     }
@@ -574,7 +686,7 @@ class ExerciseScreenState extends State<ExerciseScreen> {
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: List.generate(options.length, (index) {
-          return _buildTrueFalseCard(index, options[index]);
+          return _buildTrueFalseCard(question, index, options[index]);
         }),
       );
     } else if (type == 'multiple_answer') {
@@ -584,29 +696,32 @@ class ExerciseScreenState extends State<ExerciseScreen> {
         child: ListView.builder(
           itemCount: options.length,
           itemBuilder: (context, index) {
-            return _buildCheckboxOption(index, options[index]);
+            return _buildCheckboxOption(
+                question, index, options[index]["text"]);
           },
         ),
       );
     } else {
       return Column(
         children: List.generate(options.length, (index) {
-          return _buildOptionCard(index, options[index]);
+          return _buildOptionCard(question, index, options[index]["text"]);
         }),
       );
     }
   }
 
-  Widget _buildCheckboxOption(int index, String text) {
+  Widget _buildCheckboxOption(dynamic question, int index, String text) {
     bool isSelected = selectedAnswers.contains(index);
+
     return GestureDetector(
       onTap: () {
         setState(() {
           if (isSelected) {
-            selectedAnswers.remove(index); // Hapus jika sudah dipilih
+            selectedAnswers.remove(index);
           } else {
-            selectedAnswers.add(index); // Tambah jika belum dipilih
+            selectedAnswers.add(index);
           }
+          _saveUserAnswer(currentQuestionIndex, text, index, question);
         });
       },
       child: Container(
@@ -639,28 +754,24 @@ class ExerciseScreenState extends State<ExerciseScreen> {
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: Center(
-                child: Text(
-                  text,
-                  style: const TextStyle(fontSize: 16),
-                  softWrap: true,
-                  overflow: TextOverflow.visible,
-                ),
-              ),
-            ),
+                child: Html(
+              data: text,
+              style: {"p": Style(fontSize: FontSize(16))},
+            )),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTrueFalseCard(int index, String text) {
+  Widget _buildTrueFalseCard(dynamic question, int index, String text) {
     bool isSelected = selectedAnswer == index;
 
     return GestureDetector(
       onTap: () {
         setState(() {
           selectedAnswer = index;
+          _saveUserAnswer(currentQuestionIndex, text, index, question);
         });
       },
       child: Container(

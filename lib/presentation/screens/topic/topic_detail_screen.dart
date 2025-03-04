@@ -127,12 +127,12 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                         }
 
                         final data = snapshot.data!;
-                        if (snapshot.hasData) {
-                          final data = snapshot.data!;
-                          logger.d('Data topic: $data'); // debug log
-                          logger.i(
-                              'Lessons taken: ${data['lessons_taken_in_this_topic']}'); // info log
-                        }
+                        // if (snapshot.hasData) {
+                        //   final data = snapshot.data!;
+                        //   logger.d('Data topic: $data'); // debug log
+                        //   logger.i(
+                        //       'Lessons taken: ${data['lessons_taken_in_this_topic']}'); // info log
+                        // }
                         final topic = data['topic'];
                         final List<dynamic> lessonTaken =
                             data['lessons_taken_in_this_topic'] ?? [];
