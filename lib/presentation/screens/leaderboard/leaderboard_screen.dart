@@ -5,83 +5,66 @@ import 'package:shimmer_animation/shimmer_animation.dart';
 
 import '../profile/public_profile_screen.dart';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:progamify/api/auth_service.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 class LeaderboardScreen extends StatefulWidget {
   const LeaderboardScreen({super.key});
 
   @override
-  LeaderboardScreenState createState() => LeaderboardScreenState();
+  State<LeaderboardScreen> createState() => _LeaderboardScreenState();
 }
 
-class LeaderboardScreenState extends State<LeaderboardScreen>
+class _LeaderboardScreenState extends State<LeaderboardScreen>
     with SingleTickerProviderStateMixin {
-  final List<Map<String, dynamic>> leaderboard = [
-    {
-      'name': 'Enrico Sirait',
-      'xp': 273,
-      'avatar': 'assets/avatars/avatar_male_1.svg',
-      'hasTrophy': true,
-    },
-    {
-      'name': 'Emely Angelica',
-      'xp': 270,
-      'avatar': 'assets/avatars/avatar_female_1.svg',
-      'hasTrophy': false,
-    },
-    {
-      'name': 'Boy Sitorus',
-      'xp': 262,
-      'avatar': 'assets/avatars/avatar_male_2.svg',
-      'hasTrophy': false,
-    },
-    {
-      'name': 'Tabitha Acquila',
-      'xp': 250,
-      'avatar': 'assets/avatars/avatar_female_2.svg',
-      'hasTrophy': false,
-    },
-    {
-      'name': 'Benhard Yudha',
-      'xp': 249,
-      'avatar': 'assets/avatars/avatar_male_3.svg',
-      'hasTrophy': false,
-    },
-    {
-      'name': 'Tesalonika Aprisda',
-      'xp': 247,
-      'avatar': 'assets/avatars/avatar_female_3.svg',
-      'hasTrophy': false,
-    },
-    {
-      'name': 'Rafael Manurung',
-      'xp': 240,
-      'avatar': 'assets/avatars/avatar_male_4.svg',
-      'hasTrophy': false,
-    },
-    {
-      'name': 'Gerry Bukit',
-      'xp': 240,
-      'avatar': 'assets/avatars/avatar_male_5.svg',
-      'hasTrophy': false,
-    },
-    {
-      'name': 'Icha Samosir',
-      'xp': 200,
-      'avatar': 'assets/avatars/avatar_female_4.svg',
-      'hasTrophy': false,
-    },
-    {
-      'name': 'Agustina Butarbutar',
-      'xp': 200,
-      'avatar': 'assets/avatars/avatar_female_6.svg',
-      'hasTrophy': false,
-    },
-    // {
-    //   'name': 'Dwi Paranggi Purba',
-    //   'xp': 199,
-    //   'avatar': 'assets/avatars/avatar_male_6.svg',
-    //   'hasTrophy': false,
-    // },
-  ];
+  List<Map<String, dynamic>> leaderboard = [];
+
+  final AuthService _authService = AuthService();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchLeaderboard();
+  }
+
+  Future<void> _fetchLeaderboard() async {
+    final String? _authToken = await _authService.getToken();
+
+    try {
+      final String baseUrl =
+          dotenv.env["BASE_URL_API"] ?? "http://10.0.0.2/api";
+      final response = await http.get(
+        Uri.parse('$baseUrl/leaderboard'),
+        headers: {
+          'Authorization': 'Bearer $_authToken',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> LeaderboardList = json.decode(response.body);
+
+        setState(() {
+          leaderboard = LeaderboardList.map((leaderboard) => {
+                'id': leaderboard['id'],
+                'name': leaderboard['name'] ?? 'Unknown',
+                'email': leaderboard['email'],
+                'nim': leaderboard['nim'],
+                'angkatan': leaderboard['angkatan'],
+                'total_point': leaderboard['total_point'],
+                'total_exp': leaderboard['total_exp'],
+                'avatar': 'assets/avatars/avatar_male_1.svg',
+              }).toList();
+        });
+      } else {
+        setState(() {});
+      }
+    } catch (e) {
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -173,7 +156,7 @@ class LeaderboardScreenState extends State<LeaderboardScreen>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  user['name'],
+                  firstLastName(user['name']),
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -181,44 +164,6 @@ class LeaderboardScreenState extends State<LeaderboardScreen>
                 ),
               ],
             ),
-            // if (position == 1)
-            //   Positioned(
-            //     top: 70,
-            //     child: Transform.scale(
-            //       scale: 1.1,
-            //       child: SvgPicture.asset(
-            //         'assets/leaderboard/trophy_badge.svg',
-            //         width: 42,
-            //         height: 42,
-            //       ),
-            //     ),
-            //   ),
-            // if (position == 2)
-            //   Positioned(
-            //     top: 54,
-            //     left: 30,
-            //     child: Transform.scale(
-            //       scale: 0.85,
-            //       child: SvgPicture.asset(
-            //         'assets/leaderboard/trophy_badge_2.svg',
-            //         width: 42,
-            //         height: 42,
-            //       ),
-            //     ),
-            //   ),
-            // if (position == 3)
-            //   Positioned(
-            //     top: 41,
-            //     left: 17.5,
-            //     child: Transform.scale(
-            //       scale: 0.75,
-            //       child: SvgPicture.asset(
-            //         'assets/leaderboard/trophy_badge_3.svg',
-            //         width: 42,
-            //         height: 42,
-            //       ),
-            //     ),
-            //   ),
           ],
         ),
         const SizedBox(height: 8),
@@ -256,7 +201,6 @@ class LeaderboardScreenState extends State<LeaderboardScreen>
     bool isSecondPlace = position == 2;
     bool isThirdPlace = position == 3;
 
-    // Durasi delay berbeda untuk setiap posisi
     Duration shimmerDelay = isFirstPlace
         ? Duration.zero
         : isSecondPlace
@@ -325,14 +269,8 @@ class LeaderboardScreenState extends State<LeaderboardScreen>
                         ),
                         const SizedBox(width: 12),
                         ClipOval(
-                          // child: SvgPicture.asset(
-                          //   user['avatar'],
-                          //   width: 40,
-                          //   height: 40,
-                          //   fit: BoxFit.cover,
-                          // ),
                           child: Hero(
-                            tag: user['name'], // Tag unik untuk animasi
+                            tag: user['name'],
                             child: SvgPicture.asset(
                               user['avatar'],
                               width: 40,
@@ -362,7 +300,7 @@ class LeaderboardScreenState extends State<LeaderboardScreen>
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             Text(
-                              '${user['xp']}',
+                              '${user['total_exp']}',
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w900,
@@ -413,4 +351,10 @@ class LeaderboardScreenState extends State<LeaderboardScreen>
         return const Color(0xFFC8E2F3);
     }
   }
+}
+
+String firstLastName(fullName) {
+  List<String> words = fullName.trim().split(' ');
+  if (words.length == 1) return words[0];
+  return '${words.first} ${words.last}';
 }
