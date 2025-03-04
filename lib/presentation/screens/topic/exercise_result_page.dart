@@ -6,7 +6,6 @@ class ExerciseResultScreen extends StatelessWidget {
   const ExerciseResultScreen({super.key, required this.userAnswers});
   final List<Map<String, dynamic>> userAnswers;
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -126,8 +125,7 @@ class ExerciseResultScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            ReviewExerciseScreen(userAnswers: userAnswers),
+                        builder: (context) => ReviewExerciseScreen(),
                       ),
                     );
                   },

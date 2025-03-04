@@ -438,7 +438,7 @@ class ExerciseScreenState extends State<ExerciseScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => ExerciseResultScreen(
+                      builder: (context) => const ExerciseResultScreen(
                             userAnswers: [],
                           )),
                 );
