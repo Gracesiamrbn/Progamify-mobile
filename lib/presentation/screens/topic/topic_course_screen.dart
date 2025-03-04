@@ -173,7 +173,7 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
 
           String content = lessonData?['content'] ?? 'No content available';
           double screenWidth = MediaQuery.of(context).size.width;
-          screenWidth = screenWidth - (20);
+          screenWidth = screenWidth - (20 + 20 + 16.8);
 
           double screenHeight = MediaQuery.of(context).size.height;
           // var content = parse(html);
@@ -199,9 +199,10 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
                       ),
                       "p": Style(textAlign: TextAlign.justify),
                       "img": Style(
-                          width: Width(screenWidth * 0.7),
-                          height: Height(screenHeight * 0.3),
-                          margin: Margins(left: Margin(screenWidth * 0.05))),
+                        width: Width(screenWidth),
+                        height: Height(screenWidth),
+                        // margin: Margins(left: Margin(screenWidth * 0.05))
+                      ),
                     },
                   ),
                 ),
