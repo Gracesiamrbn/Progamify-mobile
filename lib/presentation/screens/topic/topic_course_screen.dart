@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'dart:convert';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:progamify/api/lesson_service.dart';
 import 'package:progamify/presentation/screens/topic/write_discussion_screen.dart';
@@ -172,8 +173,11 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
 
           String content = lessonData?['content'] ?? 'No content available';
           double screenWidth = MediaQuery.of(context).size.width;
+          screenWidth = screenWidth - (20);
+
           // var content = parse(html);
-          print(content);
+          // print(content);
+          print(jsonEncode(content));
 
           // double screenWidth = MediaQuery.of(context).size.width;
 
