@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:progamify/api/topic_service.dart';
+import 'package:progamify/presentation/screens/topic/exercise_result_page.dart';
 import 'package:progamify/presentation/screens/topic/topic_course_screen.dart';
 import 'package:progamify/presentation/screens/topic/excercise_screen.dart';
 import 'package:logger/logger.dart';
@@ -127,15 +128,12 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                         }
 
                         final data = snapshot.data!;
-                        // if (snapshot.hasData) {
-                        //   final data = snapshot.data!;
-                        //   logger.d('Data topic: $data'); // debug log
-                        //   logger.i(
-                        //       'Lessons taken: ${data['lessons_taken_in_this_topic']}'); // info log
-                        // }
                         final topic = data['topic'];
                         final List<dynamic> lessonTaken =
                             data['lessons_taken_in_this_topic'] ?? [];
+                        final List<dynamic> exerciseTaken =
+                            data['exercises_taken_in_this_topic'] ?? [];
+
                         final List<Map<String, dynamic>> lessons = [];
                         bool isLocked = false;
 
@@ -165,6 +163,10 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                                 j < lesson['exercises'].length;
                                 j++) {
                               var exercise = lesson['exercises'][j];
+
+                              bool isExerciseCompleted = exerciseTaken.any(
+                                  (ex) => ex['exercise_id'] == exercise['ID']);
+
                               var totalQuestions = exercise['questions'] != null
                                   ? exercise['questions'].length
                                   : 0;
@@ -185,7 +187,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                                 'pts': totalPoint,
                                 'questions': totalQuestions,
                                 'icon': 'assets/icons/tasklist1_icon.png',
-                                'isCompleted': false,
+                                'isCompleted': isExerciseCompleted,
                                 'isLocked': isLocked,
                               };
 
@@ -203,14 +205,14 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                                 horizontal: 16, vertical: 20),
                             itemCount: lessons.length,
                             itemBuilder: (context, index) {
-                              int nextIndex = index + 1;
-                              bool nextOneDone = true;
-                              if (nextIndex < lessons.length) {
-                                nextOneDone =
-                                    lessons[nextIndex]['isCompleted'] ?? false;
-                              }
-                              return _buildStepCard(
-                                  context, lessons[index], index);
+                              // int nextIndex = index + 1;
+                              // bool nextOneDone = true;
+                              // if (nextIndex < lessons.length) {
+                              //   nextOneDone =
+                              //       lessons[nextIndex]['isCompleted'] ?? false;
+                              // }
+                              return _buildStepCard(context, lessons[index],
+                                  index, lessons, exerciseTaken);
                             });
                       }))
             ],
@@ -229,14 +231,17 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   }
 
   Widget _buildStepCard(
-      BuildContext context, Map<String, dynamic> topic, int index) {
-    // bool isClicked = clickedSteps.contains(index);
+      BuildContext context,
+      Map<String, dynamic> topic,
+      int index,
+      List<Map<String, dynamic>> topics,
+      List<dynamic> exerciseTaken) {
     bool isClicked = topic['isCompleted'] ?? false;
 
     return GestureDetector(
       onTap: () {
         setState(() {
-          clickedSteps.add(index); // Simpan langkah yang diklik
+          clickedSteps.add(index);
         });
       },
       child: IntrinsicHeight(
@@ -248,8 +253,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                 children: [
                   Expanded(
                     child: Visibility(
-                      visible: index !=
-                          0, // Hilangkan divider atas pada langkah pertama
+                      visible: index != 0,
                       child: VerticalDivider(
                         color: isClicked ? Colors.blue : Colors.grey[350],
                         thickness: 5,
@@ -278,9 +282,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                   ),
                   Expanded(
                     child: Visibility(
-                      visible: index !=
-                          topics.length -
-                              1, // Hilangkan divider bawah pada langkah terakhir
+                      visible: index != topics.length - 1,
                       child: VerticalDivider(
                         color: isClicked ? Colors.blue : Colors.grey[350],
                         thickness: 5,
@@ -291,7 +293,8 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               ),
             ),
             Expanded(
-              child: _buildTopicCard(context, topic, isClicked, index),
+              child: _buildTopicCard(
+                  context, topic, isClicked, index, exerciseTaken),
             ),
           ],
         ),
@@ -300,24 +303,44 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   }
 
   Widget _buildTopicCard(BuildContext context, Map<String, dynamic> topic,
-      bool isClicked, int index) {
+      bool isClicked, int index, List<dynamic> exerciseTaken) {
     bool isExercise = topic.containsKey('questions');
     bool isLocked = topic['isLocked'];
+    List<Map<String, dynamic>> userAnswers = [];
+
+    if (isExercise && topic["isCompleted"]) {
+      Map<String, dynamic> result = exerciseTaken.firstWhere(
+        (map) => map["exercise_id"] == topic["id"],
+        orElse: () => {},
+      );
+
+      userAnswers.add(result);
+    }
+
     return GestureDetector(
       onTap: () {
         if (!isLocked) {
           setState(() {
-            clickedSteps.add(index); // Update state saat card diklik
+            clickedSteps.add(index);
           });
 
           if (isExercise) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => ExerciseScreen(
-                        exerciseId: topic['id'],
-                      )),
-            );
+            if (topic["isCompleted"]) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        ExerciseResultScreen(userAnswers: userAnswers)),
+              );
+            } else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ExerciseScreen(
+                          exerciseId: topic['id'],
+                        )),
+              );
+            }
           } else {
             Navigator.push(
               context,
@@ -429,56 +452,39 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               ],
             ),
           ),
-          // if (isLocked) ...[
-          //   Positioned.fill(
-          //     child: Container(
-          //       decoration: BoxDecoration(
-          //         color: Colors.black.withOpacity(0.5),
-          //         borderRadius: BorderRadius.circular(12),
-          //       ),
-          //       child: Center(
-          //         child: SvgPicture.asset(
-          //           'assets/icons/lock-svgrepo-com.svg', // Path to your SVG lock icon
-          //           width: 40,
-          //           height: 40,
-          //         ),
-          //       ),
-          //     ),
-          //   ),
-          // ],
         ],
       ),
     );
   }
 }
 
-final List<Map<String, dynamic>> topics = [
-  {
-    'title': 'Introduction',
-    'exp': 10,
-    'icon': 'assets/icons/introduction_icon.png',
-    'isCompleted': true
-  },
-  {
-    'title': 'Exercise I',
-    'exp': 50,
-    'pts': 10,
-    'questions': 10,
-    'icon': 'assets/icons/tasklist1_icon.png',
-    'isCompleted': true
-  },
-  {
-    'title': 'History of Programming',
-    'exp': 10,
-    'icon': 'assets/icons/course2_icon.png',
-    'isCompleted': false
-  },
-  {
-    'title': 'Exercise II',
-    'exp': 50,
-    'pts': 10,
-    'questions': 10,
-    'icon': 'assets/icons/tasklist1_icon.png',
-    'isCompleted': false
-  },
-];
+// final List<Map<String, dynamic>> topics = [
+//   {
+//     'title': 'Introduction',
+//     'exp': 10,
+//     'icon': 'assets/icons/introduction_icon.png',
+//     'isCompleted': true
+//   },
+//   {
+//     'title': 'Exercise I',
+//     'exp': 50,
+//     'pts': 10,
+//     'questions': 10,
+//     'icon': 'assets/icons/tasklist1_icon.png',
+//     'isCompleted': true
+//   },
+//   {
+//     'title': 'History of Programming',
+//     'exp': 10,
+//     'icon': 'assets/icons/course2_icon.png',
+//     'isCompleted': false
+//   },
+//   {
+//     'title': 'Exercise II',
+//     'exp': 50,
+//     'pts': 10,
+//     'questions': 10,
+//     'icon': 'assets/icons/tasklist1_icon.png',
+//     'isCompleted': false
+//   },
+// ];
