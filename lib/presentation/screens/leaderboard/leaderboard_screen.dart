@@ -72,29 +72,32 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
       backgroundColor:
           const Color.from(alpha: 1, red: 0.918, green: 0.949, blue: 1),
       body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            _buildTopThreePodium(),
-            const SizedBox(height: 16),
-            const Text(
-              'Leaderboard',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+        child: leaderboard.isEmpty
+            ? _buildSkeletonLeaderboard()
+            : Column(
+                children: [
+                  const SizedBox(height: 20),
+                  _buildTopThreePodium(
+                      leaderboard[0], leaderboard[1], leaderboard[2]),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Leaderboard',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: _buildLeaderboardList(),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: _buildLeaderboardList(),
-            ),
-          ],
-        ),
       ),
     );
   }
 
-  Widget _buildTopThreePodium() {
+  Widget _buildTopThreePodium(firstRank, secondRank, thirdRank) {
     return SizedBox(
       height: 180,
       child: Stack(
@@ -107,17 +110,17 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 _buildPodiumUser(
-                  leaderboard[1],
+                  secondRank,
                   size: 80,
                   position: 2,
                 ),
                 _buildPodiumUser(
-                  leaderboard[0],
+                  firstRank,
                   size: 100,
                   position: 1,
                 ),
                 _buildPodiumUser(
-                  leaderboard[2],
+                  thirdRank,
                   size: 70,
                   position: 3,
                 ),
@@ -168,6 +171,54 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
         ),
         const SizedBox(height: 8),
       ],
+    );
+  }
+
+  Widget _buildShimmerUser({required double size, required int position}) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Shimmer(
+          duration: const Duration(seconds: 2),
+          child: CircleAvatar(
+            backgroundColor: Colors.grey[300],
+            radius: size / 2,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Shimmer(
+          duration: const Duration(seconds: 2),
+          child: Container(
+            width: 60,
+            height: 12,
+            color: Colors.grey[300],
+          ),
+        ),
+        const SizedBox(height: 4),
+      ],
+    );
+  }
+
+  Widget _buildShimmerPodium() {
+    return SizedBox(
+      height: 180,
+      child: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                _buildShimmerUser(size: 80, position: 2),
+                _buildShimmerUser(size: 100, position: 1),
+                _buildShimmerUser(size: 70, position: 3),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -350,6 +401,46 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
       default:
         return const Color(0xFFC8E2F3);
     }
+  }
+
+  Widget _buildSkeletonLeaderboard() {
+    return Column(
+      children: [
+        const SizedBox(height: 20),
+        _buildShimmerPodium(),
+        const SizedBox(height: 16),
+        Shimmer(
+          duration: const Duration(seconds: 2),
+          child: Container(
+            width: 120,
+            height: 20,
+            color: Colors.grey[300],
+          ),
+        ),
+        const SizedBox(height: 28),
+        Expanded(
+          child: ListView.builder(
+            itemCount: 10, // Jumlah dummy skeleton list
+            itemBuilder: (context, index) {
+              return Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Shimmer(
+                  duration: const Duration(seconds: 2),
+                  child: Container(
+                    height: 62,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
   }
 }
 

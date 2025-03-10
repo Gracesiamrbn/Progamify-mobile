@@ -442,7 +442,6 @@ class ExerciseScreenState extends State<ExerciseScreen> {
       };
       jawabanUser[indexSoal] = detailJawaban;
     }
-
     logger.i(jawabanUser);
   }
 

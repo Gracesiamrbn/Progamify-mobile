@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:progamify/presentation/screens/quest/quest_excercise_screen.dart';
+import 'package:progamify/api/user_service.dart';
 
 class QuestScreen extends StatefulWidget {
   final int initialTabIndex;
@@ -46,8 +47,23 @@ class QuestScreenState extends State<QuestScreen> {
   }
 }
 
-class QuestTab extends StatelessWidget {
+class QuestTab extends StatefulWidget {
   const QuestTab({super.key});
+
+  @override
+  _QuestTabState createState() => _QuestTabState();
+}
+
+class _QuestTabState extends State<QuestTab> {
+  late Future<Map<String, dynamic>> _userFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _userFuture =
+        UserService().getCurrentUser(); // Ambil data user saat pertama kali
+    print(_userFuture);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -204,21 +220,46 @@ class QuestTab extends StatelessWidget {
           const SizedBox(height: 10),
           Align(
             alignment: Alignment.bottomRight,
-            child: FloatingActionButton(
-              backgroundColor: Colors.green[800],
-              child:
-                  const Icon(Icons.play_arrow, color: Colors.white, size: 30),
-              onPressed: () {
-                // Implement the action for play button
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const QuestExcerciseScreen(
-                            title: '',
-                          )),
-                );
-              },
-            ),
+            child: FutureBuilder<Map<String, dynamic>>(
+                future: _userFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const FloatingActionButton(
+                      backgroundColor: Colors.grey,
+                      onPressed: null, // Tidak bisa ditekan saat loading
+                      child: Icon(Icons.hourglass_empty, color: Colors.white),
+                    );
+                  } else if (snapshot.hasError) {
+                    return const FloatingActionButton(
+                      backgroundColor: Colors.red,
+                      onPressed: null, // Tidak bisa ditekan saat error
+                      child: Icon(Icons.error, color: Colors.white),
+                    );
+                  } else if (!snapshot.hasData) {
+                    return const FloatingActionButton(
+                      backgroundColor: Colors.grey,
+                      onPressed: null,
+                      child: Icon(Icons.warning, color: Colors.white),
+                    );
+                  }
+                  int userId =
+                      snapshot.data!['ID']; // Ambil ID user dari Future
+
+                  return FloatingActionButton(
+                    backgroundColor: Colors.green[800],
+                    child: const Icon(Icons.play_arrow,
+                        color: Colors.white, size: 30),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              QuestExcerciseScreen(userId: userId),
+                        ),
+                      );
+                    },
+                  );
+                }),
           ),
         ],
       ),
