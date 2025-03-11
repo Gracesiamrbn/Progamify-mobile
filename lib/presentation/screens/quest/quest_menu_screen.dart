@@ -243,7 +243,7 @@ class _QuestTabState extends State<QuestTab> {
                     );
                   }
                   int userId =
-                      snapshot.data!['ID']; // Ambil ID user dari Future
+                      snapshot.data!['ID']; 
 
                   return FloatingActionButton(
                     backgroundColor: Colors.green[800],
@@ -356,18 +356,10 @@ class BadgesTab extends StatelessWidget {
               children: [
                 Expanded(
                   child: Container(
-                    width: 120, // Ubah sesuai ukuran yang diinginkan
-                    height: 120, // Ukuran seragam
+                    width: 120, 
+                    height: 120, 
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(30),
-                      // boxShadow: const [
-                      //   BoxShadow(
-                      //     color: Colors.black26,
-                      //     blurRadius: 10,
-                      //     offset: Offset(0, 0),
-                      //     spreadRadius: 0,
-                      //   ),
-                      // ],
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12),

@@ -4,6 +4,9 @@ import 'package:lottie/lottie.dart';
 import 'package:progamify/api/quest_service.dart';
 import 'package:logger/logger.dart';
 import 'dart:async';
+import 'package:audioplayers/audioplayers.dart';
+
+import 'quest_menu_screen.dart';
 
 class QuestExcerciseScreen extends StatefulWidget {
   final int userId;
@@ -24,8 +27,11 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
 
   final logger = Logger();
 
-  int _seconds = 30 * 60;
+  int _seconds = 2 * 60;
   late Timer _timer;
+
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  bool _isSoundPlayed = false;
 
   @override
   void initState() {
@@ -38,6 +44,21 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
     _startTimer();
   }
 
+  void _playSoundEffect() async {
+    if (!_isSoundPlayed) {
+      _isSoundPlayed = true;
+      await _audioPlayer
+          .play(AssetSource('audio/spongebob-bubble-transition.mp3'));
+    }
+  }
+
+  void _stopSoundEffect() async {
+    if (_isSoundPlayed) {
+      await _audioPlayer.stop();
+      _isSoundPlayed = false;
+    }
+  }
+
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_seconds > 0) {
@@ -45,7 +66,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
           _seconds--;
         });
       } else {
-        _timer.cancel(); // Hentikan timer saat mencapai 0
+        _timer.cancel();
       }
     });
   }
@@ -53,6 +74,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
   @override
   void dispose() {
     _timer.cancel();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -70,27 +92,44 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           // logger.i("FutureBuilder: Waiting for data...");
           // return const Center(child: CircularProgressIndicator());
+          _playSoundEffect();
           return Container(
             color: Colors.white,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Stack(
+              alignment: Alignment.center,
               children: [
-                SizedBox(
-                  height: 150,
-                  width: 150,
-                  child: Lottie.asset(
-                      'assets/animation/Animation - 1741625662616.json'),
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  "Search the quest...",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: "Inter",
-                    color: Colors.black54,
-                    decoration: TextDecoration.none,
+                Positioned(
+                  left: -100,
+                  right: -100,
+                  child: Center(
+                    child: Lottie.asset(
+                      'assets/animation/Animation - 1741658093124.json',
+                      fit: BoxFit.cover,
+                      width: MediaQuery.of(context).size.width + 200,
+                    ),
                   ),
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      height: 150,
+                      width: 150,
+                      child: Lottie.asset(
+                          'assets/animation/Animation - 1741625662616.json'),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      "Search the quest...",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: "Inter",
+                        color: Colors.black54,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -98,260 +137,212 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
         }
 
         if (snapshot.hasError) {
+          _stopSoundEffect();
           logger.e("FutureBuilder Error: ${snapshot.error}");
           return Center(child: Text('Snapshot hasError: ${snapshot.error}'));
         }
 
         if (!snapshot.hasData || snapshot.hasError) {
+          _stopSoundEffect();
           // logger.w("FutureBuilder Warning: No questions available.");
           return const Center(child: Text('No questions available.'));
-        }
-
-        final response = snapshot.data!;
-
-        final question = response["content"];
-
-        final type = response["type"];
-        // logger.i(
-        //     'FutureBuilder: Data fetched successfully. with question : $question');
-
-        Map<String, dynamic> questions = {};
-        if (type == "multiple_choice") {
-          // logger.d("Processing multiple_choice question.");
-          List<Map<String, dynamic>> options = [];
-          response["answers"].forEach((answer) {
-            var option = {"id": answer["ID"], "text": answer["content"]};
-            options.add(option);
-          });
-          questions = {
-            'id': response["ID"],
-            'question': response["content"],
-            'options': options,
-            'correctAnswer': 1,
-            'explanation': response["feedback"],
-            'exp': response["exp"],
-            'pts': response["point"],
-            'type': response["type"]
-          };
-          // questions.add(q);
-        } else if (type == "true_false") {
-          // logger.d("Processing true_false question.");
-          questions = {
-            'id': response["ID"],
-            'question': response["content"],
-            'options': ["True", "False"],
-            'correctAnswer': 0,
-            'explanation': response["feedback"],
-            'exp': response["exp"],
-            'pts': response["point"],
-            'type': response["type"]
-          };
-          // logger.i('Successfully fetching question : $questions');
-          // questions.add(q);
-        } else if (type == "essay") {
-          // logger.d("Processing essay question.");
-          questions = {
-            'id': response["ID"],
-            'question': response["content"],
-            'correctAnswer': 0,
-            'explanation': response["feedback"],
-            'exp': response["exp"],
-            'pts': response["point"],
-            'type': type
-          };
-          // questions.add(q);
-        } else if (type == "short_answer") {
-          // logger.d("Processing short_answer question.");
-          questions = {
-            'id': question["ID"],
-            'question': question["content"],
-            'correctAnswer': '-',
-            'explanation': response["feedback"],
-            'exp': response["exp"],
-            'pts': response["point"],
-            'type': 'shortAnswer'
-          };
-          // questions.add(q);
-        } else if (question["type"] == "multiple_answer") {
-          // logger.d("Processing multiple_answer question.");
-          List<Map<String, dynamic>> options = [];
-          question["answers"].forEach((answer) {
-            var option = {"id": answer["ID"], "text": answer["content"]};
-            options.add(option);
-          });
-          questions = {
-            'id': question["ID"],
-            'question': question["content"],
-            'options': options,
-            'correctAnswer': 1,
-            'explanation': response["feedback"],
-            'exp': response["exp"],
-            'pts': response["point"],
-            'type': "multiple_answer"
-          };
-          // questions.add(q);
         } else {
-          logger.w("Unknown question type: ${response["type"]}");
-        }
+          _stopSoundEffect();
 
-        // final question = questions[currentQuestionIndex];
+          final response = snapshot.data!;
 
-        int exp = response['exp'];
-        // logger.i("Sucess fetch exp : ${response["exp"]}");
-        int pts = response['point'];
-        // logger.i("Sucess fetch point : ${response["point"]}");
+          final question = response["content"];
 
-        return Scaffold(
-          appBar: AppBar(
-            automaticallyImplyLeading: false,
-            backgroundColor: const Color(0xFFE7F4E8),
-            elevation: 0,
-            title: Row(
-              children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.green.shade400,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    response['difficulty'] ?? 'Easy',
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.yellow.shade700,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    _formatTime(_seconds),
-                    style: const TextStyle(
-                        color: Colors.black,
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ),
-                const Spacer(),
-                GestureDetector(
-                  onTap: _showExitConfirmationDialog,
-                  child: Container(
+          final type = response["type"];
+          // logger.i(
+          //     'FutureBuilder: Data fetched successfully. with question : $question');
+
+          Map<String, dynamic> questions = {};
+          if (type == "multiple_choice") {
+            // logger.d("Processing multiple_choice question.");
+            List<Map<String, dynamic>> options = [];
+            response["answers"].forEach((answer) {
+              var option = {"id": answer["ID"], "text": answer["content"]};
+              options.add(option);
+            });
+            questions = {
+              'id': response["ID"],
+              'question': response["content"],
+              'options': options,
+              'correctAnswer': 1,
+              'explanation': response["feedback"],
+              'exp': response["exp"],
+              'pts': response["point"],
+              'type': response["type"]
+            };
+            // questions.add(q);
+          } else if (type == "true_false") {
+            // logger.d("Processing true_false question.");
+            questions = {
+              'id': response["ID"],
+              'question': response["content"],
+              'options': ["True", "False"],
+              'correctAnswer': 0,
+              'explanation': response["feedback"],
+              'exp': response["exp"],
+              'pts': response["point"],
+              'type': response["type"]
+            };
+            // logger.i('Successfully fetching question : $questions');
+            // questions.add(q);
+          } else if (type == "essay") {
+            // logger.d("Processing essay question.");
+            questions = {
+              'id': response["ID"],
+              'question': response["content"],
+              'correctAnswer': 0,
+              'explanation': response["feedback"],
+              'exp': response["exp"],
+              'pts': response["point"],
+              'type': type
+            };
+            // questions.add(q);
+          } else if (type == "short_answer") {
+            // logger.d("Processing short_answer question.");
+            questions = {
+              'id': question["ID"],
+              'question': question["content"],
+              'correctAnswer': '-',
+              'explanation': response["feedback"],
+              'exp': response["exp"],
+              'pts': response["point"],
+              'type': 'shortAnswer'
+            };
+            // questions.add(q);
+          } else if (question["type"] == "multiple_answer") {
+            // logger.d("Processing multiple_answer question.");
+            List<Map<String, dynamic>> options = [];
+            question["answers"].forEach((answer) {
+              var option = {"id": answer["ID"], "text": answer["content"]};
+              options.add(option);
+            });
+            questions = {
+              'id': question["ID"],
+              'question': question["content"],
+              'options': options,
+              'correctAnswer': 1,
+              'explanation': response["feedback"],
+              'exp': response["exp"],
+              'pts': response["point"],
+              'type': "multiple_answer"
+            };
+            // questions.add(q);
+          } else {
+            logger.w("Unknown question type: ${response["type"]}");
+          }
+
+          // final question = questions[currentQuestionIndex];
+
+          // int exp = response['exp'];
+          // logger.i("Sucess fetch exp : ${response["exp"]}");
+          // int pts = response['point'];
+          // logger.i("Sucess fetch point : ${response["point"]}");
+
+          return Scaffold(
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+              backgroundColor: const Color(0xFFE7F4E8),
+              elevation: 0,
+              title: Row(
+                children: [
+                  Container(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.red,
+                      color: Colors.green.shade400,
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Row(
-                      children: [
-                        Text(
-                          'Exit',
-                          style: TextStyle(color: Colors.white, fontSize: 17),
-                        ),
-                        SizedBox(width: 4),
-                        Icon(Icons.exit_to_app, color: Colors.white),
-                      ],
+                    child: Text(
+                      response['difficulty'] ?? 'Easy',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15),
                     ),
                   ),
-                ),
-                //
-                // Container(
-                //   padding:
-                //       const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                //   decoration: BoxDecoration(
-                //     color: Colors.deepPurple,
-                //     borderRadius: BorderRadius.circular(8),
-                //   ),
-                //   child: Text(
-                //     '+$exp exp',
-                //     style: const TextStyle(
-                //         fontWeight: FontWeight.bold,
-                //         color: Colors.white,
-                //         fontSize: 13),
-                //   ),
-                // ),
-                // const SizedBox(width: 8),
-                // Container(
-                //   padding:
-                //       const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                //   decoration: BoxDecoration(
-                //     color: Colors.orangeAccent,
-                //     borderRadius: BorderRadius.circular(8),
-                //   ),
-                //   child: Text(
-                //     '+$pts pts',
-                //     style: const TextStyle(
-                //         fontWeight: FontWeight.bold,
-                //         color: Colors.white,
-                //         fontSize: 13),
-                //   ),
-                // ),
-                // const Spacer(),
-                // GestureDetector(
-                //   onTap: _showExitConfirmationDialog,
-                //   child: Container(
-                //     padding:
-                //         const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
-                //     decoration: BoxDecoration(
-                //       color: Colors.red,
-                //       borderRadius: BorderRadius.circular(10),
-                //     ),
-                //     child: const Row(
-                //       children: [
-                //         Text(
-                //           'Exit',
-                //           style: TextStyle(color: Colors.white, fontSize: 17),
-                //         ),
-                //         SizedBox(width: 4),
-                //         Icon(Icons.exit_to_app, color: Colors.white),
-                //       ],
-                //     ),
-                //   ),
-                // ),
-              ],
-            ),
-          ),
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Html(data: response["content"], style: {
-                    "p": Style(
-                        fontSize: FontSize(18), textAlign: TextAlign.justify),
-                  }),
-                  const SizedBox(height: 20),
-                  _buildOptions(questions),
-                  const SizedBox(height: 200),
-                  // const Spacer(),
-                  // const SizedBox(height: 20),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      minimumSize: const Size(double.infinity, 50),
+                  const SizedBox(width: 10),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.yellow.shade700,
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    onPressed:
-                        selectedAnswer != null ? _showConfirmationDialog : null,
-                    child: const Text(
-                      'Submit',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    child: Text(
+                      _formatTime(_seconds),
+                      style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: _showExitConfirmationDialog,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 15, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Row(
+                        children: [
+                          Text(
+                            'Exit',
+                            style: TextStyle(color: Colors.white, fontSize: 17),
+                          ),
+                          SizedBox(width: 4),
+                          Icon(Icons.exit_to_app, color: Colors.white),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
-          ),
-        );
+            body: SingleChildScrollView(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Html(data: response["content"], style: {
+                      "p": Style(
+                          fontSize: FontSize(18), textAlign: TextAlign.justify),
+                    }),
+                    const SizedBox(height: 20),
+                    _buildOptions(questions),
+                    const SizedBox(height: 40),
+                    // const Spacer(),
+                    // const SizedBox(height: 20),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        minimumSize: const Size(double.infinity, 50),
+                      ),
+                      onPressed: selectedAnswer != null
+                          ? () => _showConfirmationDialog(questions)
+                          : null,
+                      child: const Text(
+                        'Submit',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
       },
     );
   }
@@ -527,12 +518,13 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
         child: Row(
           children: [
             CircleAvatar(
-              backgroundColor: isSelected ? Colors.blue : Colors.grey.shade400,
+              backgroundColor:
+                  isSelected ? Colors.blue : const Color(0xFFD9D9D9),
               child: Text(
                 String.fromCharCode(65 + index),
                 style: TextStyle(
                   color: isSelected ? Colors.white : Colors.black,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.normal,
                 ),
               ),
             ),
@@ -596,26 +588,80 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
     );
   }
 
-  void _showConfirmationDialog() {
+  void _showConfirmationDialog(dynamic questions) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Submit'),
-          content: const Text('Are you sure you want to submit?'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: const Center(
+            child: Text(
+              'Submit',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 10),
+              Image.asset(
+                'assets/icons/exit_icon.png',
+                height: 80,
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Are you sure to submit the answer?',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
+          actionsAlignment: MainAxisAlignment.spaceEvenly,
           actions: [
             TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.grey[300],
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Cancel'),
+              child: const Text(
+                'Cancel',
+                style:
+                    TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+              ),
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               onPressed: () {
+                if (selectedAnswer != null) {
+                  // _saveUserAnswer(
+                  //   currentQuestionIndex,
+                  //   questions[currentQuestionIndex]['options'][selectedAnswer],
+                  // );
+                }
                 Navigator.pop(context);
                 Navigator.pop(context);
               },
-              child: const Text('Yes'),
+              child: const Text(
+                'Submit',
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         );
@@ -628,28 +674,103 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Want to Exit?  '),
-          content: const Text(
-              'Your progress will not be saved and you will not get the XP'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: const Center(
+            child: Text(
+              'Want to Quit ?',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 10),
+              Image.asset(
+                'assets/icons/exit_icon.png',
+                height: 80,
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Your progress will not be saved and you will not get the reward',
+                textAlign: TextAlign.left,
+                style: TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
+          actionsAlignment: MainAxisAlignment.spaceEvenly,
           actions: [
             TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.grey[300],
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Cancel'),
+              child: const Text(
+                'Cancel',
+                style:
+                    TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+              ),
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               onPressed: () {
                 Navigator.pop(context); // Tutup dialog
                 Navigator.pop(context); // Kembali ke halaman sebelumnya
               },
-              child: const Text('Yes'),
+              child: const Text(
+                'Yes, Quit',
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         );
       },
     );
   }
+
+  // void _showExitConfirmationDialog() {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: const Text('Want to Exit?  '),
+  //         content: const Text(
+  //             'Your progress will not be saved and you will not get the XP'),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //             },
+  //             child: const Text('Cancel'),
+  //           ),
+  //           ElevatedButton(
+  //             onPressed: () {
+  //               Navigator.pop(context); // Tutup dialog
+  //               Navigator.pop(context); // Kembali ke halaman sebelumnya
+  //             },
+  //             child: const Text('Yes'),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
   void _saveUserAnswer(String answer, int indexJawaban, dynamic question) {
     // jawabanUser[indexSoal] = answer;

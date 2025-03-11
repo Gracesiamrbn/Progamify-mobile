@@ -46,6 +46,7 @@ dependencies:
   flutter_dotenv: ^5.2.1
   flutter_html: ^3.0.0-beta.2
   logger: ^1.4.0
+  audioplayers: ^5.2.1
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1 # Pastikan versi terbaru
@@ -89,6 +90,7 @@ flutter:
     - assets/achievement/
     - assets/animation/
     - assets/gifts/
+    - assets/audio/
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
