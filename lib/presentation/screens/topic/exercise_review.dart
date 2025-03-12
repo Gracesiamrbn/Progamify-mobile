@@ -45,7 +45,9 @@ class _ReviewExerciseScreenState extends State<ReviewExerciseScreen> {
   Widget build(BuildContext context) {
     final questionData = userAnswers[currentQuestionIndex];
     int correctIndex = (questionData['correctAnswer'] ?? -1) as int;
-    int userIndex = (questionData['userAnswer'] ?? -1) as int;
+    int userIndex = questionData['userAnswer'] != null
+        ? questionData['userAnswer'] as int
+        : -1;
 
     return Scaffold(
       appBar: AppBar(
@@ -117,22 +119,22 @@ class _ReviewExerciseScreenState extends State<ReviewExerciseScreen> {
               // Progress Bar
               Container(
                 padding: const EdgeInsets.all(10),
-                color: Colors.blue,
+                color: Colors.blue[200],
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: List.generate(userAnswers.length, (index) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 5),
                       child: CircleAvatar(
                         backgroundColor: currentQuestionIndex == index
                             ? Colors.white
-                            : Colors.grey,
+                            : Colors.grey[350],
                         child: Text(
                           "${index + 1}",
                           style: TextStyle(
                               color: currentQuestionIndex == index
-                                  ? Colors.blue
-                                  : Colors.white),
+                                  ? Colors.black
+                                  : Colors.grey[500]),
                         ),
                       ),
                     );
@@ -182,16 +184,31 @@ class _ReviewExerciseScreenState extends State<ReviewExerciseScreen> {
                       }),
 
                       const SizedBox(height: 10),
-                      const Text("Reward Gain"),
+                      const Text(
+                        "Reward Gain",
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           Text(
                             "+${questionData['exp']} ",
                             style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: Colors.deepPurple),
                           ),
                           Image.asset("assets/icons/exp_point_1.png",
                               height: 20),
+                          const SizedBox(width: 10),
+                          Text(
+                            "+${questionData['exp']} ",
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: Colors.amber),
+                          ),
+                          Image.asset("assets/icons/coin.png", height: 20),
                         ],
                       ),
                     ],
@@ -209,8 +226,8 @@ class _ReviewExerciseScreenState extends State<ReviewExerciseScreen> {
             child: Container(
               // ✅ Gunakan Container, bukan Expanded
               width: double.infinity,
-              height:
-                  MediaQuery.of(context).size.height * 0.35, // FIX 1/2 layar
+              height: MediaQuery.of(context).size.height *
+                  0.35, // ukuran fix layar biru
               decoration: const BoxDecoration(
                 color: Colors.blue,
                 borderRadius: BorderRadius.only(
@@ -225,32 +242,68 @@ class _ReviewExerciseScreenState extends State<ReviewExerciseScreen> {
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.all(16),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment
+                            .start, // 🔥 Ini yang bikin teks rata kiri
                         children: [
-                          const Text(
-                            "Answer Explanation",
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                          const Center(
+                            // Agar judul tetap di tengah
+                            child: Text(
+                              "Answer Explanation",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 10),
                           Text(
                             "Answer: ${String.fromCharCode(65 + correctIndex)}. ${questionData['options'][correctIndex]}",
-                            style: const TextStyle(color: Colors.white),
+                            textAlign: TextAlign.left,
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 16),
                           ),
                           Text(
-                            "Your Answer: ${String.fromCharCode(65 + userIndex)}. ${questionData['options'][userIndex]}",
-                            style: TextStyle(
-                                color: userIndex == correctIndex
-                                    ? Colors.green
-                                    : Colors.red),
+                            userIndex >= 0
+                                ? "Your Answer: ${String.fromCharCode(65 + userIndex)}. ${questionData['options'][userIndex]}"
+                                : "Your Answer: Not Answered",
+                            textAlign: TextAlign.left,
+                            style: const TextStyle(
+                                fontSize: 16, color: Colors.white),
+                          ),
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                const TextSpan(
+                                  text: "Reward:  ",
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors
+                                          .white), // Warna putih untuk "Your Answer:"
+                                ),
+                                TextSpan(
+                                  text: "+${questionData['exp']} exp, ",
+                                  style: const TextStyle(
+                                    color: Colors.deepPurple,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: "+${questionData['pts']} point ",
+                                  style: const TextStyle(
+                                    color: Colors.amber,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                           const SizedBox(height: 10),
                           Text(
                             "Explanation:\n${questionData['explanation']}",
-                            style: const TextStyle(color: Colors.white),
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 16),
                           ),
                         ],
                       ),
@@ -264,32 +317,43 @@ class _ReviewExerciseScreenState extends State<ReviewExerciseScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        ElevatedButton(
+                        ElevatedButton.icon(
                           onPressed: currentQuestionIndex > 0
                               ? () => _goToQuestion(currentQuestionIndex - 1)
                               : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Colors.blue,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            color: Color(0xFFFFFFFF),
                           ),
-                          child: const Text("⬅ Previous"),
+                          label: const Text(
+                            'Previous',
+                            style: TextStyle(color: Color(0xFFFFFFFF)),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: currentQuestionIndex > 0
+                                ? const Color(0xFF6FBAFF)
+                                : Colors.grey[400],
+                          ),
                         ),
-                        ElevatedButton(
+                        ElevatedButton.icon(
                           onPressed: currentQuestionIndex <
                                   userAnswers.length - 1
                               ? () => _goToQuestion(currentQuestionIndex + 1)
                               : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Colors.blue,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
+                          icon: const Icon(
+                            Icons.arrow_forward,
+                            color: Color(0xFFFFFFFF),
                           ),
-                          child: const Text("Next ➡"),
+                          label: const Text(
+                            'Next',
+                            style: TextStyle(color: Color(0xFFFFFFFF)),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                currentQuestionIndex < userAnswers.length - 1
+                                    ? const Color(0xFF6FBAFF)
+                                    : Colors.green,
+                          ),
                         ),
                       ],
                     ),
@@ -300,81 +364,6 @@ class _ReviewExerciseScreenState extends State<ReviewExerciseScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  void _showExitConfirmationDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          title: const Center(
-            child: Text(
-              'Want to Quit ?',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 10),
-              Image.asset(
-                'assets/icons/exit_icon.png',
-                height: 80,
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Your progress will not be saved and you will not get the XP',
-                textAlign: TextAlign.left,
-                style: TextStyle(fontSize: 14),
-              ),
-            ],
-          ),
-          actionsAlignment: MainAxisAlignment.spaceEvenly,
-          actions: [
-            TextButton(
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.grey[300],
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                'Cancel',
-                style:
-                    TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-              ),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              onPressed: () {
-                Navigator.pop(context); // Tutup dialog
-                Navigator.pop(context); // Kembali ke halaman sebelumnya
-              },
-              child: const Text(
-                'Yes, Quit',
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }
