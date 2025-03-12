@@ -408,14 +408,16 @@ class ExerciseScreenState extends State<ExerciseScreen> {
         "question_id": question["id"],
         "answer_id": question["options"][indexJawaban]["id"],
         "answer_text": question["options"][indexJawaban]["text"],
-        "index_jawaban": indexJawaban
+        "index_jawaban": indexJawaban,
+        "type": question["type"]
       };
       jawabanUser[indexSoal] = detailJawaban;
     } else if (question["type"] == "true_false") {
       Map<String, dynamic> detailJawaban = {
         "question_id": question["id"],
-        "answer_text": question["options"][indexJawaban],
-        "index_jawaban": indexJawaban
+        "answer_text": question['options'][indexJawaban] as String,
+        "index_jawaban": indexJawaban,
+        "type": question["type"]
       };
       jawabanUser[indexSoal] = detailJawaban;
     } else if (question["type"] == "essay" ||
@@ -423,6 +425,7 @@ class ExerciseScreenState extends State<ExerciseScreen> {
       Map<String, dynamic> detailJawaban = {
         "question_id": question["id"],
         "index_jawaban": answer,
+        "type": question["type"]
       };
       jawabanUser[indexSoal] = detailJawaban;
     } else if (question["type"] == "multiple_answer") {
@@ -438,7 +441,8 @@ class ExerciseScreenState extends State<ExerciseScreen> {
       Map<String, dynamic> detailJawaban = {
         "question_id": question["id"],
         "answers": answers,
-        "index_jawaban": selectedAnswers
+        "index_jawaban": selectedAnswers,
+        "type": question["type"]
       };
       jawabanUser[indexSoal] = detailJawaban;
     }
@@ -518,23 +522,22 @@ class ExerciseScreenState extends State<ExerciseScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              onPressed: () {
-                if (selectedAnswer != null) {
-                  // _saveUserAnswer(
-                  //   currentQuestionIndex,
-                  //   questions[currentQuestionIndex]['options'][selectedAnswer],
-                  // );
-                }
+              onPressed: () async {
+                var result = await ExerciseService()
+                    .submitExercise(widget.exerciseId, jawabanUser);
+
+                Logger().i(result);
+
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const ExerciseResultScreen(
-                            userAnswers: [],
+                      builder: (context) => ExerciseResultScreen(
+                            userAnswers: [result],
                           )),
                 );
               },
               child: const Text(
-                'Yes, Quit',
+                'Yes, Submit',
                 style:
                     TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),

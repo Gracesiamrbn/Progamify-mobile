@@ -1,6 +1,6 @@
-// TODO Implement this library.
 import 'package:flutter/material.dart';
 import 'package:progamify/presentation/screens/topic/exercise_review.dart';
+import 'package:intl/intl.dart';
 
 class ExerciseResultScreen extends StatelessWidget {
   const ExerciseResultScreen({super.key, required this.userAnswers});
@@ -8,6 +8,11 @@ class ExerciseResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, dynamic> result = userAnswers[0];
+
+    DateTime dateTime = DateTime.parse(result["CreatedAt"]);
+    String createdAt = DateFormat('EEEE, dd MMMM yyyy').format(dateTime);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue,
@@ -50,17 +55,17 @@ class ExerciseResultScreen extends StatelessWidget {
             const SizedBox(height: 15),
 
             // Detail soal
-            const Text(
-              'Questions total : 10',
-              style: TextStyle(fontSize: 14),
+            Text(
+              'Questions total : ${result["total_question"]}',
+              style: const TextStyle(fontSize: 14),
             ),
-            const Text(
-              'Exp Reward    : 100 exp',
-              style: TextStyle(fontSize: 14),
+            Text(
+              'Exp Reward    : ${result["total_exp"]}',
+              style: const TextStyle(fontSize: 14),
             ),
-            const Text(
-              'Coin Reward   : 100 coin',
-              style: TextStyle(fontSize: 14),
+            Text(
+              'Coin Reward   : ${result["total_point"]}',
+              style: const TextStyle(fontSize: 14),
             ),
 
             const SizedBox(height: 30),
@@ -71,35 +76,35 @@ class ExerciseResultScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
               ),
               elevation: 2,
-              child: const Padding(
-                padding: EdgeInsets.all(12.0),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Summary of your attempt',
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                     ),
-                    Divider(),
+                    const Divider(),
                     Text(
-                      'Grade               : 90 / 100',
-                      style: TextStyle(fontSize: 13),
+                      'Grade               : ${result["score"] * 100} / 100',
+                      style: const TextStyle(fontSize: 13),
                     ),
                     Text(
-                      'Correct Answer : 9/10',
-                      style: TextStyle(fontSize: 13),
+                      'Correct Answer : ${result["total_correct"]}/${result["total_question"]}',
+                      style: const TextStyle(fontSize: 13),
                     ),
                     Text(
-                      'Exp gain           : 90',
-                      style: TextStyle(fontSize: 13),
+                      'Exp gain           : ${result["total_exp"]}',
+                      style: const TextStyle(fontSize: 13),
                     ),
                     Text(
-                      'Coin gain         : 90',
-                      style: TextStyle(fontSize: 13),
+                      'Point gain         : ${result["total_point"]}',
+                      style: const TextStyle(fontSize: 13),
                     ),
                     Text(
-                      'Time submitted  : Tuesday, 25 February 2025, 11:12 AM',
+                      'Time submitted  : $createdAt',
                     ),
                   ],
                 ),

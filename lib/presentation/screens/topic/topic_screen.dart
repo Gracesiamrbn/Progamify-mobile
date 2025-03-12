@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:logger/logger.dart';
 import 'package:progamify/api/auth_service.dart';
 import 'topic_detail_screen.dart';
 import 'package:http/http.dart' as http;
@@ -17,6 +18,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
   List<Map<String, dynamic>> topics = [];
 
   final AuthService _authService = AuthService();
+  bool previousCompleted = true;
 
   @override
   void initState() {
@@ -117,12 +119,16 @@ class _TopicsScreenState extends State<TopicsScreen> {
     return ListView.builder(
       itemCount: topics.length,
       itemBuilder: (context, index) {
-        return _buildTopicCard(topics[index]);
+        bool isLocked = !previousCompleted;
+        int totalSections = topics[index]['sections'];
+        int completedSections = topics[index]['completed'];
+        previousCompleted = completedSections >= totalSections;
+        return _buildTopicCard(topics[index], isLocked);
       },
     );
   }
 
-  Widget _buildTopicCard(Map<String, dynamic> topic) {
+  Widget _buildTopicCard(Map<String, dynamic> topic, bool isLocked) {
     int totalSections = topic['sections'];
     int completedSections = topic['completed'];
     double progress =
@@ -130,23 +136,28 @@ class _TopicsScreenState extends State<TopicsScreen> {
 
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TopicDetailScreen(
-              topicId: topic['id'],
-              topicTitle: topic['title'],
-              totalLesson: topic['total_lessons'],
-              totalExercise: topic['total_exercises'],
+        if (!isLocked) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TopicDetailScreen(
+                topicId: topic['id'],
+                topicTitle: topic['title'],
+                totalLesson: topic['total_lessons'],
+                totalExercise: topic['total_exercises'],
+              ),
             ),
-          ),
-        );
+          );
+        }
       },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.blue.shade200,
+          color: isLocked
+              ? Colors.grey.shade400.withOpacity(0.7)
+              // : const Color.fromARGB(255, 93, 134, 168),
+              : Colors.blue.shade200,
           borderRadius: BorderRadius.circular(14),
           boxShadow: const [
             BoxShadow(color: Colors.black12, blurRadius: 5, spreadRadius: 2),
