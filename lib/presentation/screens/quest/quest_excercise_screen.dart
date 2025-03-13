@@ -6,7 +6,9 @@ import 'package:logger/logger.dart';
 import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 
-import 'quest_menu_screen.dart';
+import '../topic/exercise_result_page.dart';
+
+// import 'quest_menu_screen.dart';
 
 class QuestExcerciseScreen extends StatefulWidget {
   final int userId;
@@ -18,10 +20,11 @@ class QuestExcerciseScreen extends StatefulWidget {
 
 class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
   // int? selectedOption;
+  int questId = 0;
   dynamic selectedAnswer;
   List<int> selectedAnswers = [];
   List<Map<String, dynamic>> userAnswers = [];
-  Map<int, dynamic> jawabanUser = {};
+  Map<String, dynamic> jawabanUser = {};
 
   late Future<Map<String, dynamic>> _questionsFuture;
 
@@ -150,6 +153,8 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
           _stopSoundEffect();
 
           final response = snapshot.data!;
+
+          questId = response["ID"];
 
           final question = response["content"];
 
@@ -647,15 +652,23 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              onPressed: () {
+              onPressed: () async {
                 if (selectedAnswer != null) {
-                  // _saveUserAnswer(
-                  //   currentQuestionIndex,
-                  //   questions[currentQuestionIndex]['options'][selectedAnswer],
-                  // );
+                  var result =
+                      await QuestService().submitQuest(questId, jawabanUser);
+
+                  Logger().i(result);
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ExerciseResultScreen(
+                              userAnswers: [result],
+                            )),
+                  );
                 }
-                Navigator.pop(context);
-                Navigator.pop(context);
+                // Navigator.pop(context);
+                // Navigator.pop(context);
               },
               child: const Text(
                 'Submit',
@@ -744,34 +757,6 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
     );
   }
 
-  // void _showExitConfirmationDialog() {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: const Text('Want to Exit?  '),
-  //         content: const Text(
-  //             'Your progress will not be saved and you will not get the XP'),
-  //         actions: [
-  //           TextButton(
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //             child: const Text('Cancel'),
-  //           ),
-  //           ElevatedButton(
-  //             onPressed: () {
-  //               Navigator.pop(context); // Tutup dialog
-  //               Navigator.pop(context); // Kembali ke halaman sebelumnya
-  //             },
-  //             child: const Text('Yes'),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
-
   void _saveUserAnswer(String answer, int indexJawaban, dynamic question) {
     // jawabanUser[indexSoal] = answer;
 
@@ -783,6 +768,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
         "index_jawaban": indexJawaban
       };
       // jawabanUser[indexSoal] = detailJawaban;
+      jawabanUser = detailJawaban;
     } else if (question["type"] == "true_false") {
       Map<String, dynamic> detailJawaban = {
         "question_id": question["id"],
@@ -790,6 +776,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
         "index_jawaban": indexJawaban
       };
       // jawabanUser[indexSoal] = detailJawaban;
+      jawabanUser = detailJawaban;
     } else if (question["type"] == "essay" ||
         question["type"] == "shortAnswer") {
       Map<String, dynamic> detailJawaban = {
@@ -797,6 +784,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
         "index_jawaban": answer,
       };
       // jawabanUser[indexSoal] = detailJawaban;
+      jawabanUser = detailJawaban;
     } else if (question["type"] == "multiple_answer") {
       List<Map<String, dynamic>> answers = [];
       if (selectedAnswers.isNotEmpty) {
@@ -813,8 +801,9 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
         "index_jawaban": selectedAnswers
       };
       // jawabanUser[indexSoal] = detailJawaban;
+      jawabanUser = detailJawaban;
     }
 
-    // logger.i(jawabanUser);
+    logger.i(jawabanUser);
   }
 }

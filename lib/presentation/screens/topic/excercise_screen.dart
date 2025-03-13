@@ -283,12 +283,6 @@ class ExerciseScreenState extends State<ExerciseScreen> {
                     "p": Style(
                         fontSize: FontSize(18), textAlign: TextAlign.justify),
                   }),
-                  // Text(
-                  //   "${question['id']}",
-                  //   style: const TextStyle(
-                  //     fontSize: 18,
-                  //   ),
-                  // ),
                   const SizedBox(height: 20),
                   _buildOptions(questions),
                   const SizedBox(height: 20),
