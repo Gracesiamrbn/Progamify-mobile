@@ -130,8 +130,7 @@ class ExerciseResultScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            ReviewExerciseScreen(userAnswers: [result]),
+                        builder: (context) => ReviewExerciseScreen(),
                       ),
                     );
                   },
