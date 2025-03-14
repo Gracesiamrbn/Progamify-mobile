@@ -455,12 +455,34 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               ),
             ),
           ),
-          if (isCorrect)
+          if (isCorrect) ...[
             const Text(
               "Jawaban Anda benar",
               style: TextStyle(color: Colors.green, fontSize: 16),
-            )
-          else
+            ),
+            const SizedBox(height: 5),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("+$rewardExp",
+                    style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.purple)),
+                const SizedBox(width: 5),
+                Image.asset('assets/icons/exp_point.png',
+                    width: 20, height: 20),
+                const SizedBox(width: 10),
+                Text("+$rewardPoint",
+                    style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amber)),
+                const SizedBox(width: 5),
+                Image.asset('assets/icons/coin.png', width: 20, height: 20),
+              ],
+            ),
+          ] else
             const Text(
               "Jawaban Anda salah",
               style: TextStyle(color: Colors.red, fontSize: 16),
@@ -486,7 +508,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               "Jawaban Anda benar !",
               style: TextStyle(color: Colors.green, fontSize: 16),
             ),
-            const SizedBox(height: 5), // Spasi kecil sebelum reward
+            const SizedBox(height: 5),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -542,12 +564,34 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
             return _buildOptionPreview(
                 question, index, options[index]["text"], correctAnswerId);
           }),
-          if (isCorrect)
+          if (isCorrect) ...[
             const Text(
               "Jawaban Anda benar",
               style: TextStyle(color: Colors.green, fontSize: 16),
-            )
-          else
+            ),
+            const SizedBox(height: 5),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("+$rewardExp",
+                    style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.purple)),
+                const SizedBox(width: 5),
+                Image.asset('assets/icons/exp_point.png',
+                    width: 20, height: 20),
+                const SizedBox(width: 10),
+                Text("+$rewardPoint",
+                    style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amber)),
+                const SizedBox(width: 5),
+                Image.asset('assets/icons/coin.png', width: 20, height: 20),
+              ],
+            ),
+          ] else
             const Text(
               "Jawaban Anda salah",
               style: TextStyle(color: Colors.red, fontSize: 16),
@@ -927,6 +971,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
   }
 
   void _showConfirmationDialog(dynamic questions) {
+    bool isSubmitting = false;
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -987,6 +1032,8 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               ),
               onPressed: () async {
                 if (selectedAnswer != null) {
+                  _showLoadingDialog();
+
                   result =
                       await QuestService().submitQuest(questId, jawabanUser);
 
@@ -998,6 +1045,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
 
                   _timer.cancel();
 
+                  Navigator.pop(context);
                   Navigator.pop(context);
 
                   // Navigator.push(
@@ -1149,5 +1197,26 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
     }
 
     logger.i(jawabanUser);
+  }
+
+  void _showLoadingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 20),
+              Text("Submitting...", style: TextStyle(fontSize: 16)),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
