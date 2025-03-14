@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:progamify/api/topic_service.dart';
+import 'package:progamify/presentation/screens/navigation/bottom_navigation.dart';
 import 'package:progamify/presentation/screens/topic/exercise_result_page.dart';
 import 'package:progamify/presentation/screens/topic/topic_course_screen.dart';
 import 'package:progamify/presentation/screens/topic/excercise_screen.dart';
@@ -222,7 +223,14 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             left: 8,
             child: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () => Navigator.pop(context),
+              // onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const MainScreen(currentIndex: 0)),
+                );
+              },
             ),
           ),
         ],
@@ -338,6 +346,10 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                 MaterialPageRoute(
                     builder: (context) => ExerciseScreen(
                           exerciseId: topic['id'],
+                          topicId: widget.topicId,
+                          topicTitle: widget.topicTitle,
+                          totalExercise: widget.totalExercise,
+                          totalLesson: widget.totalLesson,
                         )),
               );
             }

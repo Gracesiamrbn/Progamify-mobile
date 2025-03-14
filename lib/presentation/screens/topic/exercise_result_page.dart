@@ -1,14 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:progamify/presentation/screens/topic/exercise_review.dart';
 import 'package:intl/intl.dart';
+import 'package:progamify/presentation/screens/topic/exercise_view.dart';
+import 'package:progamify/presentation/screens/topic/topic_detail_screen.dart';
 
-class ExerciseResultScreen extends StatelessWidget {
-  const ExerciseResultScreen({super.key, required this.userAnswers});
+class ExerciseResultScreen extends StatefulWidget {
+  final int? topicId;
+  final String? topicTitle;
+  final int? totalLesson;
+  final int? totalExercise;
+  const ExerciseResultScreen(
+      {super.key,
+      required this.userAnswers,
+      this.topicId,
+      this.topicTitle,
+      this.totalLesson,
+      this.totalExercise});
   final List<Map<String, dynamic>> userAnswers;
 
   @override
+  ExerciseResultScreenState createState() => ExerciseResultScreenState();
+}
+
+class ExerciseResultScreenState extends State<ExerciseResultScreen> {
+  @override
   Widget build(BuildContext context) {
-    final Map<String, dynamic> result = userAnswers[0];
+    final Map<String, dynamic> result = widget.userAnswers[0];
+
+    double score = result["score"].toDouble() * 100;
+    String formattedScore = score.toStringAsFixed(2);
 
     DateTime dateTime = DateTime.parse(result["CreatedAt"]);
     String createdAt = DateFormat('EEEE, dd MMMM yyyy').format(dateTime);
@@ -20,7 +39,19 @@ class ExerciseResultScreen extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
-            Navigator.pop(context);
+            if (widget.topicId != null) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => TopicDetailScreen(
+                        topicId: widget.topicId ?? 0,
+                        topicTitle: widget.topicTitle ?? "",
+                        totalExercise: widget.totalExercise ?? 0,
+                        totalLesson: widget.totalLesson ?? 0)),
+              );
+            } else {
+              Navigator.pop(context);
+            }
           },
         ),
         title: const Text(
@@ -60,11 +91,11 @@ class ExerciseResultScreen extends StatelessWidget {
               style: const TextStyle(fontSize: 14),
             ),
             Text(
-              'Exp Reward    : ${result["total_exp"]}',
+              'Exp Reward    : ${result["reward_exp"]}',
               style: const TextStyle(fontSize: 14),
             ),
             Text(
-              'Coin Reward   : ${result["total_point"]}',
+              'Point Reward   : ${result["reward_point"]}',
               style: const TextStyle(fontSize: 14),
             ),
 
@@ -88,7 +119,7 @@ class ExerciseResultScreen extends StatelessWidget {
                     ),
                     const Divider(),
                     Text(
-                      'Grade               : ${result["score"] * 100} / 100',
+                      'Grade               : $formattedScore / 100.00',
                       style: const TextStyle(fontSize: 13),
                     ),
                     Text(
@@ -129,8 +160,17 @@ class ExerciseResultScreen extends StatelessWidget {
                   onPressed: () {
                     Navigator.push(
                       context,
+                      // MaterialPageRoute(
+                      //   builder: (context) => ReviewExerciseScreen(
+                      //     exerciseId: result["exercise_id"],
+                      //     userAnswers: result,
+                      //   ),
+                      // ),
                       MaterialPageRoute(
-                        builder: (context) => ReviewExerciseScreen(),
+                        builder: (context) => ExerciseViewScreen(
+                          exerciseId: result["exercise_id"],
+                          userAnswers: result,
+                        ),
                       ),
                     );
                   },

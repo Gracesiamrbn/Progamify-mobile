@@ -6,13 +6,24 @@ import 'package:logger/logger.dart';
 
 class ExerciseScreen extends StatefulWidget {
   final int exerciseId;
-  const ExerciseScreen({super.key, required this.exerciseId});
+  final int topicId;
+  final String topicTitle;
+  final int totalLesson;
+  final int totalExercise;
+  const ExerciseScreen(
+      {super.key,
+      required this.exerciseId,
+      required this.topicId,
+      required this.topicTitle,
+      required this.totalLesson,
+      required this.totalExercise});
 
   @override
   ExerciseScreenState createState() => ExerciseScreenState();
 }
 
 class ExerciseScreenState extends State<ExerciseScreen> {
+  bool isLoading = false;
   int currentQuestionIndex = 0;
   dynamic selectedAnswer;
   final ScrollController _scrollController = ScrollController();
@@ -37,8 +48,16 @@ class ExerciseScreenState extends State<ExerciseScreen> {
 
         if (jawabanUser[currentQuestionIndex] != null) {
           selectedAnswer = jawabanUser[currentQuestionIndex]["index_jawaban"];
+          if (jawabanUser[currentQuestionIndex]["type"] == "multiple_answer") {
+            logger.i(selectedAnswers);
+            selectedAnswers.clear();
+            selectedAnswers
+                .addAll(jawabanUser[currentQuestionIndex]["index_jawaban"]);
+            logger.i(selectedAnswers);
+          }
         } else {
           selectedAnswer = null;
+          selectedAnswers.clear();
         }
 
         _scrollToCurrentQuestion();
@@ -53,12 +72,41 @@ class ExerciseScreenState extends State<ExerciseScreen> {
 
         if (jawabanUser[currentQuestionIndex] != null) {
           selectedAnswer = jawabanUser[currentQuestionIndex]["index_jawaban"];
+          if (jawabanUser[currentQuestionIndex]["type"] == "multiple_answer") {
+            logger.i(selectedAnswers);
+            selectedAnswers.clear();
+            selectedAnswers
+                .addAll(jawabanUser[currentQuestionIndex]["index_jawaban"]);
+            logger.i(selectedAnswers);
+          }
         } else {
           selectedAnswer = null;
+          selectedAnswers.clear();
         }
         _scrollToCurrentQuestion();
       });
     }
+  }
+
+  void _goToQuestion(int index) {
+    setState(() {
+      currentQuestionIndex = index;
+
+      if (jawabanUser[currentQuestionIndex] != null) {
+        selectedAnswer = jawabanUser[currentQuestionIndex]["index_jawaban"];
+        if (jawabanUser[currentQuestionIndex]["type"] == "multiple_answer") {
+          logger.i(selectedAnswers);
+          selectedAnswers.clear();
+          selectedAnswers
+              .addAll(jawabanUser[currentQuestionIndex]["index_jawaban"]);
+          logger.i(jawabanUser[currentQuestionIndex]);
+        }
+      } else {
+        selectedAnswer = null;
+        selectedAnswers.clear();
+      }
+    });
+    _scrollToCurrentQuestion();
   }
 
   void _scrollToCurrentQuestion() {
@@ -424,36 +472,26 @@ class ExerciseScreenState extends State<ExerciseScreen> {
       jawabanUser[indexSoal] = detailJawaban;
     } else if (question["type"] == "multiple_answer") {
       List<Map<String, dynamic>> answers = [];
+      List<int> indexJawaban = [];
       if (selectedAnswers.isNotEmpty) {
         selectedAnswers.forEach((ans) {
           answers.add({
             "answer_id": question["options"][ans]["id"],
             "answer_text": question["options"][ans]["text"],
           });
+          indexJawaban.add(ans);
         });
       }
       Map<String, dynamic> detailJawaban = {
         "question_id": question["id"],
         "answers": answers,
-        "index_jawaban": selectedAnswers,
+        "index_jawaban": indexJawaban,
         "type": question["type"]
       };
       jawabanUser[indexSoal] = detailJawaban;
     }
+
     logger.i(jawabanUser);
-  }
-
-  void _goToQuestion(int index) {
-    setState(() {
-      currentQuestionIndex = index;
-
-      if (jawabanUser[currentQuestionIndex] != null) {
-        selectedAnswer = jawabanUser[currentQuestionIndex]["index_jawaban"];
-      } else {
-        selectedAnswer = null;
-      }
-    });
-    _scrollToCurrentQuestion();
   }
 
   void _showSubmitDialog(dynamic questions) {
@@ -515,25 +553,51 @@ class ExerciseScreenState extends State<ExerciseScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              onPressed: () async {
-                var result = await ExerciseService()
-                    .submitExercise(widget.exerciseId, jawabanUser);
+              onPressed: isLoading
+                  ? null
+                  : () async {
+                      setState(() {
+                        isLoading = true;
+                      });
 
-                Logger().i(result);
+                      var result = await ExerciseService()
+                          .submitExercise(widget.exerciseId, jawabanUser);
 
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => ExerciseResultScreen(
+                      Logger().i(result);
+
+                      setState(() {
+                        isLoading = false;
+                      });
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ExerciseResultScreen(
                             userAnswers: [result],
-                          )),
-                );
-              },
-              child: const Text(
-                'Yes, Submit',
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              ),
+                            topicId: widget.topicId,
+                            topicTitle: widget.topicTitle,
+                            totalExercise: widget.totalExercise,
+                            totalLesson: widget.totalLesson,
+                          ),
+                        ),
+                      );
+                    },
+              child: isLoading
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Text(
+                      'Yes, Submit',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ),
           ],
         );
@@ -708,7 +772,6 @@ class ExerciseScreenState extends State<ExerciseScreen> {
 
   Widget _buildCheckboxOption(dynamic question, int index, String text) {
     bool isSelected = selectedAnswers.contains(index);
-
     return GestureDetector(
       onTap: () {
         setState(() {

@@ -45,12 +45,10 @@ class _SummaryBoxesState extends State<SummaryBoxes> {
         [
           BoxItem(
               value: '${widget.exp}',
-              label: "experience point",
+              label: "Experience",
               icon: "assets/icons/exp_point.png"),
           BoxItem(
-              value: "15",
-              label: "quest level",
-              icon: "assets/icons/treasure.png"),
+              value: "15", label: "Level", icon: "assets/icons/treasure.png"),
           BoxItem(
               value: "4", label: "lesson done", icon: "assets/icons/topic.png"),
         ];
