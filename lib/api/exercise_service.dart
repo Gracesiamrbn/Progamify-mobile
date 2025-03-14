@@ -25,7 +25,9 @@ class ExerciseService {
   }
 
   Future<Map<String, dynamic>> submitExercise(
-      int id, Map<int, dynamic> jawabanUser) async {
+    int id,
+    Map<int, dynamic> jawabanUser,
+  ) async {
     String? token = await authService.getToken();
 
     final response = await http.post(
@@ -68,8 +70,21 @@ class ExerciseService {
           "question_id": value["question_id"],
           "index_jawaban": value["index_jawaban"].toString(),
         };
-      } else if (value["type"] == "multiple_answer") {}
+      } else if (value["type"] == "multiple_answer") {
+        converted[key.toString()] = {
+          "question_id": value["question_id"],
+          "answers": value["answers"],
+          "index_jawaban": value["index_jawaban"],
+        };
+      }
     });
     return converted;
+  }
+
+  Map<int, dynamic> convertJawabanUserStringToInt(
+      Map<String, dynamic> jawabanUser) {
+    Map<int, dynamic> intMap =
+        jawabanUser.map((key, value) => MapEntry(int.parse(key), value));
+    return intMap;
   }
 }
