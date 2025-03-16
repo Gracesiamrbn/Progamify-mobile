@@ -1220,11 +1220,11 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                         isCorrect
                             ? 'assets/animation/Animation - 1742010178937.json'
                             : 'assets/animation/Animation - 1742010214972.json',
-                        width: 200,
-                        height: 200,
+                        width: 400,
+                        height: 400,
                         fit: BoxFit.contain,
                       ),
-                      const SizedBox(height: 20),
+                      // const SizedBox(height: 20),
                       Text(
                         isCorrect
                             ? "Yey, jawaban kamu benar!"

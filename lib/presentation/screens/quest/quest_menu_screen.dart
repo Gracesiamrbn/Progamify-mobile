@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:progamify/presentation/screens/quest/quest_excercise_screen.dart';
 import 'package:progamify/api/user_service.dart';
 import 'package:progamify/api/quest_service.dart';
+import 'package:shimmer_animation/shimmer_animation.dart';
 
 class QuestScreen extends StatefulWidget {
   final int initialTabIndex;
@@ -108,127 +109,133 @@ class _QuestTabState extends State<QuestTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildQuestHeader(),
-          const SizedBox(height: 20),
-          _buildInstructionContainer(context),
-        ],
+    return Container(
+      color: Colors.orange[50],
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildQuestHeader(),
+            const SizedBox(height: 20),
+            _buildInstructionContainer(context),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildQuestHeader() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.green[800],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Quest of the Week',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+    return Shimmer(
+      color: const Color(0xFFFFD700),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFB8860B),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Quest of the Week',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Complete the quest to gain more XP!',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white,
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Complete the quest to gain more XP!',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TweenAnimationBuilder<double>(
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TweenAnimationBuilder<double>(
+                          duration: const Duration(seconds: 2),
+                          curve: Curves.easeOut,
+                          tween: Tween<double>(
+                            begin: 0,
+                            end: animateProgress ? progress : 0,
+                          ),
+                          builder: (context, value, child) {
+                            return LinearProgressIndicator(
+                              value: value,
+                              backgroundColor: Colors.white,
+                              color: Color(0xFFFFD700),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      TweenAnimationBuilder<int>(
                         duration: const Duration(seconds: 2),
-                        curve: Curves.easeOut,
-                        tween: Tween<double>(
+                        tween: IntTween(
                           begin: 0,
-                          end: animateProgress ? progress : 0,
+                          end: animateProgress ? (progress * 100).toInt() : 0,
                         ),
                         builder: (context, value, child) {
-                          return LinearProgressIndicator(
-                            value: value,
-                            backgroundColor: Colors.white54,
-                            color: Colors.orange[800],
+                          return Text(
+                            '$value%',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           );
                         },
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    TweenAnimationBuilder<int>(
-                      duration: const Duration(seconds: 2),
-                      tween: IntTween(
-                        begin: 0,
-                        end: animateProgress ? (progress * 100).toInt() : 0,
-                      ),
-                      builder: (context, value, child) {
-                        return Text(
-                          '$value%',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Column(
-              children: [
-                const Text(
-                  'Level',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    ],
                   ),
-                ),
-                const SizedBox(height: 4),
-                TweenAnimationBuilder<int>(
-                  duration: const Duration(seconds: 1),
-                  tween: IntTween(begin: 0, end: userLevel),
-                  builder: (context, value, child) {
-                    return Text(
-                      '$value',
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green,
-                      ),
-                    );
-                  },
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+            const SizedBox(width: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                children: [
+                  const Text(
+                    'Level',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFD2691E),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  TweenAnimationBuilder<int>(
+                    duration: const Duration(seconds: 1),
+                    tween: IntTween(begin: 0, end: userLevel),
+                    builder: (context, value, child) {
+                      return Text(
+                        '$value',
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFD2691E),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -253,7 +260,7 @@ class _QuestTabState extends State<QuestTab> {
           Container(
             padding: const EdgeInsets.symmetric(vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.orange[800],
+              color: const Color(0xFFD2B48C),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Center(
@@ -310,7 +317,7 @@ class _QuestTabState extends State<QuestTab> {
                   int userId = snapshot.data!['ID'];
 
                   return FloatingActionButton(
-                    backgroundColor: Colors.green[800],
+                    backgroundColor: const Color(0xFFB8860B),
                     child: const Icon(Icons.play_arrow,
                         color: Colors.white, size: 30),
                     onPressed: () {
