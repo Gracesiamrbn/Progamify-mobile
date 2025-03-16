@@ -52,15 +52,23 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
 
   void _playSoundEffect(audioPath) async {
     if (!_isSoundPlayed) {
+      print("[AUDIO] Playing sound: $audioPath");
       _isSoundPlayed = true;
       await _audioPlayer.play(AssetSource(audioPath));
+      print("[AUDIO] Sound started: $audioPath");
+    } else {
+      print("[AUDIO] Sound already playing, skipping: $audioPath");
     }
   }
 
   void _stopSoundEffect() async {
-    await _audioPlayer.stop();
-    await _audioPlayer.release();
-    _isSoundPlayed = false;
+    if (_audioPlayer.state == PlayerState.playing) {
+      print("[AUDIO] Stopping sound...");
+      await _audioPlayer.stop();
+      await _audioPlayer.release();
+      _isSoundPlayed = false;
+      print("[AUDIO] Sound stopped and released.");
+    }
   }
 
   void _startTimer() {
@@ -114,8 +122,8 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
 
   @override
   void dispose() {
-    _timer.cancel();
     _audioPlayer.dispose();
+    _timer.cancel();
     _textController.dispose();
     super.dispose();
   }
@@ -138,13 +146,11 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
 
         if (snapshot.hasError) {
           _stopSoundEffect();
-          // logger.e("FutureBuilder Error: ${snapshot.error}");
           return Center(child: Text('Snapshot hasError: ${snapshot.error}'));
         }
 
         if (!snapshot.hasData || snapshot.hasError) {
           _stopSoundEffect();
-          // logger.w("FutureBuilder Warning: No questions available.");
           return const Center(child: Text('No questions available.'));
         } else {
           _stopSoundEffect();
@@ -156,12 +162,9 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
           final question = response["content"];
 
           final type = response["type"];
-          // logger.i(
-          //     'FutureBuilder: Data fetched successfully. with question : $question');
 
           Map<String, dynamic> questions = {};
           if (type == "multiple_choice") {
-            // logger.d("Processing multiple_choice question.");
             List<Map<String, dynamic>> options = [];
             response["answers"].forEach((answer) {
               var option = {"id": answer["ID"], "text": answer["content"]};
@@ -177,9 +180,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               'pts': response["point"],
               'type': response["type"]
             };
-            // questions.add(q);
           } else if (type == "true_false") {
-            // logger.d("Processing true_false question.");
             questions = {
               'id': response["ID"],
               'question': response["content"],
@@ -190,10 +191,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               'pts': response["point"],
               'type': response["type"]
             };
-            // logger.i('Successfully fetching question : $questions');
-            // questions.add(q);
           } else if (type == "essay") {
-            // logger.d("Processing essay question.");
             questions = {
               'id': response["ID"],
               'question': response["content"],
@@ -203,9 +201,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               'pts': response["point"],
               'type': type
             };
-            // questions.add(q);
           } else if (type == "short_answer") {
-            // logger.d("Processing short_answer question.");
             questions = {
               'id': response["ID"],
               'question': response["content"],
@@ -215,9 +211,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               'pts': response["point"],
               'type': 'shortAnswer'
             };
-            // questions.add(q);
           } else if (question["type"] == "multiple_answer") {
-            // logger.d("Processing multiple_answer question.");
             List<Map<String, dynamic>> options = [];
             question["answers"].forEach((answer) {
               var option = {"id": answer["ID"], "text": answer["content"]};
@@ -233,18 +227,9 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               'pts': response["point"],
               'type': "multiple_answer"
             };
-            // questions.add(q);
           } else {
-            // logger.w("Unknown question type: ${response["type"]}");
+            logger.w("Unknown question type: ${response["type"]}");
           }
-
-          // final question = questions[currentQuestionIndex];
-
-          // int exp = response['exp'];
-          // logger.i("Sucess fetch exp : ${response["exp"]}");
-          // int pts = response['point'];
-          // logger.i("Sucess fetch point : ${response["point"]}");
-
           return Scaffold(
             appBar: AppBar(
               automaticallyImplyLeading: false,
