@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:progamify/presentation/screens/quest/quest_excercise_screen.dart';
 import 'package:progamify/api/user_service.dart';
+import 'package:progamify/api/quest_service.dart';
 
 class QuestScreen extends StatefulWidget {
   final int initialTabIndex;
@@ -11,7 +12,10 @@ class QuestScreen extends StatefulWidget {
 }
 
 class QuestScreenState extends State<QuestScreen> {
-  double progress = 0.5;
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,13 +60,50 @@ class QuestTab extends StatefulWidget {
 
 class _QuestTabState extends State<QuestTab> {
   late Future<Map<String, dynamic>> _userFuture;
+  late QuestService _questService;
+
+  int userLevel = 0;
+  int totalExp = 0;
+  int? expNeeded;
+  double progress = 0.0;
+  bool animateProgress = false;
 
   @override
   void initState() {
     super.initState();
-    _userFuture =
-        UserService().getCurrentUser(); // Ambil data user saat pertama kali
-    print(_userFuture);
+    _userFuture = UserService().getCurrentUser();
+    _questService = QuestService();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final userData = await UserService().getCurrentUser();
+      int levelId = userData['level_id'];
+      totalExp = userData['total_exp'];
+
+      final levelData = await _questService.getLevel(levelId);
+      int fetchedLevel = levelData['level'];
+      expNeeded = levelData['next_level']['exp_needed'];
+
+      double newProgress =
+          (totalExp != null && expNeeded != null && expNeeded! > 0)
+              ? (totalExp! / expNeeded!).clamp(0.0, 1.0)
+              : 0.0;
+
+      setState(() {
+        userLevel = fetchedLevel;
+      });
+
+      Future.delayed(const Duration(seconds: 1), () {
+        setState(() {
+          animateProgress = true;
+          progress = newProgress;
+        });
+      });
+    } catch (e) {
+      print("Error fetching data: $e");
+    }
   }
 
   @override
@@ -81,7 +122,6 @@ class _QuestTabState extends State<QuestTab> {
   }
 
   Widget _buildQuestHeader() {
-    double progress = 0.5;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -114,20 +154,39 @@ class _QuestTabState extends State<QuestTab> {
                 Row(
                   children: [
                     Expanded(
-                      child: LinearProgressIndicator(
-                        value: progress,
-                        backgroundColor: Colors.white54,
-                        color: Colors.orange[800],
+                      child: TweenAnimationBuilder<double>(
+                        duration: const Duration(seconds: 2),
+                        curve: Curves.easeOut,
+                        tween: Tween<double>(
+                          begin: 0,
+                          end: animateProgress ? progress : 0,
+                        ),
+                        builder: (context, value, child) {
+                          return LinearProgressIndicator(
+                            value: value,
+                            backgroundColor: Colors.white54,
+                            color: Colors.orange[800],
+                          );
+                        },
                       ),
                     ),
                     const SizedBox(width: 10),
-                    Text(
-                      '${(progress * 100).toInt()}%',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                    TweenAnimationBuilder<int>(
+                      duration: const Duration(seconds: 2),
+                      tween: IntTween(
+                        begin: 0,
+                        end: animateProgress ? (progress * 100).toInt() : 0,
                       ),
+                      builder: (context, value, child) {
+                        return Text(
+                          '$value%',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -141,9 +200,9 @@ class _QuestTabState extends State<QuestTab> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Column(
+            child: Column(
               children: [
-                Text(
+                const Text(
                   'Level',
                   style: TextStyle(
                     fontSize: 14,
@@ -151,14 +210,20 @@ class _QuestTabState extends State<QuestTab> {
                     color: Colors.black,
                   ),
                 ),
-                SizedBox(height: 4),
-                Text(
-                  '4',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green,
-                  ),
+                const SizedBox(height: 4),
+                TweenAnimationBuilder<int>(
+                  duration: const Duration(seconds: 1),
+                  tween: IntTween(begin: 0, end: userLevel),
+                  builder: (context, value, child) {
+                    return Text(
+                      '$value',
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -242,8 +307,7 @@ class _QuestTabState extends State<QuestTab> {
                       child: Icon(Icons.warning, color: Colors.white),
                     );
                   }
-                  int userId =
-                      snapshot.data!['ID']; 
+                  int userId = snapshot.data!['ID'];
 
                   return FloatingActionButton(
                     backgroundColor: Colors.green[800],
@@ -356,8 +420,8 @@ class BadgesTab extends StatelessWidget {
               children: [
                 Expanded(
                   child: Container(
-                    width: 120, 
-                    height: 120, 
+                    width: 120,
+                    height: 120,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(30),
                     ),
