@@ -26,6 +26,13 @@ class MainScreenState extends State<MainScreen> {
     _tabIndex = widget.tabIndex ?? 0; // Gunakan tabIndex dari widget jika ada
   }
 
+  final List<Color> _navColors = [
+    const Color(0xFF6FBAFF),
+    const Color(0xFFD2B48C),
+    const Color(0xFFF5C97C),
+    const Color(0xFF6FBAFF),
+  ];
+
   // Method untuk mendapatkan screen berdasarkan index
   Widget getScreen(int index) {
     switch (index) {
@@ -46,7 +53,8 @@ class MainScreenState extends State<MainScreen> {
     setState(() {
       _currentIndex = index;
       if (index == 1) {
-        _tabIndex = 0; // Reset tab ke default (tab "Badge") setiap kali QuestScreen dibuka
+        _tabIndex =
+            0; // Reset tab ke default (tab "Badge") setiap kali QuestScreen dibuka
       }
     });
   }
@@ -54,10 +62,17 @@ class MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: getScreen(_currentIndex),
+      extendBody: true,
+      body: Column(
+        children: [
+          Expanded(
+              child:
+                  getScreen(_currentIndex)), // Pastikan layar anak terisi penuh
+        ],
+      ),
       bottomNavigationBar: CurvedNavigationBar(
         backgroundColor: Colors.transparent,
-        color: const Color(0xFF6FBAFF),
+        color: _navColors[_currentIndex],
         buttonBackgroundColor: Colors.white.withOpacity(0.8),
         animationDuration: const Duration(milliseconds: 700),
         height: 60,

@@ -89,7 +89,7 @@ class BadgesSection extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 16), // Jarak di bawah section
+          const SizedBox(height:86), // Jarak di bawah section
         ],
       ),
     );

@@ -14,12 +14,12 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  late Future<Map<String, dynamic>> futureUser;
+  late Future<Map<String, dynamic>> _futureUser;
 
   @override
   void initState() {
     super.initState();
-    futureUser = UserService().getCurrentUser();
+    _futureUser = UserService().getCurrentUser();
   }
 
   @override
@@ -27,7 +27,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF0F4FA),
       body: FutureBuilder<Map<String, dynamic>>(
-        future: UserService().getCurrentUser(), // Fetch current user data
+        future: _futureUser,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -45,11 +45,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       const SizedBox(height: 20),
                       ProfileInfo(
-                        name: user['name'], // Use dynamic user name
+                        name: user['name'], 
                         details:
                             "${user['nim']} | ${user['email']} | ${user['angkatan']}",
-                        // name: "Boy Martahan Sitorus", // Use dynamic user name
-                        // details: "11S21025 | sitorusboy0123@gmail.com | 2021",
                         settingIconPath: "assets/icons/gear.png",
                         shopIconPath: "assets/icons/shopping-cart.png",
                       ),

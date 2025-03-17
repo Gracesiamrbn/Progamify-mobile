@@ -1,14 +1,12 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:lottie/lottie.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 
 import '../profile/public_profile_screen.dart';
-
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:progamify/api/auth_service.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:progamify/api/user_service.dart';
+import 'package:progamify/api/leaderboard_service.dart';
 
 class LeaderboardScreen extends StatefulWidget {
   const LeaderboardScreen({super.key});
@@ -17,82 +15,219 @@ class LeaderboardScreen extends StatefulWidget {
   State<LeaderboardScreen> createState() => _LeaderboardScreenState();
 }
 
-class _LeaderboardScreenState extends State<LeaderboardScreen>
-    with SingleTickerProviderStateMixin {
-  List<Map<String, dynamic>> leaderboard = [];
+class _LeaderboardScreenState extends State<LeaderboardScreen> {
+  late Future<Map<String, dynamic>> _futureUser;
+  late Future<List<Map<String, dynamic>>> _futureLeaderboard;
+  bool _showWinnerPopup = false;
+  String _winnerName = "";
 
-  final AuthService _authService = AuthService();
+  // Audio
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  bool _isSoundPlayed = false;
 
   @override
   void initState() {
     super.initState();
-    _fetchLeaderboard();
+    _futureUser = UserService().getCurrentUser();
+    _futureLeaderboard = LeaderboardService().getLeaderboard();
+    _checkIfUserIsWinner();
   }
 
-  Future<void> _fetchLeaderboard() async {
-    final String? _authToken = await _authService.getToken();
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
 
+  void _playSoundEffect(audioPath) async {
+    if (!_isSoundPlayed) {
+      print("[AUDIO] Playing sound: $audioPath");
+      _isSoundPlayed = true;
+      await _audioPlayer.play(AssetSource(audioPath));
+      print("[AUDIO] Sound started: $audioPath");
+    } else {
+      print("[AUDIO] Sound already playing, skipping: $audioPath");
+    }
+  }
+
+  void _stopSoundEffect() async {
+    if (_audioPlayer.state == PlayerState.playing) {
+      print("[AUDIO] Stopping sound...");
+      await _audioPlayer.stop();
+      await _audioPlayer.release();
+      _isSoundPlayed = false;
+      print("[AUDIO] Sound stopped and released.");
+    }
+  }
+
+  Future<void> _checkIfUserIsWinner() async {
     try {
-      final String baseUrl =
-          dotenv.env["BASE_URL_API"] ?? "http://10.0.0.2/api";
-      final response = await http.get(
-        Uri.parse('$baseUrl/leaderboard'),
-        headers: {
-          'Authorization': 'Bearer $_authToken',
-          'Content-Type': 'application/json',
-        },
-      );
+      final user = await _futureUser;
+      final leaderboard = await _futureLeaderboard;
 
-      if (response.statusCode == 200) {
-        final List<dynamic> LeaderboardList = json.decode(response.body);
+      debugPrint("Current User ID: ${user['ID']}");
+      debugPrint("Leaderboard Top 1 ID: ${leaderboard[0]['ID']}");
 
+      if (leaderboard.isNotEmpty && leaderboard[0]['ID'] == user['ID']) {
         setState(() {
-          leaderboard = LeaderboardList.map((leaderboard) => {
-                'id': leaderboard['id'],
-                'name': leaderboard['name'] ?? 'Unknown',
-                'email': leaderboard['email'],
-                'nim': leaderboard['nim'],
-                'angkatan': leaderboard['angkatan'],
-                'total_point': leaderboard['total_point'],
-                'total_exp': leaderboard['total_exp'],
-                'avatar': 'assets/avatars/avatar_male_1.svg',
-              }).toList();
+          _showWinnerPopup = true;
+          _winnerName = user['name'];
         });
-      } else {
-        setState(() {});
       }
     } catch (e) {
-      setState(() {});
+      debugPrint("Error checking winner: $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          const Color.from(alpha: 1, red: 0.918, green: 0.949, blue: 1),
+      extendBodyBehindAppBar: true,
+      backgroundColor: const Color(0xFFEAF2FF),
       body: SafeArea(
-        child: leaderboard.isEmpty
-            ? _buildSkeletonLeaderboard()
-            : Column(
+        child: Stack(
+          children: [
+            FutureBuilder<List<Map<String, dynamic>>>(
+              future: _futureLeaderboard,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return _buildSkeletonLeaderboard();
+                } else if (snapshot.hasError) {
+                  return Center(
+                    child: Text("Terjadi kesalahan: ${snapshot.error}"),
+                  );
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(child: Text("Leaderboard kosong"));
+                }
+
+                final leaderboard = snapshot.data!;
+
+                return Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    if (leaderboard.length >= 3)
+                      _buildTopThreePodium(
+                        leaderboard[0],
+                        leaderboard[1],
+                        leaderboard[2],
+                      ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Leaderboard',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: _buildLeaderboardList(leaderboard),
+                    ),
+                  ],
+                );
+              },
+            ),
+            if (_showWinnerPopup) _buildWinnerPopup()
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWinnerPopup() {
+    _playSoundEffect('audio/mixkit-grand-brass-fanfare-631.wav');
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: Colors.white,
+      child: Center(
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: Lottie.asset(
+                'assets/animation/Animation - 1740197651611.json',
+                fit: BoxFit.cover,
+                repeat: true,
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(20),
+              width: double.infinity,
+              height: double.infinity,
+              child: Column(
                 children: [
-                  const SizedBox(height: 20),
-                  _buildTopThreePodium(
-                      leaderboard[0], leaderboard[1], leaderboard[2]),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Leaderboard',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Lottie.asset(
+                          'assets/animation/Animation - 1742200561611.json',
+                          width: 200,
+                          height: 200,
+                          repeat: false,
+                        ),
+                        const SizedBox(height: 20),
+                        const Text(
+                          '🎉 Selamat! 🎉',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontFamily: 'Inter',
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          _winnerName,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontFamily: 'Inter',
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'Kamu mendapat peringkat pertama di leaderboard!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: _buildLeaderboardList(),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      onPressed: () {
+                        _stopSoundEffect();
+                        setState(() {
+                          _showWinnerPopup = false;
+                        });
+                      },
+                      child: const Text(
+                        'Lihat Leaderboard',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Inter',
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
                   ),
+                  const SizedBox(height: 20),
                 ],
               ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -222,7 +357,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     );
   }
 
-  Widget _buildLeaderboardList() {
+  Widget _buildLeaderboardList(List<Map<String, dynamic>> leaderboard) {
     return ListView.builder(
       padding: EdgeInsets.zero,
       itemCount: leaderboard.length,

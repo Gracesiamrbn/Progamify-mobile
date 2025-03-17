@@ -23,4 +23,21 @@ class UserService {
       throw Exception('Failed to load current user data');
     }
   }
+
+  Future<Map<String, dynamic>> getUserById(int userId) async {
+    String? token = await authService.getToken();
+    final response = await http.get(
+      Uri.parse('$baseUrl/users/$userId'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load current user data');
+    }
+  }
 }

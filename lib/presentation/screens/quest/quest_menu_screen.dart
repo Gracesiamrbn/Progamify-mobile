@@ -26,15 +26,17 @@ class QuestScreenState extends State<QuestScreen> {
       child: Scaffold(
         appBar: PreferredSize(
           preferredSize:
-              const Size.fromHeight(50), // Menyembunyikan space AppBar
+              const Size.fromHeight(50), 
           child: AppBar(
+            backgroundColor: const Color.fromARGB(255, 250, 226, 217),
             automaticallyImplyLeading: false, // Menonaktifkan tombol back
-            bottom: const TabBar(
-              indicatorColor: Colors.black,
+            bottom:  TabBar(
+              indicatorColor: Colors.brown[300],
+              indicatorSize: TabBarIndicatorSize.tab,
               labelColor: Colors.black, // Warna teks tab yang aktif
               unselectedLabelColor:
                   Colors.grey, // Warna teks tab yang tidak aktif
-              tabs: [
+              tabs: const [
                 Tab(text: 'Quests'),
                 Tab(text: 'Badges'),
               ],
@@ -84,12 +86,14 @@ class _QuestTabState extends State<QuestTab> {
       totalExp = userData['total_exp'];
 
       final levelData = await _questService.getLevel(levelId);
+      int expForCurrentLevel = levelData['exp_needed'];
+      int initExp = totalExp - expForCurrentLevel;
       int fetchedLevel = levelData['level'];
-      expNeeded = levelData['next_level']['exp_needed'];
+      expNeeded = levelData['next_level']['exp_needed'] - expForCurrentLevel;
 
       double newProgress =
-          (totalExp != null && expNeeded != null && expNeeded! > 0)
-              ? (totalExp! / expNeeded!).clamp(0.0, 1.0)
+          (initExp != null && expNeeded != null && expNeeded! > 0)
+              ? (initExp! / expNeeded!).clamp(0.0, 1.0)
               : 0.0;
 
       setState(() {
@@ -116,6 +120,7 @@ class _QuestTabState extends State<QuestTab> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const SizedBox(height: 20),
             _buildQuestHeader(),
             const SizedBox(height: 20),
             _buildInstructionContainer(context),
@@ -127,11 +132,11 @@ class _QuestTabState extends State<QuestTab> {
 
   Widget _buildQuestHeader() {
     return Shimmer(
-      color: const Color(0xFFFFD700),
+      color: const Color(0xFFF2C6A0),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFFB8860B),
+          color: const Color(0xFFB88A66),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -171,7 +176,7 @@ class _QuestTabState extends State<QuestTab> {
                             return LinearProgressIndicator(
                               value: value,
                               backgroundColor: Colors.white,
-                              color: Color(0xFFFFD700),
+                              color: const Color(0xFFFFC107),
                             );
                           },
                         ),
@@ -317,7 +322,7 @@ class _QuestTabState extends State<QuestTab> {
                   int userId = snapshot.data!['ID'];
 
                   return FloatingActionButton(
-                    backgroundColor: const Color(0xFFB8860B),
+                    backgroundColor: const Color(0xFFB88A66),
                     child: const Icon(Icons.play_arrow,
                         color: Colors.white, size: 30),
                     onPressed: () {
