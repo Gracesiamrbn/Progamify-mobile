@@ -54,6 +54,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       SummaryBoxes(
                         exp: user["total_exp"],
                         level: user["level_id"],
+                        totalLesson: user["total_lesson_taken"],
                       ),
                       const SummaryGrid(),
                       const BadgesSection(),

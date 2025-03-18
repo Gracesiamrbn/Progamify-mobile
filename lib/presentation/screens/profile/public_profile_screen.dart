@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../../widgets/profile_header.dart';
+import 'package:logger/logger.dart';
 import '../../widgets/profile_info.dart';
 import '../../widgets/summary_boxes.dart';
 import '../../widgets/summary_grid.dart';
@@ -13,6 +13,7 @@ class PublicProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Logger().i(user);
     return Scaffold(
       backgroundColor: const Color(0xFFF0F4FA),
       body: CustomScrollView(
@@ -58,7 +59,11 @@ class PublicProfileScreen extends StatelessWidget {
                   details:
                       "${user['nim']} | ${user['email']} | ${user['angkatan']}",
                 ),
-                SummaryBoxes(exp: user['total_exp'], level: user['level_id']),
+                SummaryBoxes(
+                  exp: user['total_exp'],
+                  level: user['level_id'],
+                  totalLesson: 0,
+                ),
                 const SummaryGrid(),
                 const BadgesSection(),
               ],

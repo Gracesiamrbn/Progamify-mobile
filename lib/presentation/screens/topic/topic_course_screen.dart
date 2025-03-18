@@ -1,8 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/svg.dart';
-import 'dart:convert';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:logger/logger.dart';
 import 'package:progamify/api/discussion_service.dart';
@@ -149,10 +147,10 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
           double screenWidth = MediaQuery.of(context).size.width;
           screenWidth = screenWidth - (20 + 20 + 16.8);
 
-          double screenHeight = MediaQuery.of(context).size.height;
+          // double screenHeight = MediaQuery.of(context).size.height;
           // var content = parse(html);
           // print(content);
-          print(jsonEncode(content));
+          // print(jsonEncode(content));
 
           // double screenWidth = MediaQuery.of(context).size.width;
 

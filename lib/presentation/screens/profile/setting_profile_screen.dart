@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_styles.dart';
 
 class SettingProfileScreen extends StatelessWidget {
   const SettingProfileScreen({super.key});
@@ -69,7 +68,8 @@ class SettingProfileScreen extends StatelessWidget {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.yellow, // Yellow background
-                minimumSize: const Size(double.infinity, 50), // Full width button
+                minimumSize:
+                    const Size(double.infinity, 50), // Full width button
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),

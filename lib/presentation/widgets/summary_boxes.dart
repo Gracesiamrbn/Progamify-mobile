@@ -7,6 +7,7 @@ class SummaryBoxes extends StatefulWidget {
   final List<BoxItem>? items;
   final int exp;
   final int level;
+  final int totalLesson;
 
   const SummaryBoxes({
     super.key,
@@ -14,6 +15,7 @@ class SummaryBoxes extends StatefulWidget {
     required this.exp,
     required this.level,
     this.items,
+    required this.totalLesson,
   });
 
   @override
@@ -54,7 +56,9 @@ class _SummaryBoxesState extends State<SummaryBoxes> {
               label: "Level",
               icon: "assets/icons/treasure.png"),
           BoxItem(
-              value: "4", label: "lesson done", icon: "assets/icons/topic.png"),
+              value: "${widget.totalLesson}",
+              label: "lesson done",
+              icon: "assets/icons/topic.png"),
         ];
 
     return Padding(

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:progamify/presentation/screens/navigation/bottom_navigation.dart';
 
-import '../screens/quest/quest_menu_screen.dart';
+// import '../screens/quest/quest_menu_screen.dart';
 
 class BadgesSection extends StatelessWidget {
   final String title;
@@ -89,7 +89,7 @@ class BadgesSection extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height:86), // Jarak di bawah section
+          const SizedBox(height: 86), // Jarak di bawah section
         ],
       ),
     );

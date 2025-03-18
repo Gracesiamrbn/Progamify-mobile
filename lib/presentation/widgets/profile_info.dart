@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import '../screens/profile/setting_screen.dart';
 import '../screens/profile/market_screen.dart';
 
@@ -64,8 +63,10 @@ class ProfileInfo extends StatelessWidget {
                 );
               },
             ),
-          if (settingIconPath != null && settingIconPath!.isNotEmpty && 
-              shopIconPath != null && shopIconPath!.isNotEmpty)
+          if (settingIconPath != null &&
+              settingIconPath!.isNotEmpty &&
+              shopIconPath != null &&
+              shopIconPath!.isNotEmpty)
             const SizedBox(width: 8),
           if (shopIconPath != null && shopIconPath!.isNotEmpty)
             _buildIconButton(

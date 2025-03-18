@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import '../../widgets/market_app_bar.dart';
 import '../../widgets/market_tab_selector.dart';
 import '../../widgets/market_item_grid.dart';
