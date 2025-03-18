@@ -3,10 +3,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:logger/logger.dart';
 import 'package:progamify/api/discussion_service.dart';
 import 'package:progamify/api/user_service.dart';
+import 'package:progamify/presentation/screens/topic/topic_course_screen.dart';
 
 class WriteDiscussionScreen extends StatefulWidget {
   final int lessonId;
-  const WriteDiscussionScreen({super.key, required this.lessonId});
+  final String topicTitle;
+  const WriteDiscussionScreen(
+      {super.key, required this.lessonId, required this.topicTitle});
 
   @override
   WriteDiscussionScreenState createState() => WriteDiscussionScreenState();
@@ -61,6 +64,18 @@ class WriteDiscussionScreenState extends State<WriteDiscussionScreen> {
               onPressed: () {
                 Navigator.pop(context);
                 Navigator.pop(context);
+
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TopicCourseScreen(
+                      topicTitle: widget.topicTitle,
+                      lessonId: widget.lessonId,
+                      courseTitle: "",
+                      isFromDisc: true,
+                    ),
+                  ),
+                );
               },
               child: const Text("OK"),
             )

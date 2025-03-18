@@ -2,7 +2,6 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:logger/logger.dart';
 import 'package:progamify/api/discussion_service.dart';
 import 'package:progamify/api/lesson_service.dart';
 import 'package:progamify/presentation/screens/topic/write_discussion_screen.dart';
@@ -13,11 +12,14 @@ import 'package:lottie/lottie.dart';
 class TopicCourseScreen extends StatefulWidget {
   final String topicTitle;
   final int lessonId;
+  final bool isFromDisc;
+
   const TopicCourseScreen(
       {super.key,
       required this.lessonId,
       required this.topicTitle,
-      required String courseTitle});
+      required String courseTitle,
+      this.isFromDisc = false});
 
   @override
   TopicCourseScreenState createState() => TopicCourseScreenState();
@@ -38,6 +40,9 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(_handleTabChange);
+    if (widget.isFromDisc) {
+      _tabController.index = 1;
+    }
     futureLesson = LessonService().getLesson(widget.lessonId);
   }
 
@@ -73,7 +78,17 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
   }
 
   void _handleTabChange() {
-    setState(() {}); // Perbarui tampilan saat tab berubah
+    setState(() {});
+  }
+
+  void reloadTab(int index) {
+    if (index == 1) {
+      setState(() {});
+    }
+  }
+
+  void setTabIndex(int index) {
+    _tabController.index = 1;
   }
 
   @override
@@ -117,8 +132,10 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) =>
-                          WriteDiscussionScreen(lessonId: widget.lessonId)),
+                      builder: (context) => WriteDiscussionScreen(
+                            lessonId: widget.lessonId,
+                            topicTitle: widget.topicTitle,
+                          )),
                 );
               },
               child: const Icon(Icons.add, size: 32, color: Colors.white),
@@ -129,7 +146,7 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
 
   Widget _buildLessonContent() {
     return FutureBuilder<Map<String, dynamic>>(
-      future: futureLesson, // The future that fetches lesson data
+      future: futureLesson,
       builder:
           (BuildContext context, AsyncSnapshot<Map<String, dynamic>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -214,8 +231,6 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
         if (snapshot.hasData && snapshot.data!.isNotEmpty) {
           List<Map<String, String>> discussions = snapshot.data!;
 
-          Logger().i(discussions);
-
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Column(
@@ -255,15 +270,24 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
                                 Row(
                                   children: [
                                     CircleAvatar(
-                                      backgroundColor: Colors.grey,
-                                      radius: 10,
-                                      child: SvgPicture.asset(
-                                        "assets/avatars/avatar_male_1.svg",
-                                        width: 40,
-                                        height: 40,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
+                                        backgroundColor: Colors.grey,
+                                        radius: 10,
+                                        child: ClipOval(
+                                          child: SvgPicture.asset(
+                                            "assets/avatars/avatar_jumbotron_1.svg",
+                                            fit: BoxFit.cover,
+                                          ),
+                                        )),
+                                    // child: ClipOval(
+                                    //   child: SvgPicture.network(
+                                    //     "http://194.163.40.203:9000/storage/market/images/2gvDExwSaeKV33LG1zLOYn0SCyT9rzYclEESaOb3.svg",
+                                    //     fit: BoxFit.cover,
+                                    //     placeholderBuilder: (BuildContext
+                                    //             context) =>
+                                    //         const CircularProgressIndicator(),
+                                    //   ),
+                                    // ),
+                                    // ),
                                     const SizedBox(width: 8),
                                     Text(
                                       discussions[index]['name']!,

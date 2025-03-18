@@ -608,11 +608,14 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
   Widget _buildCheckboxOption(dynamic question, int index, String text) {
     bool isSelected = selectedAnswers.contains(index);
 
-    var jawaban = jawabanUser[question["q_index"]];
+    Logger().i(selectedAnswers);
+    Logger().i(jawabanUser);
 
     bool isCorrect = false;
 
-    if (jawaban["correct_answer_index"].contains(index)) {
+    var jawaban = jawabanUser[question["q_index"]];
+
+    if (jawaban != null && jawaban["correct_answer_index"].contains(index)) {
       isCorrect = true;
     }
 
