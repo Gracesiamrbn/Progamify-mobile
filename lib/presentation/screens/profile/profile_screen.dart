@@ -45,13 +45,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       const SizedBox(height: 20),
                       ProfileInfo(
-                        name: user['name'], 
+                        name: user['name'],
                         details:
                             "${user['nim']} | ${user['email']} | ${user['angkatan']}",
                         settingIconPath: "assets/icons/gear.png",
                         shopIconPath: "assets/icons/shopping-cart.png",
                       ),
-                      SummaryBoxes(exp: user["total_exp"], level: user["level_id"],),
+                      SummaryBoxes(
+                        exp: user["total_exp"],
+                        level: user["level_id"],
+                      ),
                       const SummaryGrid(),
                       const BadgesSection(),
                     ],

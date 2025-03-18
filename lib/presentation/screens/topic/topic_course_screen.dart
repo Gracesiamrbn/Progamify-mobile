@@ -4,6 +4,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/svg.dart';
 import 'dart:convert';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:progamify/api/discussion_service.dart';
 import 'package:progamify/api/lesson_service.dart';
 import 'package:progamify/presentation/screens/topic/write_discussion_screen.dart';
 import 'discussion_reply_screen.dart';
@@ -20,10 +21,10 @@ class TopicCourseScreen extends StatefulWidget {
       required String courseTitle});
 
   @override
-  _TopicCourseScreenState createState() => _TopicCourseScreenState();
+  TopicCourseScreenState createState() => TopicCourseScreenState();
 }
 
-class _TopicCourseScreenState extends State<TopicCourseScreen>
+class TopicCourseScreenState extends State<TopicCourseScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late Future<Map<String, dynamic>> futureLesson;
@@ -116,7 +117,8 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const WriteDiscussionScreen()),
+                      builder: (context) =>
+                          WriteDiscussionScreen(lessonId: widget.lessonId)),
                 );
               },
               child: const Icon(Icons.add, size: 32, color: Colors.white),
@@ -190,181 +192,235 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
             ),
           );
         }
-
         return const Center(child: Text('No data available'));
       },
     );
   }
 
   Widget _buildDiscussionContent() {
-    List<Map<String, String>> discussions = [
-      {
-        "name": "Boy Sitorus",
-        "date": "12/09/24 13:45",
-        "title": "How \"Hello World!\" become most iconic for coders?",
-      },
-      {
-        "name": "Emely Angel",
-        "date": "10/09/24 09:15",
-        "title": "Which better? Python or Java?",
-      },
-      {
-        "name": "Enrico Sirait",
-        "date": "30/08/24 23:11",
-        "title": "What programming language I should learn first?",
-      },
-      {
-        "name": "John Doe",
-        "date": "29/08/24 10:00",
-        "title": "Why so many programming language?",
-      },
-      {
-        "name": "Boy Sitorus",
-        "date": "12/09/24 13:45",
-        "title": "How \"Hello World!\" become most iconic for coders?",
-      },
-      {
-        "name": "Emely Angel",
-        "date": "10/09/24 09:15",
-        "title": "Which better? Python or Java?",
-      },
-      {
-        "name": "Enrico Sirait",
-        "date": "30/08/24 23:11",
-        "title": "What programming language I should learn first?",
-      },
-    ];
+    return FutureBuilder<List<Map<String, String>>>(
+      future: DiscussionService().getDiscussions(widget.lessonId),
+      builder: (BuildContext context,
+          AsyncSnapshot<List<Map<String, String>>> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Search...',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+          List<Map<String, String>> discussions = snapshot.data!;
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              children: [
+                const SizedBox(height: 10),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: discussions.length,
+                    itemBuilder: (context, index) {
+                      return InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DiscussionReplyScreen(
+                                discussionTitle: discussions[index]['title']!,
+                                author: discussions[index]['name']!,
+                                date: discussions[index]['date']!,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Card(
+                          color: Colors.blue[50],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          margin: const EdgeInsets.only(bottom: 10),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const CircleAvatar(
+                                      backgroundColor: Colors.grey,
+                                      radius: 10,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      discussions[index]['name']!,
+                                      style: GoogleFonts.inter(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    Text(
+                                      discussions[index]['date']!,
+                                      style: GoogleFonts.inter(
+                                          fontSize: 12, color: Colors.grey),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  discussions[index]['title']!,
+                                  style: GoogleFonts.inter(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  discussions[index]['content']!,
+                                  style: GoogleFonts.inter(
+                                      fontSize: 14, color: Colors.black87),
+                                ),
+                                const SizedBox(height: 8),
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      // Navigasi ke DiscussionReplyScreen saat button diklik
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              DiscussionReplyScreen(
+                                            discussionTitle: discussions[index]
+                                                ['title']!,
+                                            author: discussions[index]['name']!,
+                                            date: discussions[index]['date']!,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.grey.shade300,
+                                      foregroundColor: Colors.black,
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12),
+                                    ),
+                                    child: const Text('Replies (0)'),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
-              ),
-              const SizedBox(width: 10),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey.shade300,
-                  foregroundColor: Colors.black,
-                ),
-                child: const Text('Filter Discussion'),
-              ),
-            ],
+              ],
+            ),
+          );
+        }
+
+        return const Center(child: Text('No discussions available.'));
+      },
+    );
+  }
+
+  void _showExpPopup(BuildContext context, int exp) {
+    _playSoundEffect('audio/mixkit-winning-notification-2018.wav');
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false, // Tidak bisa ditutup dengan tap luar
+      barrierLabel: "",
+      transitionBuilder: (context, anim1, anim2, child) {
+        return ScaleTransition(
+          scale: CurvedAnimation(
+            parent: anim1,
+            curve: Curves.easeOutBack, // Efek pop keluar
           ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: ListView.builder(
-              itemCount: discussions.length,
-              itemBuilder: (context, index) {
-                return InkWell(
-                  onTap: () {
-                    // Navigasi ke DiscussionReplyScreen saat Card diklik
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DiscussionReplyScreen(
-                          discussionTitle: discussions[index]['title']!,
-                          author: discussions[index]['name']!,
-                          date: discussions[index]['date']!,
+          child: child,
+        );
+      },
+      pageBuilder: (context, anim1, anim2) {
+        return Dialog(
+          backgroundColor: Colors.white,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 20),
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Lottie.asset(
+                      'assets/animation/Animation - 1742261944915.json',
+                      repeat: false,
+                      width: 200,
+                      height: 200,
+                      fit: BoxFit.cover,
+                    ),
+                    Image.asset(
+                      'assets/icons/exp_point.png',
+                      width: 64,
+                      height: 64,
+                    ),
+                  ],
+                ),
+                Text.rich(
+                  TextSpan(
+                    text: "Anda mendapatkan ",
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontFamily: 'Inter',
+                      color: Colors.black87,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: "$exp EXP",
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.purple,
                         ),
                       ),
-                    );
-                  },
-                  child: Card(
-                    color: Colors.blue[50],
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _stopSoundEffect();
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurpleAccent,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
-                    margin: const EdgeInsets.only(bottom: 10),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const CircleAvatar(
-                                backgroundColor: Colors.grey,
-                                radius: 10,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                discussions[index]['name']!,
-                                style: GoogleFonts.inter(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const Spacer(),
-                              Text(
-                                discussions[index]['date']!,
-                                style: GoogleFonts.inter(
-                                    fontSize: 12, color: Colors.grey),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            discussions[index]['title']!,
-                            style: GoogleFonts.inter(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Lorem ipsum dolor sit amet, consectetur adipiscing elit...',
-                            style: GoogleFonts.inter(
-                                fontSize: 14, color: Colors.black87),
-                          ),
-                          const SizedBox(height: 8),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                // Navigasi ke DiscussionReplyScreen saat button diklik
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => DiscussionReplyScreen(
-                                      discussionTitle: discussions[index]
-                                          ['title']!,
-                                      author: discussions[index]['name']!,
-                                      date: discussions[index]['date']!,
-                                    ),
-                                  ),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey.shade300,
-                                foregroundColor: Colors.black,
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 12),
-                              ),
-                              child: const Text('Replies (3)'),
-                            ),
-                          ),
-                        ],
+                    child: const Text(
+                      "Lanjutkan Belajar",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                );
-              },
+                ),
+              ],
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 

@@ -1,15 +1,89 @@
 import 'package:flutter/material.dart';
+import 'package:progamify/api/discussion_service.dart';
 
 class WriteDiscussionScreen extends StatefulWidget {
-  const WriteDiscussionScreen({super.key});
+  final int lessonId;
+  const WriteDiscussionScreen({super.key, required this.lessonId});
 
   @override
-  _WriteDiscussionScreenState createState() => _WriteDiscussionScreenState();
+  WriteDiscussionScreenState createState() => WriteDiscussionScreenState();
 }
 
-class _WriteDiscussionScreenState extends State<WriteDiscussionScreen> {
+class WriteDiscussionScreenState extends State<WriteDiscussionScreen> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController questionController = TextEditingController();
+
+  Future<void> _submitDiscussion() async {
+    _showLoadingDialog();
+
+    try {
+      await DiscussionService().submitDiscussion(
+          widget.lessonId, titleController.text, questionController.text);
+      Navigator.pop(context); // Close loading dialog
+      _showSuccessDialog();
+    } catch (error) {
+      Navigator.pop(context); // Close loading dialog
+      _showErrorDialog(error.toString());
+    }
+  }
+
+  void _showLoadingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return const AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 10),
+              Text("Posting your discussion...")
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Success"),
+          content: const Text("Discussion successfully posted!"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+              child: const Text("OK"),
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Error"),
+          content: Text("Failed to post discussion: $message"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("OK"),
+            )
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,14 +104,14 @@ class _WriteDiscussionScreenState extends State<WriteDiscussionScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            const Row(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 20,
                   backgroundColor: Colors.grey,
                 ),
-                const SizedBox(width: 10),
-                const Text(
+                SizedBox(width: 10),
+                Text(
                   'Enrico Sirait',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
@@ -68,9 +142,7 @@ class _WriteDiscussionScreenState extends State<WriteDiscussionScreen> {
             Align(
               alignment: Alignment.centerRight,
               child: ElevatedButton(
-                onPressed: () {
-                  // Handle post action
-                },
+                onPressed: _submitDiscussion,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                 ),
