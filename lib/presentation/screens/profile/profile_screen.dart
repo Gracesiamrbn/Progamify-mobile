@@ -53,7 +53,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         settingIconPath: "assets/icons/gear.png",
                         shopIconPath: "assets/icons/shopping-cart.png",
                       ),
-                      SummaryBoxes(exp: user["total_exp"]),
+                      SummaryBoxes(
+                        exp: user["total_exp"],
+                        level: user["level_id"],
+                      ),
                       const SummaryGrid(),
                       const BadgesSection(),
                     ],
