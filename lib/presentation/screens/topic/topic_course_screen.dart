@@ -28,6 +28,7 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late Future<Map<String, dynamic>> futureLesson;
+  bool _isExpPopupShown = false;
 
   // Audio
   final AudioPlayer _audioPlayer = AudioPlayer();
@@ -154,12 +155,13 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
 
           // double screenWidth = MediaQuery.of(context).size.width;
 
-          if (lessonData?['takeLesson'] != null) {
+          if (lessonData?['takeLesson'] != null && !_isExpPopupShown) {
             print(lessonData?['takeLesson']);
             int exp = lessonData?['exp'] ?? 0;
             WidgetsBinding.instance.addPostFrameCallback((_) {
               _showExpPopup(context, exp);
             });
+            _isExpPopupShown = true;
           } else {
             print('Sudah pernah dibaca');
           }
@@ -323,103 +325,6 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
         }
 
         return const Center(child: Text('No discussions available.'));
-      },
-    );
-  }
-
-  void _showExpPopup(BuildContext context, int exp) {
-    _playSoundEffect('audio/mixkit-winning-notification-2018.wav');
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: false, // Tidak bisa ditutup dengan tap luar
-      barrierLabel: "",
-      transitionBuilder: (context, anim1, anim2, child) {
-        return ScaleTransition(
-          scale: CurvedAnimation(
-            parent: anim1,
-            curve: Curves.easeOutBack, // Efek pop keluar
-          ),
-          child: child,
-        );
-      },
-      pageBuilder: (context, anim1, anim2) {
-        return Dialog(
-          backgroundColor: Colors.white,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(height: 20),
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Lottie.asset(
-                      'assets/animation/Animation - 1742261944915.json',
-                      repeat: false,
-                      width: 200,
-                      height: 200,
-                      fit: BoxFit.cover,
-                    ),
-                    Image.asset(
-                      'assets/icons/exp_point.png',
-                      width: 64,
-                      height: 64,
-                    ),
-                  ],
-                ),
-                Text.rich(
-                  TextSpan(
-                    text: "Anda mendapatkan ",
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontFamily: 'Inter',
-                      color: Colors.black87,
-                    ),
-                    children: [
-                      TextSpan(
-                        text: "$exp EXP",
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.purple,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      _stopSoundEffect();
-                      Navigator.pop(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurpleAccent,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text(
-                      "Lanjutkan Belajar",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
       },
     );
   }
