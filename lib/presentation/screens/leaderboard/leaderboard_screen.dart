@@ -97,7 +97,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                     child: Text("Terjadi kesalahan: ${snapshot.error}"),
                   );
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(child: Text("Leaderboard kosong"));
+                  return const Center(child: Text("Leaderboard kosong"));
                 }
 
                 final leaderboard = snapshot.data!;
