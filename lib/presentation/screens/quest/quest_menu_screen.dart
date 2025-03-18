@@ -25,12 +25,11 @@ class QuestScreenState extends State<QuestScreen> {
       initialIndex: widget.initialTabIndex,
       child: Scaffold(
         appBar: PreferredSize(
-          preferredSize:
-              const Size.fromHeight(50), 
+          preferredSize: const Size.fromHeight(50),
           child: AppBar(
             backgroundColor: const Color.fromARGB(255, 250, 226, 217),
             automaticallyImplyLeading: false, // Menonaktifkan tombol back
-            bottom:  TabBar(
+            bottom: TabBar(
               indicatorColor: Colors.brown[300],
               indicatorSize: TabBarIndicatorSize.tab,
               labelColor: Colors.black, // Warna teks tab yang aktif
@@ -89,12 +88,16 @@ class _QuestTabState extends State<QuestTab> {
       int expForCurrentLevel = levelData['exp_needed'];
       int initExp = totalExp - expForCurrentLevel;
       int fetchedLevel = levelData['level'];
-      expNeeded = levelData['next_level']['exp_needed'] - expForCurrentLevel;
+
+      bool hasNextLevel = levelData.containsKey('next_level') &&
+          levelData['next_level'] != null;
+
+      expNeeded = hasNextLevel
+          ? levelData['next_level']['exp_needed'] - expForCurrentLevel
+          : 0;
 
       double newProgress =
-          (initExp != null && expNeeded != null && expNeeded! > 0)
-              ? (initExp! / expNeeded!).clamp(0.0, 1.0)
-              : 0.0;
+          hasNextLevel ? ((initExp / (expNeeded ?? 1)).clamp(0.0, 1.0)) : 1.0;
 
       setState(() {
         userLevel = fetchedLevel;
