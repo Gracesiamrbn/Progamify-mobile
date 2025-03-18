@@ -32,13 +32,15 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
     _questionsFuture = ExerciseService().getExercise(widget.exerciseId);
     jawabanUser = ExerciseService()
         .convertJawabanUserStringToInt(widget.userAnswers["answers"]);
-    selectedAnswer = jawabanUser[currentQuestionIndex]["user_answer_index"];
 
-    Logger().i(jawabanUser[currentQuestionIndex]);
+    Logger().i(jawabanUser);
 
-    if (jawabanUser[currentQuestionIndex]["type"] == "multiple_answer") {
-      selectedAnswers
-          .addAll(jawabanUser[currentQuestionIndex]["user_answer_index"]);
+    if (jawabanUser[currentQuestionIndex] != null) {
+      selectedAnswer = jawabanUser[currentQuestionIndex]["user_answer_index"];
+      if (jawabanUser[currentQuestionIndex]["type"] == "multiple_answer") {
+        selectedAnswers
+            .addAll(jawabanUser[currentQuestionIndex]["user_answer_index"]);
+      }
     }
   }
 
@@ -607,9 +609,6 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
 
   Widget _buildCheckboxOption(dynamic question, int index, String text) {
     bool isSelected = selectedAnswers.contains(index);
-
-    Logger().i(selectedAnswers);
-    Logger().i(jawabanUser);
 
     bool isCorrect = false;
 
