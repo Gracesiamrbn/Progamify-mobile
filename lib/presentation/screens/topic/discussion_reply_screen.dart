@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class DiscussionReplyScreen extends StatelessWidget {
   final String discussionTitle;
   final String author;
   final String date;
+  final String discussionContent;
+  final int discId;
 
-  const DiscussionReplyScreen({
-    super.key,
-    required this.discussionTitle,
-    required this.author,
-    required this.date,
-  });
+  const DiscussionReplyScreen(
+      {super.key,
+      required this.discussionTitle,
+      required this.author,
+      required this.date,
+      required this.discussionContent,
+      required this.discId});
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +37,15 @@ class DiscussionReplyScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   backgroundColor: Colors.grey,
                   radius: 14,
+                  child: SvgPicture.asset(
+                    "assets/avatars/avatar_male_1.svg",
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.cover,
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -61,7 +71,7 @@ class DiscussionReplyScreen extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+              discussionContent,
               style: GoogleFonts.inter(fontSize: 14, color: Colors.black87),
             ),
             const SizedBox(height: 16),
@@ -89,9 +99,9 @@ class DiscussionReplyScreen extends StatelessWidget {
             Expanded(
               child: ListView(
                 children: const [
-                  _ReplyItem(name: 'Melanie Zoe', date: '12/09/24 23:01'),
-                  _ReplyItem(name: 'Richard Lee', date: '13/09/24 09:09'),
-                  _ReplyItem(name: 'Michelle Yeoh', date: '13/09/24 10:59'),
+                  // _ReplyItem(name: 'Melanie Zoe', date: '12/09/24 23:01'),
+                  // _ReplyItem(name: 'Richard Lee', date: '13/09/24 09:09'),
+                  // _ReplyItem(name: 'Michelle Yeoh', date: '13/09/24 10:59'),
                 ],
               ),
             ),
@@ -120,9 +130,15 @@ class _ReplyItem extends StatelessWidget {
           children: [
             Row(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   backgroundColor: Colors.grey,
                   radius: 10,
+                  child: SvgPicture.asset(
+                    "assets/avatars/avatar_male_1.svg",
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.cover,
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Text(

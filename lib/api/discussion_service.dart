@@ -24,6 +24,7 @@ class DiscussionService {
         List<Map<String, String>> discussions = List<Map<String, String>>.from(
           data.map((item) {
             return {
+              'id': "${item['id']}",
               'content': item['content'] as String,
               'date': item['date'] as String,
               'name': item['name'] as String,

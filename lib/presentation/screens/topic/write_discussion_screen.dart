@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:logger/logger.dart';
 import 'package:progamify/api/discussion_service.dart';
+import 'package:progamify/api/user_service.dart';
 
 class WriteDiscussionScreen extends StatefulWidget {
   final int lessonId;
@@ -87,71 +90,175 @@ class WriteDiscussionScreenState extends State<WriteDiscussionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.blue,
-        title: const Text("Add Discussion",
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Row(
-              children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: Colors.grey,
+    return FutureBuilder<Map<String, dynamic>>(
+        future: UserService().getCurrentUser(),
+        builder: (BuildContext context,
+            AsyncSnapshot<Map<String, dynamic>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+            Map<String, dynamic> user = snapshot.data!;
+
+            Logger().i(user);
+
+            return Scaffold(
+              appBar: AppBar(
+                backgroundColor: Colors.blue,
+                title: const Text("Add Discussion",
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
                 ),
-                SizedBox(width: 10),
-                Text(
-                  'Enrico Sirait',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              body: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundColor: Colors.grey,
+                          child: SvgPicture.asset(
+                            "assets/avatars/avatar_male_1.svg",
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          user["name"],
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    const Text("Title",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18)),
+                    TextField(
+                      controller: titleController,
+                      decoration: const InputDecoration(
+                        hintText: "Type your title...",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text("Question",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18)),
+                    TextField(
+                      controller: questionController,
+                      maxLines: 5,
+                      decoration: const InputDecoration(
+                        hintText: "Type your question...",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: ElevatedButton(
+                        onPressed: _submitDiscussion,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                        ),
+                        child: const Text("Post"),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            const Text("Title",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            TextField(
-              controller: titleController,
-              decoration: const InputDecoration(
-                hintText: "Type your title...",
-                border: OutlineInputBorder(),
               ),
-            ),
-            const SizedBox(height: 20),
-            const Text("Question",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            TextField(
-              controller: questionController,
-              maxLines: 5,
-              decoration: const InputDecoration(
-                hintText: "Type your question...",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton(
-                onPressed: _submitDiscussion,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+            );
+          } else {
+            return Scaffold(
+              appBar: AppBar(
+                backgroundColor: Colors.blue,
+                title: const Text("Add Discussion",
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
                 ),
-                child: const Text("Post"),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
+              body: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundColor: Colors.grey,
+                          child: SvgPicture.asset(
+                            "assets/avatars/avatar_male_1.svg",
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        const Text(
+                          'Enrico Sirait',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    const Text("Title",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18)),
+                    TextField(
+                      controller: titleController,
+                      decoration: const InputDecoration(
+                        hintText: "Type your title...",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text("Question",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18)),
+                    TextField(
+                      controller: questionController,
+                      maxLines: 5,
+                      decoration: const InputDecoration(
+                        hintText: "Type your question...",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: ElevatedButton(
+                        onPressed: _submitDiscussion,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                        ),
+                        child: const Text("Post"),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+        });
   }
 }

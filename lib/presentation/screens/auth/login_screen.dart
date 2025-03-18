@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:progamify/api/user_service.dart';
 import 'package:progamify/presentation/screens/auth/register_screen.dart';
 import 'package:progamify/presentation/screens/navigation/bottom_navigation.dart';
 import '../../widgets/text_field_style1.dart';
@@ -25,7 +26,7 @@ class LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    // _checkLogin();
+    _checkLogin();
   }
 
   Future<void> _checkLogin() async {
@@ -35,6 +36,14 @@ class LoginScreenState extends State<LoginScreen> {
         context,
         MaterialPageRoute(builder: (context) => const MainScreen()),
       );
+    } else {
+      Map<String, dynamic> checkUser = await UserService().getCurrentUser();
+      if (checkUser["error"] != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MainScreen()),
+        );
+      }
     }
   }
 

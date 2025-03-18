@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:logger/logger.dart';
 import 'package:progamify/api/discussion_service.dart';
 import 'package:progamify/api/lesson_service.dart';
 import 'package:progamify/presentation/screens/topic/write_discussion_screen.dart';
@@ -163,6 +165,8 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
         if (snapshot.hasData && snapshot.data!.isNotEmpty) {
           List<Map<String, String>> discussions = snapshot.data!;
 
+          Logger().i(discussions);
+
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Column(
@@ -178,9 +182,12 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
                             context,
                             MaterialPageRoute(
                               builder: (context) => DiscussionReplyScreen(
+                                discId: int.parse(discussions[index]['id']!),
                                 discussionTitle: discussions[index]['title']!,
                                 author: discussions[index]['name']!,
                                 date: discussions[index]['date']!,
+                                discussionContent: discussions[index]
+                                    ['content']!,
                               ),
                             ),
                           );
@@ -198,9 +205,15 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
                               children: [
                                 Row(
                                   children: [
-                                    const CircleAvatar(
+                                    CircleAvatar(
                                       backgroundColor: Colors.grey,
                                       radius: 10,
+                                      child: SvgPicture.asset(
+                                        "assets/avatars/avatar_male_1.svg",
+                                        width: 40,
+                                        height: 40,
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
@@ -236,16 +249,19 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
                                   alignment: Alignment.centerLeft,
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      // Navigasi ke DiscussionReplyScreen saat button diklik
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
                                           builder: (context) =>
                                               DiscussionReplyScreen(
+                                            discId: int.parse(
+                                                discussions[index]['id']!),
                                             discussionTitle: discussions[index]
                                                 ['title']!,
                                             author: discussions[index]['name']!,
                                             date: discussions[index]['date']!,
+                                            discussionContent:
+                                                discussions[index]['content']!,
                                           ),
                                         ),
                                       );
