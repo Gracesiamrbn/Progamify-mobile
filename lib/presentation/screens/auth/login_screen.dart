@@ -20,6 +20,7 @@ class LoginScreenState extends State<LoginScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isObscure = true;
   final AuthService _authService = AuthService();
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -38,8 +39,16 @@ class LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
+    setState(() {
+      _isLoading = true;
+    });
+
     bool success = await _authService.login(
         _emailController.text, _passwordController.text);
+
+    setState(() {
+      _isLoading = false;
+    });
 
     if (success) {
       await _authService.getToken();
@@ -61,87 +70,106 @@ class LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Padding(
+      body: SafeArea(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('Sign In', style: AppStyles.headingStyle),
-                const SizedBox(height: 20),
-                CustomTextField(
-                  controller: _emailController,
-                  label: 'Email',
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    return null;
-                  },
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              const SizedBox(height: 40),
+              Image.asset(
+                'assets/logo.png',
+                height: 150,
+              ),
+              const SizedBox(height: 20),
+              const Text('Sign In', style: AppStyles.headingStyle),
+              const SizedBox(height: 20),
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    CustomTextField(
+                      controller: _emailController,
+                      label: 'Email',
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your email';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    CustomTextField(
+                      controller: _passwordController,
+                      label: 'Password',
+                      obscureText: _isObscure,
+                      isPassword: true,
+                      onToggleObscure: () {
+                        setState(() {
+                          _isObscure = !_isObscure;
+                        });
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your password';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    CustomButton(
+                      onPressed: _isLoading
+                          ? () {}
+                          : () {
+                              if (_formKey.currentState!.validate()) {
+                                setState(() => _isLoading = true);
+                                _login().then((_) {
+                                  setState(() => _isLoading = false);
+                                });
+                              }
+                            },
+                      text: 'Sign In',
+                      isLoading: _isLoading,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 10),
-                CustomTextField(
-                  controller: _passwordController,
-                  label: 'Password',
-                  obscureText: _isObscure,
-                  isPassword: true,
-                  onToggleObscure: () {
-                    setState(() {
-                      _isObscure = !_isObscure;
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
-                    }
-                    return null;
-                  },
+              ),
+              const SizedBox(height: 20),
+              RichText(
+                text: TextSpan(
+                  children: [
+                    const TextSpan(
+                      text: 'Don\'t have an account? ',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontFamily: 'Inter',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w100,
+                      ),
+                    ),
+                    TextSpan(
+                      text: 'Sign Up',
+                      style: const TextStyle(
+                        color: Colors.blue,
+                        fontWeight: FontWeight.w400,
+                        fontSize: 14,
+                        fontFamily: 'Inter',
+                      ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const RegisterScreen(),
+                            ),
+                          );
+                        },
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 20),
-                CustomButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      _login();
-                    }
-                  },
-                  text: 'Sign In',
-                ),
-                const SizedBox(height: 20),
-                RichText(
-                  text: TextSpan(
-                      // style: DefaultTextStyle.of(context).style,
-                      children: [
-                        const TextSpan(
-                          text: 'Don\'t have an account? ',
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontFamily: 'Inter',
-                              fontSize: 14,
-                              fontWeight: FontWeight.w100),
-                        ),
-                        TextSpan(
-                            text: 'Sign Up',
-                            style: const TextStyle(
-                                color: Colors.blue,
-                                fontWeight: FontWeight.w400,
-                                fontSize: 14,
-                                fontFamily: 'Inter'),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const RegisterScreen()),
-                                );
-                              })
-                      ]),
-                )
-              ],
-            ),
+              )
+            ],
           ),
         ),
       ),

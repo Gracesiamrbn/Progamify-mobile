@@ -51,7 +51,7 @@ class QuestService {
   }
 
   Map<String, dynamic> convertJawabanUser(Map<String, dynamic> jawabanUser) {
-    Map<String, dynamic> converted = {};
+    // Map<String, dynamic> converted = {};
     if (jawabanUser["type"] == "multiple_choice") {
       return {
         "question_id": jawabanUser["question_id"],
@@ -73,5 +73,23 @@ class QuestService {
       };
     } else if (jawabanUser["type"] == "multiple_answer") {}
     return jawabanUser;
+  }
+
+  Future<Map<String, dynamic>> getLevel(int levelId) async {
+    String? token = await authService.getToken();
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/level/$levelId'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load level data');
+    }
   }
 }

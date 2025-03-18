@@ -6,8 +6,6 @@ import 'package:logger/logger.dart';
 import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 
-// import 'quest_menu_screen.dart';
-
 class QuestExcerciseScreen extends StatefulWidget {
   final int userId;
   const QuestExcerciseScreen({super.key, required this.userId});
@@ -17,20 +15,28 @@ class QuestExcerciseScreen extends StatefulWidget {
 }
 
 class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
-  // int? selectedOption;
+  // Quest
   int questId = 0;
   dynamic selectedAnswer;
   List<int> selectedAnswers = [];
   List<Map<String, dynamic>> userAnswers = [];
   Map<String, dynamic> jawabanUser = {};
   late Future<Map<String, dynamic>> _questionsFuture;
+  Map<String, dynamic>? result;
+
+  // Logger
   final logger = Logger();
+
+  // Timer
   int _seconds = 2 * 60;
   late Timer _timer;
+
+  // Audio
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool _isSoundPlayed = false;
+
+  // State UI
   bool isPreview = false;
-  Map<String, dynamic>? result;
   final TextEditingController _textController = TextEditingController();
 
   @override
@@ -44,18 +50,24 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
     _startTimer();
   }
 
-  void _playSoundEffect() async {
+  void _playSoundEffect(audioPath) async {
     if (!_isSoundPlayed) {
+      print("[AUDIO] Playing sound: $audioPath");
       _isSoundPlayed = true;
-      await _audioPlayer
-          .play(AssetSource('audio/spongebob-bubble-transition.mp3'));
+      await _audioPlayer.play(AssetSource(audioPath));
+      print("[AUDIO] Sound started: $audioPath");
+    } else {
+      print("[AUDIO] Sound already playing, skipping: $audioPath");
     }
   }
 
   void _stopSoundEffect() async {
-    if (_isSoundPlayed) {
+    if (_audioPlayer.state == PlayerState.playing) {
+      print("[AUDIO] Stopping sound...");
       await _audioPlayer.stop();
+      await _audioPlayer.release();
       _isSoundPlayed = false;
+      print("[AUDIO] Sound stopped and released.");
     }
   }
 
@@ -81,7 +93,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
       _showSubmissionResult(response);
       _timer.cancel();
     } catch (e) {
-      logger.e("Submission failed: $e");
+      // logger.e("Submission failed: $e");
     }
   }
 
@@ -110,8 +122,8 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
 
   @override
   void dispose() {
-    _timer.cancel();
     _audioPlayer.dispose();
+    _timer.cancel();
     _textController.dispose();
     super.dispose();
   }
@@ -128,18 +140,17 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
       future: _questionsFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
+          _playSoundEffect('audio/spongebob-bubble-transition.mp3');
           return _buildLoadingScreen();
         }
 
         if (snapshot.hasError) {
           _stopSoundEffect();
-          logger.e("FutureBuilder Error: ${snapshot.error}");
           return Center(child: Text('Snapshot hasError: ${snapshot.error}'));
         }
 
         if (!snapshot.hasData || snapshot.hasError) {
           _stopSoundEffect();
-          // logger.w("FutureBuilder Warning: No questions available.");
           return const Center(child: Text('No questions available.'));
         } else {
           _stopSoundEffect();
@@ -151,12 +162,9 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
           final question = response["content"];
 
           final type = response["type"];
-          // logger.i(
-          //     'FutureBuilder: Data fetched successfully. with question : $question');
 
           Map<String, dynamic> questions = {};
           if (type == "multiple_choice") {
-            // logger.d("Processing multiple_choice question.");
             List<Map<String, dynamic>> options = [];
             response["answers"].forEach((answer) {
               var option = {"id": answer["ID"], "text": answer["content"]};
@@ -172,9 +180,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               'pts': response["point"],
               'type': response["type"]
             };
-            // questions.add(q);
           } else if (type == "true_false") {
-            // logger.d("Processing true_false question.");
             questions = {
               'id': response["ID"],
               'question': response["content"],
@@ -185,10 +191,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               'pts': response["point"],
               'type': response["type"]
             };
-            // logger.i('Successfully fetching question : $questions');
-            // questions.add(q);
           } else if (type == "essay") {
-            // logger.d("Processing essay question.");
             questions = {
               'id': response["ID"],
               'question': response["content"],
@@ -198,9 +201,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               'pts': response["point"],
               'type': type
             };
-            // questions.add(q);
           } else if (type == "short_answer") {
-            // logger.d("Processing short_answer question.");
             questions = {
               'id': response["ID"],
               'question': response["content"],
@@ -210,9 +211,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               'pts': response["point"],
               'type': 'shortAnswer'
             };
-            // questions.add(q);
           } else if (question["type"] == "multiple_answer") {
-            // logger.d("Processing multiple_answer question.");
             List<Map<String, dynamic>> options = [];
             question["answers"].forEach((answer) {
               var option = {"id": answer["ID"], "text": answer["content"]};
@@ -228,18 +227,9 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               'pts': response["point"],
               'type': "multiple_answer"
             };
-            // questions.add(q);
           } else {
             logger.w("Unknown question type: ${response["type"]}");
           }
-
-          // final question = questions[currentQuestionIndex];
-
-          // int exp = response['exp'];
-          // logger.i("Sucess fetch exp : ${response["exp"]}");
-          // int pts = response['point'];
-          // logger.i("Sucess fetch point : ${response["point"]}");
-
           return Scaffold(
             appBar: AppBar(
               automaticallyImplyLeading: false,
@@ -326,23 +316,6 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                       _buildPreviewMode(questions, result)
                     else
                       _buildAnswerMode(questions),
-                    // _buildOptions(questions),
-                    // const SizedBox(height: 40),
-                    // const Spacer(),
-                    // const SizedBox(height: 20),
-                    // ElevatedButton(
-                    //   style: ElevatedButton.styleFrom(
-                    //     backgroundColor: Colors.blue,
-                    //     minimumSize: const Size(double.infinity, 50),
-                    //   ),
-                    //   onPressed: selectedAnswer != null
-                    //       ? () => _showConfirmationDialog(questions)
-                    //       : null,
-                    //   child: const Text(
-                    //     'Submit',
-                    //     style: TextStyle(color: Colors.white, fontSize: 16),
-                    //   ),
-                    // ),
                   ],
                 ),
               ),
@@ -455,12 +428,34 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               ),
             ),
           ),
-          if (isCorrect)
+          if (isCorrect) ...[
             const Text(
               "Jawaban Anda benar",
               style: TextStyle(color: Colors.green, fontSize: 16),
-            )
-          else
+            ),
+            const SizedBox(height: 5),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("+$rewardExp",
+                    style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.purple)),
+                const SizedBox(width: 5),
+                Image.asset('assets/icons/exp_point.png',
+                    width: 20, height: 20),
+                const SizedBox(width: 10),
+                Text("+$rewardPoint",
+                    style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amber)),
+                const SizedBox(width: 5),
+                Image.asset('assets/icons/coin.png', width: 20, height: 20),
+              ],
+            ),
+          ] else
             const Text(
               "Jawaban Anda salah",
               style: TextStyle(color: Colors.red, fontSize: 16),
@@ -486,7 +481,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               "Jawaban Anda benar !",
               style: TextStyle(color: Colors.green, fontSize: 16),
             ),
-            const SizedBox(height: 5), // Spasi kecil sebelum reward
+            const SizedBox(height: 5),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -540,14 +535,36 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
         children: [
           ...List.generate(options.length, (index) {
             return _buildOptionPreview(
-                question, index, options[index]["text"], correctAnswerId);
+                question, index, options[index]["text"], correctAnswerIndex);
           }),
-          if (isCorrect)
+          if (isCorrect) ...[
             const Text(
               "Jawaban Anda benar",
               style: TextStyle(color: Colors.green, fontSize: 16),
-            )
-          else
+            ),
+            const SizedBox(height: 5),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("+$rewardExp",
+                    style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.purple)),
+                const SizedBox(width: 5),
+                Image.asset('assets/icons/exp_point.png',
+                    width: 20, height: 20),
+                const SizedBox(width: 10),
+                Text("+$rewardPoint",
+                    style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amber)),
+                const SizedBox(width: 5),
+                Image.asset('assets/icons/coin.png', width: 20, height: 20),
+              ],
+            ),
+          ] else
             const Text(
               "Jawaban Anda salah",
               style: TextStyle(color: Colors.red, fontSize: 16),
@@ -559,12 +576,19 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
   }
 
   Widget _buildOptionPreview(
-      dynamic question, int index, String text, int? correctAnswerId) {
+      dynamic question, int index, String text, int? correctAnswerIndex) {
     bool isSelected = selectedAnswer == index;
-    bool isCorrect = correctAnswerId == index;
+    bool isCorrect = correctAnswerIndex == index;
     Color bgColor;
     Color circleColor;
     Color borderColor;
+
+    // Debugging logs
+    // debugPrint("========== DEBUG: _buildOptionPreview ==========");
+    // debugPrint("Index: $index");
+    // debugPrint("Selected Answer: $selectedAnswer");
+    // debugPrint("Correct Answer ID: $correctAnswerIndex");
+    // debugPrint("isSelected: $isSelected, isCorrect: $isCorrect");
 
     if (isSelected) {
       bgColor = isCorrect ? const Color(0xFF44C4A1) : const Color(0xFFEB4747);
@@ -987,31 +1011,29 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               ),
               onPressed: () async {
                 if (selectedAnswer != null) {
+                  _timer.cancel();
+                  _showLoadingDialog();
+
                   result =
                       await QuestService().submitQuest(questId, jawabanUser);
 
-                  Logger().i(result);
+                  // Logger().i(result);
 
                   setState(() {
-                    isPreview = true; // Ubah state menjadi preview
+                    isPreview = true;
                   });
 
-                  _timer.cancel();
-
+                  Navigator.pop(context);
                   Navigator.pop(context);
 
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //       builder: (context) => ExerciseResultScreen(
-                  //             userAnswers: [result],
-                  //           )),
-                  // );
-
-                  //Disini state menjadi preview
+                  if (result != null) {
+                    bool isCorrect = result?["is_correct"] ?? false;
+                    String correctPath = 'audio/correct-answer-new.mp3';
+                    String wrongPath = 'audio/070-challenge-lose.mp3';
+                    _showResultDialog(
+                        context, isCorrect, correctPath, wrongPath);
+                  }
                 }
-                // Navigator.pop(context);
-                // Navigator.pop(context);
               },
               child: const Text(
                 'Submit',
@@ -1148,6 +1170,107 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
       jawabanUser = detailJawaban;
     }
 
-    logger.i(jawabanUser);
+    // logger.i(jawabanUser);
+  }
+
+  void _showLoadingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 20),
+              Text("Submitting...", style: TextStyle(fontSize: 16)),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showResultDialog(BuildContext context, bool isCorrect,
+      String correctPath, String wrongPath) {
+    if (isCorrect) {
+      _playSoundEffect(correctPath);
+    } else {
+      _playSoundEffect(wrongPath);
+    }
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0.5),
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, anim1, anim2) {
+        return Scaffold(
+          backgroundColor: Colors.white,
+          body: SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Lottie.asset(
+                        isCorrect
+                            ? 'assets/animation/Animation - 1742010178937.json'
+                            : 'assets/animation/Animation - 1742010214972.json',
+                        width: 400,
+                        height: 400,
+                        fit: BoxFit.contain,
+                      ),
+                      // const SizedBox(height: 20),
+                      Text(
+                        isCorrect
+                            ? "Yey, jawaban kamu benar!"
+                            : "Oops, jawaban kamu salah!",
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _stopSoundEffect();
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: Colors.blue,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text(
+                        "Lanjutkan",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 }

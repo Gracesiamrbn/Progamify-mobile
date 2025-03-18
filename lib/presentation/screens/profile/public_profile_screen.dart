@@ -58,10 +58,7 @@ class PublicProfileScreen extends StatelessWidget {
                   details:
                       "${user['nim']} | ${user['email']} | ${user['angkatan']}",
                 ),
-                SummaryBoxes(
-                  exp: user['total_exp'],
-                  level: user['level_id'],
-                ),
+                SummaryBoxes(exp: user['total_exp'], level: user['level_id']),
                 const SummaryGrid(),
                 const BadgesSection(),
               ],

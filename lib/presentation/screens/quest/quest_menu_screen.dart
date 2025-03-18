@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:progamify/presentation/screens/quest/quest_excercise_screen.dart';
 import 'package:progamify/api/user_service.dart';
+import 'package:progamify/api/quest_service.dart';
+import 'package:shimmer_animation/shimmer_animation.dart';
 
 class QuestScreen extends StatefulWidget {
   final int initialTabIndex;
@@ -11,7 +13,10 @@ class QuestScreen extends StatefulWidget {
 }
 
 class QuestScreenState extends State<QuestScreen> {
-  double progress = 0.5;
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,15 +26,17 @@ class QuestScreenState extends State<QuestScreen> {
       child: Scaffold(
         appBar: PreferredSize(
           preferredSize:
-              const Size.fromHeight(50), // Menyembunyikan space AppBar
+              const Size.fromHeight(50), 
           child: AppBar(
+            backgroundColor: const Color.fromARGB(255, 250, 226, 217),
             automaticallyImplyLeading: false, // Menonaktifkan tombol back
-            bottom: const TabBar(
-              indicatorColor: Colors.black,
+            bottom:  TabBar(
+              indicatorColor: Colors.brown[300],
+              indicatorSize: TabBarIndicatorSize.tab,
               labelColor: Colors.black, // Warna teks tab yang aktif
               unselectedLabelColor:
                   Colors.grey, // Warna teks tab yang tidak aktif
-              tabs: [
+              tabs: const [
                 Tab(text: 'Quests'),
                 Tab(text: 'Badges'),
               ],
@@ -56,114 +63,184 @@ class QuestTab extends StatefulWidget {
 
 class _QuestTabState extends State<QuestTab> {
   late Future<Map<String, dynamic>> _userFuture;
+  late QuestService _questService;
+
+  int userLevel = 0;
+  int totalExp = 0;
+  int? expNeeded;
+  double progress = 0.0;
+  bool animateProgress = false;
 
   @override
   void initState() {
     super.initState();
-    _userFuture =
-        UserService().getCurrentUser(); // Ambil data user saat pertama kali
-    print(_userFuture);
+    _userFuture = UserService().getCurrentUser();
+    _questService = QuestService();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final userData = await UserService().getCurrentUser();
+      int levelId = userData['level_id'];
+      totalExp = userData['total_exp'];
+
+      final levelData = await _questService.getLevel(levelId);
+      int expForCurrentLevel = levelData['exp_needed'];
+      int initExp = totalExp - expForCurrentLevel;
+      int fetchedLevel = levelData['level'];
+      expNeeded = levelData['next_level']['exp_needed'] - expForCurrentLevel;
+
+      double newProgress =
+          (initExp != null && expNeeded != null && expNeeded! > 0)
+              ? (initExp! / expNeeded!).clamp(0.0, 1.0)
+              : 0.0;
+
+      setState(() {
+        userLevel = fetchedLevel;
+      });
+
+      Future.delayed(const Duration(seconds: 1), () {
+        setState(() {
+          animateProgress = true;
+          progress = newProgress;
+        });
+      });
+    } catch (e) {
+      print("Error fetching data: $e");
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildQuestHeader(),
-          const SizedBox(height: 20),
-          _buildInstructionContainer(context),
-        ],
+    return Container(
+      color: Colors.orange[50],
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 20),
+            _buildQuestHeader(),
+            const SizedBox(height: 20),
+            _buildInstructionContainer(context),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildQuestHeader() {
-    double progress = 0.5;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.green[800],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Quest of the Week',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Complete the quest to gain more XP!',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: LinearProgressIndicator(
-                        value: progress,
-                        backgroundColor: Colors.white54,
-                        color: Colors.orange[800],
-                      ),
+    return Shimmer(
+      color: const Color(0xFFF2C6A0),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFB88A66),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Quest of the Week',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
-                    const SizedBox(width: 10),
-                    Text(
-                      '${(progress * 100).toInt()}%',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Complete the quest to gain more XP!',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white,
                     ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Column(
-              children: [
-                Text(
-                  'Level',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
                   ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  '4',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green,
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TweenAnimationBuilder<double>(
+                          duration: const Duration(seconds: 2),
+                          curve: Curves.easeOut,
+                          tween: Tween<double>(
+                            begin: 0,
+                            end: animateProgress ? progress : 0,
+                          ),
+                          builder: (context, value, child) {
+                            return LinearProgressIndicator(
+                              value: value,
+                              backgroundColor: Colors.white,
+                              color: const Color(0xFFFFC107),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      TweenAnimationBuilder<int>(
+                        duration: const Duration(seconds: 2),
+                        tween: IntTween(
+                          begin: 0,
+                          end: animateProgress ? (progress * 100).toInt() : 0,
+                        ),
+                        builder: (context, value, child) {
+                          return Text(
+                            '$value%',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+            const SizedBox(width: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                children: [
+                  const Text(
+                    'Level',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFD2691E),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  TweenAnimationBuilder<int>(
+                    duration: const Duration(seconds: 1),
+                    tween: IntTween(begin: 0, end: userLevel),
+                    builder: (context, value, child) {
+                      return Text(
+                        '$value',
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFD2691E),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -188,7 +265,7 @@ class _QuestTabState extends State<QuestTab> {
           Container(
             padding: const EdgeInsets.symmetric(vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.orange[800],
+              color: const Color(0xFFD2B48C),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Center(
@@ -242,11 +319,10 @@ class _QuestTabState extends State<QuestTab> {
                       child: Icon(Icons.warning, color: Colors.white),
                     );
                   }
-                  int userId =
-                      snapshot.data!['ID']; 
+                  int userId = snapshot.data!['ID'];
 
                   return FloatingActionButton(
-                    backgroundColor: Colors.green[800],
+                    backgroundColor: const Color(0xFFB88A66),
                     child: const Icon(Icons.play_arrow,
                         color: Colors.white, size: 30),
                     onPressed: () {
@@ -356,8 +432,8 @@ class BadgesTab extends StatelessWidget {
               children: [
                 Expanded(
                   child: Container(
-                    width: 120, 
-                    height: 120, 
+                    width: 120,
+                    height: 120,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(30),
                     ),

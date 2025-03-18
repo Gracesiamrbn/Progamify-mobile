@@ -4,10 +4,12 @@ import '../../core/theme/app_styles.dart';
 class CustomButton extends StatelessWidget {
   final VoidCallback onPressed;
   final String text;
+  final bool isLoading;
 
   const CustomButton({
     required this.onPressed,
     required this.text,
+    this.isLoading = false,
     super.key,
   });
 
@@ -16,10 +18,18 @@ class CustomButton extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: onPressed,
+        onPressed: isLoading ? null : onPressed,
         style: AppStyles.buttonPrimaryStyle, // Menggunakan buttonPrimaryStyle
-        child: Text(text,
-            style: AppStyles.buttonTextStyle), // Menggunakan buttonTextStyle
+        child: isLoading
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
+            : Text(text, style: AppStyles.buttonTextStyle),
       ),
     );
   }

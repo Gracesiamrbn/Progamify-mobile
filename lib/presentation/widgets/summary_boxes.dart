@@ -8,12 +8,22 @@ class SummaryBoxes extends StatefulWidget {
   final int exp;
   final int level;
 
+<<<<<<< HEAD
   const SummaryBoxes(
       {super.key,
       this.title = "Boxes",
       required this.exp,
       this.items,
       required this.level});
+=======
+  const SummaryBoxes({
+    super.key,
+    this.title = "Boxes",
+    required this.exp,
+    required this.level,
+    this.items,
+  });
+>>>>>>> caa9eadefdae4076bd685c73c4af37f22f11b9da
 
   @override
   _SummaryBoxesState createState() => _SummaryBoxesState();
@@ -49,7 +59,11 @@ class _SummaryBoxesState extends State<SummaryBoxes> {
               label: "Experience",
               icon: "assets/icons/exp_point.png"),
           BoxItem(
+<<<<<<< HEAD
               value: "${widget.level}",
+=======
+              value: '${widget.level}',
+>>>>>>> caa9eadefdae4076bd685c73c4af37f22f11b9da
               label: "Level",
               icon: "assets/icons/treasure.png"),
           BoxItem(

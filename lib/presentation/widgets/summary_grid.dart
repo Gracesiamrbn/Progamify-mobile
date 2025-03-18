@@ -159,7 +159,6 @@ class SummaryGrid extends StatelessWidget {
               );
             },
           ),
-          const SizedBox(height: 8),
           Align(
             alignment: Alignment.centerRight,
             child: RichText(
@@ -208,6 +207,7 @@ class _PopupScreen extends StatelessWidget {
             child: Center(
               child: Lottie.asset(
                 'assets/animation/Animation - 1740191982184.json',
+                repeat: false,
                 fit: BoxFit.cover,
                 width: MediaQuery.of(context).size.width + 200,
               ),
