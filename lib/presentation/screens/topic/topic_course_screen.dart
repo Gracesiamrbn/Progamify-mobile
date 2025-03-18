@@ -1,11 +1,14 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_svg/svg.dart';
 import 'dart:convert';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:progamify/api/lesson_service.dart';
 import 'package:progamify/presentation/screens/topic/write_discussion_screen.dart';
 import 'discussion_reply_screen.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:lottie/lottie.dart';
 
 class TopicCourseScreen extends StatefulWidget {
   final String topicTitle;
@@ -25,6 +28,10 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
   late TabController _tabController;
   late Future<Map<String, dynamic>> futureLesson;
 
+  // Audio
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  bool _isSoundPlayed = false;
+
   @override
   void initState() {
     super.initState();
@@ -33,10 +40,34 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
     futureLesson = LessonService().getLesson(widget.lessonId);
   }
 
+  void _playSoundEffect(audioPath) async {
+    if (!_isSoundPlayed) {
+      print("[AUDIO] Playing sound: $audioPath");
+      _isSoundPlayed = true;
+      await _audioPlayer.play(AssetSource(audioPath));
+      print("[AUDIO] Sound started: $audioPath");
+    } else {
+      print("[AUDIO] Sound already playing, skipping: $audioPath");
+    }
+  }
+
+  void _stopSoundEffect() async {
+    if (_audioPlayer.state == PlayerState.playing) {
+      print("[AUDIO] Stopping sound...");
+      await _audioPlayer.stop();
+      await _audioPlayer.release();
+      _isSoundPlayed = false;
+      print("[AUDIO] Sound stopped and released.");
+    } else {
+      _isSoundPlayed = false;
+    }
+  }
+
   @override
   void dispose() {
     _tabController.removeListener(_handleTabChange);
     _tabController.dispose();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -94,67 +125,6 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
     );
   }
 
-  // Widget _buildLessonContent() {
-  //   return SingleChildScrollView(
-  //     padding: const EdgeInsets.symmetric(horizontal: 20)
-  //         .copyWith(top: 30, bottom: 20),
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         Text(
-  //           'Introduction of Programming',
-  //           style: GoogleFonts.inter(
-  //             fontSize: 24,
-  //             fontWeight: FontWeight.bold,
-  //           ),
-  //         ),
-  //         const SizedBox(height: 10),
-  //         Text(
-  //           'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-  //           style: GoogleFonts.inter(fontSize: 14, color: Colors.black87),
-  //         ),
-  //         const Text(
-  //           '',
-  //         ),
-  //         Text(
-  //           'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-  //           style: GoogleFonts.inter(fontSize: 14, color: Colors.black87),
-  //         ),
-  //         const SizedBox(height: 16),
-  //         Container(
-  //           padding: const EdgeInsets.all(12),
-  //           decoration: BoxDecoration(
-  //             color: Colors.grey.shade200,
-  //             borderRadius: BorderRadius.circular(10),
-  //           ),
-  //           child: Column(
-  //             children: [
-  //               Image.asset(
-  //                 'assets/icons/media_icon.png',
-  //                 height: 150,
-  //                 width: 350,
-  //               ),
-  //               const SizedBox(height: 10),
-  //               Text(
-  //                 'Programming Basics',
-  //                 style: GoogleFonts.inter(
-  //                   fontSize: 16,
-  //                   fontWeight: FontWeight.bold,
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //         const SizedBox(height: 16),
-  //         Text(
-  //           'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-  //           style: GoogleFonts.inter(fontSize: 14, color: Colors.black87),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
   Widget _buildLessonContent() {
     return FutureBuilder<Map<String, dynamic>>(
       future: futureLesson, // The future that fetches lesson data
@@ -181,6 +151,16 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
           print(jsonEncode(content));
 
           // double screenWidth = MediaQuery.of(context).size.width;
+
+          if (lessonData?['takeLesson'] != null) {
+            print(lessonData?['takeLesson']);
+            int exp = lessonData?['exp'] ?? 0;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _showExpPopup(context, exp);
+            });
+          } else {
+            print('Sudah pernah dibaca');
+          }
 
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 20)
@@ -385,6 +365,103 @@ class _TopicCourseScreenState extends State<TopicCourseScreen>
           ),
         ],
       ),
+    );
+  }
+
+  void _showExpPopup(BuildContext context, int exp) {
+    _playSoundEffect('audio/mixkit-winning-notification-2018.wav');
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false, // Tidak bisa ditutup dengan tap luar
+      barrierLabel: "",
+      transitionBuilder: (context, anim1, anim2, child) {
+        return ScaleTransition(
+          scale: CurvedAnimation(
+            parent: anim1,
+            curve: Curves.easeOutBack, // Efek pop keluar
+          ),
+          child: child,
+        );
+      },
+      pageBuilder: (context, anim1, anim2) {
+        return Dialog(
+          backgroundColor: Colors.white,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 20),
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Lottie.asset(
+                      'assets/animation/Animation - 1742261944915.json',
+                      repeat: false,
+                      width: 200,
+                      height: 200,
+                      fit: BoxFit.cover,
+                    ),
+                    Image.asset(
+                      'assets/icons/exp_point.png',
+                      width: 64,
+                      height: 64,
+                    ),
+                  ],
+                ),
+                Text.rich(
+                  TextSpan(
+                    text: "Anda mendapatkan ",
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontFamily: 'Inter',
+                      color: Colors.black87,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: "$exp EXP",
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.purple,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _stopSoundEffect();
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurpleAccent,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      "Lanjutkan Belajar",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
