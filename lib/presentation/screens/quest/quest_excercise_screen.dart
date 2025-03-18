@@ -1030,8 +1030,10 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                     bool isCorrect = result?["is_correct"] ?? false;
                     String correctPath = 'audio/correct-answer-new.mp3';
                     String wrongPath = 'audio/070-challenge-lose.mp3';
-                    _showResultDialog(
-                        context, isCorrect, correctPath, wrongPath);
+                    int expGain = result?['answer']['exp_gained'];
+                    int pointGain = result?['answer']['point_gained'];
+                    _showResultDialog(context, isCorrect, correctPath,
+                        wrongPath, expGain, pointGain);
                   }
                 }
               },
@@ -1195,7 +1197,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
   }
 
   void _showResultDialog(BuildContext context, bool isCorrect,
-      String correctPath, String wrongPath) {
+      String correctPath, String wrongPath, int expGain, int poinGain) {
     if (isCorrect) {
       _playSoundEffect(correctPath);
     } else {
@@ -1236,6 +1238,25 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                         ),
                         textAlign: TextAlign.center,
                       ),
+                      if (isCorrect) ...[
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _buildRewardBox(
+                                "Exp Gain",
+                                expGain,
+                                const Color(0xFF9E6FD7),
+                                'assets/icons/exp_point.png'),
+                            const SizedBox(width: 16),
+                            _buildRewardBox(
+                                "Poin Gain",
+                                poinGain,
+                                const Color(0xFFECB751),
+                                'assets/icons/coin.png'),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -1271,6 +1292,67 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildRewardBox(
+      String title, int value, Color colorBox, String iconPath) {
+    return Container(
+      width: 120,
+      decoration: BoxDecoration(
+        color: colorBox,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: colorBox, width: 2),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Inter',
+                color: Colors.white,
+              ),
+            ),
+          ),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(12),
+                bottomRight: Radius.circular(12),
+              ),
+              border: Border.all(color: colorBox, width: 1),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  iconPath,
+                  width: 24, // Atur ukuran ikon
+                  height: 24,
+                ),
+                const SizedBox(width: 8), // Jarak antara ikon dan teks
+                Text(
+                  "$value",
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Inter',
+                    color: Colors.black,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

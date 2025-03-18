@@ -303,12 +303,21 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
                                       );
                                     },
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.grey.shade300,
+                                      backgroundColor: const Color(0xFF6FBAFF),
                                       foregroundColor: Colors.black,
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 12),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                            10),
+                                      ),
                                     ),
-                                    child: const Text('Replies (0)'),
+                                    child: const Text(
+                                      'Replies (0)',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontFamily: 'Inter'),
+                                    ),
                                   ),
                                 ),
                               ],
