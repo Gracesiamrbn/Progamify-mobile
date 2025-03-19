@@ -11,6 +11,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:lottie/lottie.dart';
 
 class TopicCourseScreen extends StatefulWidget {
+  final String lessonTitle;
   final String topicTitle;
   final int lessonId;
   final int topicId;
@@ -20,8 +21,9 @@ class TopicCourseScreen extends StatefulWidget {
 
   const TopicCourseScreen({
     super.key,
-    required this.lessonId,
     required this.topicTitle,
+    required this.lessonId,
+    required this.lessonTitle,
     required String courseTitle,
     required this.topicId,
     required this.totalLesson,
@@ -105,7 +107,7 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
       appBar: AppBar(
         backgroundColor: Colors.blue[300],
         title: Text(
-          widget.topicTitle,
+          widget.lessonTitle,
           style: GoogleFonts.inter(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -160,6 +162,7 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
                       builder: (context) => WriteDiscussionScreen(
                             lessonId: widget.lessonId,
                             topicTitle: widget.topicTitle,
+                            lessonTitle: widget.lessonTitle,
                             topicId: widget.topicId,
                             totalLesson: widget.totalLesson,
                             totalExercise: widget.totalExercise,

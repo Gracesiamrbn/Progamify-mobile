@@ -369,7 +369,8 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                   builder: (context) => TopicCourseScreen(
                         lessonId: topic['id'],
                         courseTitle: topic['title'] as String? ?? '',
-                        topicTitle: topic['title'] as String? ?? '',
+                        lessonTitle: topic['title'] as String? ?? '',
+                        topicTitle: widget.topicTitle,
                         topicId: widget.topicId,
                         totalLesson: widget.totalLesson,
                         totalExercise: widget.totalExercise,

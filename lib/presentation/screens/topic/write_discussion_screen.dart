@@ -7,6 +7,7 @@ import 'package:progamify/presentation/screens/topic/topic_course_screen.dart';
 
 class WriteDiscussionScreen extends StatefulWidget {
   final int lessonId;
+  final String lessonTitle;
   final String topicTitle;
   final int topicId;
   final int totalLesson;
@@ -15,6 +16,7 @@ class WriteDiscussionScreen extends StatefulWidget {
       {super.key,
       required this.lessonId,
       required this.topicTitle,
+      required this.lessonTitle,
       required this.topicId,
       required this.totalLesson,
       required this.totalExercise});
@@ -78,6 +80,7 @@ class WriteDiscussionScreenState extends State<WriteDiscussionScreen> {
                   MaterialPageRoute(
                     builder: (context) => TopicCourseScreen(
                       topicTitle: widget.topicTitle,
+                      lessonTitle: widget.lessonTitle,
                       lessonId: widget.lessonId,
                       courseTitle: "",
                       isFromDisc: true,
