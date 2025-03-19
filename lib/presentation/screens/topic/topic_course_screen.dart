@@ -348,9 +348,9 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                     ),
-                                    child: const Text(
-                                      'Replies (0)',
-                                      style: TextStyle(
+                                    child: Text(
+                                      "Replies (${discussions[index]['replies']})",
+                                      style: const TextStyle(
                                           color: Colors.white,
                                           fontFamily: 'Inter'),
                                     ),
@@ -378,7 +378,7 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
     _playSoundEffect('audio/mixkit-winning-notification-2018.wav');
     showGeneralDialog(
       context: context,
-      barrierDismissible: false, // Tidak bisa ditutup dengan tap luar
+      barrierDismissible: false,
       barrierLabel: "",
       transitionBuilder: (context, anim1, anim2, child) {
         return ScaleTransition(

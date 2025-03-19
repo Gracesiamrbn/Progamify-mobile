@@ -10,7 +10,7 @@ class DiscussionService {
   Future<List<Map<String, String>>> getDiscussions(int lessonId) async {
     String? token = await authService.getToken();
     final response = await http.get(
-      Uri.parse('$baseUrl/discussions/$lessonId'),
+      Uri.parse('$baseUrl/discussions/lesson/$lessonId'),
       headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
@@ -29,6 +29,7 @@ class DiscussionService {
               'date': item['date'] as String,
               'name': item['name'] as String,
               'title': item['title'] as String,
+              'replies': "${item['replies']}"
             };
           }),
         );
@@ -36,6 +37,25 @@ class DiscussionService {
       }
 
       return [];
+    } else {
+      throw Exception('Failed to load discussion data');
+    }
+  }
+
+  Future<Map<String, dynamic>> detailDiscussion(int discussionId) async {
+    String? token = await authService.getToken();
+    final response = await http.get(
+      Uri.parse('$baseUrl/discussions/$discussionId'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      var data = json.decode(response.body);
+
+      return data;
     } else {
       throw Exception('Failed to load discussion data');
     }
@@ -54,6 +74,29 @@ class DiscussionService {
       body: json.encode({
         "lesson_id": lessonId,
         "title": title.toString(),
+        "content": content.toString(),
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to submit discussion');
+    }
+  }
+
+  Future<Map<String, dynamic>> submitReply(
+      int discussionId, String content) async {
+    String? token = await authService.getToken();
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/discussions/reply'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        "discussion_id": discussionId,
         "content": content.toString(),
       }),
     );
