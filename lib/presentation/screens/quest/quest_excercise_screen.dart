@@ -90,7 +90,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
     });
     try {
       var response = await QuestService().submitQuest(questId, jawabanUser);
-      _showSubmissionResult(response);
+      _showSubmissionResult(response["quest"]);
       _timer.cancel();
     } catch (e) {
       // logger.e("Submission failed: $e");
@@ -313,7 +313,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                     }),
                     const SizedBox(height: 20),
                     if (isPreview)
-                      _buildPreviewMode(questions, result)
+                      _buildPreviewMode(questions, result?["quest"])
                     else
                       _buildAnswerMode(questions),
                   ],
@@ -1026,12 +1026,12 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                   Navigator.pop(context);
                   Navigator.pop(context);
 
-                  if (result != null) {
-                    bool isCorrect = result?["is_correct"] ?? false;
+                  if (result?["quest"] != null) {
+                    bool isCorrect = result?["quest"]["is_correct"] ?? false;
                     String correctPath = 'audio/correct-answer-new.mp3';
                     String wrongPath = 'audio/070-challenge-lose.mp3';
-                    int expGain = result?['answer']['exp_gained'];
-                    int pointGain = result?['answer']['point_gained'];
+                    int expGain = result?["quest"]['answer']['exp_gained'];
+                    int pointGain = result?["quest"]['answer']['point_gained'];
                     _showResultDialog(context, isCorrect, correctPath,
                         wrongPath, expGain, pointGain);
                   }

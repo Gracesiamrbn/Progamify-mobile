@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:progamify/presentation/screens/quest/quest_excercise_screen.dart';
 import 'package:progamify/api/user_service.dart';
 import 'package:progamify/api/quest_service.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
+
+import '../../../api/badge_service.dart';
 
 class QuestScreen extends StatefulWidget {
   final int initialTabIndex;
@@ -346,145 +349,180 @@ class _QuestTabState extends State<QuestTab> {
   }
 }
 
-class BadgesTab extends StatelessWidget {
+class BadgesTab extends StatefulWidget {
   const BadgesTab({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final List<BadgeItemData> badges = [
-      // BadgeItemData(
-      //     imagePath: 'assets/badges/badge-1.png',
-      //     title: 'Quest Beginner',
-      //     subtitle: 'Complete 10 quests'),
-      BadgeItemData(
-          imagePath: 'assets/badges/badge-2.png',
-          title: 'Task Tackler',
-          subtitle: 'Complete 50 quests'),
-      BadgeItemData(
-          imagePath: 'assets/badges/badge-3.png',
-          title: 'Mission Veteran',
-          subtitle: 'Complete 100 quests'),
-      BadgeItemData(
-          imagePath: 'assets/badges/badge-1.png',
-          title: 'Quest Beginner',
-          subtitle: 'Complete 10 quests'),
-      BadgeItemData(
-          imagePath: 'assets/badges/badge-2.png',
-          title: 'Task Tackler',
-          subtitle: 'Complete 50 quests'),
-      BadgeItemData(
-          imagePath: 'assets/badges/badge-3.png',
-          title: 'Mission Veteran',
-          subtitle: 'Complete 100 quests'),
-      BadgeItemData(
-          imagePath: 'assets/badges/badge-1.png',
-          title: 'Quest Beginner',
-          subtitle: 'Complete 10 quests'),
-      BadgeItemData(
-          imagePath: 'assets/badges/badge-2.png',
-          title: 'Task Tackler',
-          subtitle: 'Complete 50 quests'),
-      BadgeItemData(
-          imagePath: 'assets/badges/badge-3.png',
-          title: 'Mission Veteran',
-          subtitle: 'Complete 100 quests'),
-      BadgeItemData(
-          imagePath: 'assets/badges/badge-1.png',
-          title: 'Quest Beginner',
-          subtitle: 'Complete 10 quests'),
-      BadgeItemData(
-          imagePath: 'assets/badges/badge-2.png',
-          title: 'Task Tackler',
-          subtitle: 'Complete 50 quests'),
-      BadgeItemData(
-          imagePath: 'assets/badges/badge-3.png',
-          title: 'Mission Veteran',
-          subtitle: 'Complete 100 quests'),
-      BadgeItemData(
-          imagePath: 'assets/badges/badge-1.png',
-          title: 'Quest Beginner',
-          subtitle: 'Complete 10 quests'),
-      BadgeItemData(
-          imagePath: 'assets/badges/badge-2.png',
-          title: 'Task Tackler',
-          subtitle: 'Complete 50 quests'),
-      BadgeItemData(
-          imagePath: 'assets/badges/badge-10.png',
-          title: 'Mission Veteran',
-          subtitle: 'Complete 100 quests'),
-      BadgeItemData(
-          imagePath: 'assets/badges/badge02.png',
-          title: 'Mission Veteran',
-          subtitle: 'Complete 100 quests'),
-    ];
+  _BadgesTabState createState() => _BadgesTabState();
+}
 
+class _BadgesTabState extends State<BadgesTab> {
+  late Future<List<Map<String, dynamic>>> _badgesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _badgesFuture = BadgesService().getBadges();
+  }
+
+  Widget build(BuildContext context) {
     return Container(
-      color: Colors.orange[50], // Warna latar belakang
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 1,
-            mainAxisSpacing: 10,
-            childAspectRatio: 0.8,
-          ),
-          itemCount: badges.length,
-          itemBuilder: (context, index) {
-            return Column(
-              children: [
-                Expanded(
-                  child: Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(30),
+      color: Colors.orange[50],
+      padding: const EdgeInsets.all(16.0),
+      child: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _badgesFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return const Center(child: Text("Failed to load badges"));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text("No badges available"));
+          }
+
+          final badges = snapshot.data!;
+
+          return GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2, // 2 item per baris
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              childAspectRatio: 0.8,
+            ),
+            itemCount: badges.length,
+            itemBuilder: (context, index) {
+              final badge = badges[index];
+
+              return GestureDetector(
+                onTap: () => _showBadgePopup(
+                    context, badge), // Klik untuk tampilkan popup
+                child: Column(
+                  children: [
+                    Stack(
+                      children: [
+                        Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.asset(
+                              badge["picture"],
+                              width: 120,
+                              height: 120,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: 5,
+                          right: 5,
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 2),
+                            ),
+                            child: Text(
+                              badge["count"].toString(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.asset(
-                        badges[index].imagePath,
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.scaleDown,
+                    const SizedBox(height: 5),
+                    SizedBox(
+                      width: 120,
+                      child: Text(
+                        badge["title"],
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-                const SizedBox(height: 1),
-                SizedBox(
-                  width: 200, // Pastikan lebar tetap agar teks tidak melebar
-                  child: Text(
-                    badges[index].title,
-                    textAlign: TextAlign.center,
-                    maxLines: 2, // Batasi jumlah baris
-                    overflow: TextOverflow
-                        .ellipsis, // Tambahkan "..." jika teks kepanjangan
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 1),
-                SizedBox(
-                  width: 100,
-                  child: Text(
-                    badges[index].subtitle,
-                    textAlign: TextAlign.center,
-                    maxLines: 3, // Bisa dua baris jika perlu
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.black54,
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
+              );
+            },
+          );
+        },
       ),
+    );
+  }
+
+  void _showBadgePopup(BuildContext context, Map<String, dynamic> badge) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  badge["picture"],
+                  width: 150,
+                  height: 150,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                badge["title"],
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                badge["description"], // Menampilkan deskripsi
+                style: const TextStyle(fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  "Jumlah: ${badge["count"]}",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Tutup"),
+            ),
+          ],
+        );
+      },
     );
   }
 }
