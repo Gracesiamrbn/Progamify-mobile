@@ -403,9 +403,11 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
 
     bool isCorrect = false;
 
-    if (jawabanUser[question["q_index"]]["user_answer_id"] ==
-        jawabanUser[question["q_index"]]["correct_answer_id"]) {
-      isCorrect = true;
+    if (jawabanUser[question["q_index"]] != null) {
+      if (jawabanUser[question["q_index"]]["user_answer_id"] ==
+          jawabanUser[question["q_index"]]["correct_answer_id"]) {
+        isCorrect = true;
+      }
     }
 
     return GestureDetector(
@@ -658,9 +660,11 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
 
     bool isCorrect = false;
 
-    if (jawabanUser[question["q_index"]]["user_answer_index"] ==
-        jawabanUser[question["q_index"]]["correct_answer_index"]) {
-      isCorrect = true;
+    if (jawabanUser[question["q_index"]] != null) {
+      if (jawabanUser[question["q_index"]]["user_answer_index"] ==
+          jawabanUser[question["q_index"]]["correct_answer_index"]) {
+        isCorrect = true;
+      }
     }
 
     return GestureDetector(
