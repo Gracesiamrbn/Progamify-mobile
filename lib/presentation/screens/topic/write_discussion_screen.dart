@@ -8,8 +8,16 @@ import 'package:progamify/presentation/screens/topic/topic_course_screen.dart';
 class WriteDiscussionScreen extends StatefulWidget {
   final int lessonId;
   final String topicTitle;
+  final int topicId;
+  final int totalLesson;
+  final int totalExercise;
   const WriteDiscussionScreen(
-      {super.key, required this.lessonId, required this.topicTitle});
+      {super.key,
+      required this.lessonId,
+      required this.topicTitle,
+      required this.topicId,
+      required this.totalLesson,
+      required this.totalExercise});
 
   @override
   WriteDiscussionScreenState createState() => WriteDiscussionScreenState();
@@ -73,6 +81,9 @@ class WriteDiscussionScreenState extends State<WriteDiscussionScreen> {
                       lessonId: widget.lessonId,
                       courseTitle: "",
                       isFromDisc: true,
+                      topicId: widget.topicId,
+                      totalLesson: widget.totalLesson,
+                      totalExercise: widget.totalExercise,
                     ),
                   ),
                 );

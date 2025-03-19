@@ -28,7 +28,7 @@ class DiscussionReplyScreenState extends State<DiscussionReplyScreen> {
   String? _errorMessage;
   bool _isLoading = false;
 
-  void _submitReply() {
+  void _submitReply() async {
     String value = _controller.text.trim();
     if (value.isEmpty) {
       setState(() {
@@ -36,12 +36,24 @@ class DiscussionReplyScreenState extends State<DiscussionReplyScreen> {
       });
       return;
     }
-    DiscussionService().submitReply(widget.discId, value);
-    _controller.clear();
 
     setState(() {
+      _isLoading = true;
       _errorMessage = null;
     });
+
+    try {
+      await DiscussionService().submitReply(widget.discId, value);
+      _controller.clear();
+    } catch (e) {
+      setState(() {
+        _errorMessage = "Failed to submit reply: $e";
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -53,7 +65,6 @@ class DiscussionReplyScreenState extends State<DiscussionReplyScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
@@ -148,7 +159,12 @@ class DiscussionReplyScreenState extends State<DiscussionReplyScreen> {
                           backgroundColor: Colors.blue[300],
                           foregroundColor: Colors.white,
                         ),
-                        child: const Text('Reply'),
+                        child: _isLoading
+                            ? const CircularProgressIndicator(
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                              )
+                            : const Text('Reply'),
                       ),
                     ),
                     const SizedBox(height: 16),

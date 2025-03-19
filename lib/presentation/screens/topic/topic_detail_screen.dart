@@ -12,13 +12,15 @@ class TopicDetailScreen extends StatefulWidget {
   final String topicTitle;
   final int totalLesson;
   final int totalExercise;
+  final bool isReload;
 
   const TopicDetailScreen(
       {super.key,
       required this.topicId,
       required this.topicTitle,
       required this.totalLesson,
-      required this.totalExercise});
+      required this.totalExercise,
+      this.isReload = true});
 
   @override
   State<TopicDetailScreen> createState() => _TopicDetailScreenState();
@@ -33,6 +35,9 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   void initState() {
     super.initState();
     futureTopic = TopicService().getTopic(widget.topicId);
+    if (widget.isReload) {
+      setState(() {});
+    }
   }
 
   @override
@@ -152,6 +157,10 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                             'isCompleted': isCompleted,
                             'isLocked': isLocked
                           };
+
+                          if (isCompleted) {
+                            clickedSteps.add(i);
+                          }
 
                           if (!isCompleted && !isLocked) {
                             isLocked = true;
@@ -361,6 +370,9 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                         lessonId: topic['id'],
                         courseTitle: topic['title'] as String? ?? '',
                         topicTitle: topic['title'] as String? ?? '',
+                        topicId: widget.topicId,
+                        totalLesson: widget.totalLesson,
+                        totalExercise: widget.totalExercise,
                       )),
             );
           }

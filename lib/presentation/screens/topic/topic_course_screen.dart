@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:progamify/api/discussion_service.dart';
 import 'package:progamify/api/lesson_service.dart';
+import 'package:progamify/presentation/screens/topic/topic_detail_screen.dart';
 import 'package:progamify/presentation/screens/topic/write_discussion_screen.dart';
 import 'discussion_reply_screen.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -12,14 +13,21 @@ import 'package:lottie/lottie.dart';
 class TopicCourseScreen extends StatefulWidget {
   final String topicTitle;
   final int lessonId;
+  final int topicId;
+  final int totalLesson;
+  final int totalExercise;
   final bool isFromDisc;
 
-  const TopicCourseScreen(
-      {super.key,
-      required this.lessonId,
-      required this.topicTitle,
-      required String courseTitle,
-      this.isFromDisc = false});
+  const TopicCourseScreen({
+    super.key,
+    required this.lessonId,
+    required this.topicTitle,
+    required String courseTitle,
+    required this.topicId,
+    required this.totalLesson,
+    required this.totalExercise,
+    this.isFromDisc = false,
+  });
 
   @override
   TopicCourseScreenState createState() => TopicCourseScreenState();
@@ -103,6 +111,24 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
             fontWeight: FontWeight.bold,
           ),
         ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TopicDetailScreen(
+                  topicTitle: widget.topicTitle,
+                  topicId: widget.topicId,
+                  totalLesson: widget.totalLesson,
+                  totalExercise: widget.totalExercise,
+                  isReload: true,
+                ),
+              ),
+            );
+          },
+        ),
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
@@ -128,13 +154,15 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
           ? FloatingActionButton(
               backgroundColor: Colors.blue[300],
               onPressed: () {
-                // Aksi ketika tombol tambah diklik
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: (context) => WriteDiscussionScreen(
                             lessonId: widget.lessonId,
                             topicTitle: widget.topicTitle,
+                            topicId: widget.topicId,
+                            totalLesson: widget.totalLesson,
+                            totalExercise: widget.totalExercise,
                           )),
                 );
               },
@@ -369,7 +397,7 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
           );
         }
 
-        return const Center(child: Text('No discussions available.'));
+        return const Center(child: Text('No discussions yet.'));
       },
     );
   }

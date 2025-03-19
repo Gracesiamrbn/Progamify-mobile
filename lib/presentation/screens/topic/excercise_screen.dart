@@ -41,6 +41,38 @@ class ExerciseScreenState extends State<ExerciseScreen> {
     _questionsFuture = ExerciseService().getExercise(widget.exerciseId);
   }
 
+  Future<void> _submitExercise() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      var result = await ExerciseService()
+          .submitExercise(widget.exerciseId, jawabanUser);
+      Logger().i(result);
+
+      Navigator.pop(context);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ExerciseResultScreen(
+            userAnswers: [result],
+            topicId: widget.topicId,
+            topicTitle: widget.topicTitle,
+            totalExercise: widget.totalExercise,
+            totalLesson: widget.totalLesson,
+          ),
+        ),
+      );
+    } catch (e) {
+      Logger().e("Error submitting exercise: $e");
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   void _nextQuestion(dynamic questions) {
     if (currentQuestionIndex < questions.length - 1) {
       setState(() {
@@ -490,8 +522,6 @@ class ExerciseScreenState extends State<ExerciseScreen> {
       };
       jawabanUser[indexSoal] = detailJawaban;
     }
-
-    logger.i(jawabanUser);
   }
 
   void _showSubmitDialog(dynamic questions) {
@@ -553,35 +583,53 @@ class ExerciseScreenState extends State<ExerciseScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              onPressed: isLoading
-                  ? null
-                  : () async {
-                      setState(() {
-                        isLoading = true;
-                      });
+              // onPressed: isLoading
+              //     ? null
+              //     : () async {
+              //         setState(() {
+              //           isLoading = true;
+              //         });
 
-                      var result = await ExerciseService()
-                          .submitExercise(widget.exerciseId, jawabanUser);
+              //         var result = await ExerciseService()
+              //             .submitExercise(widget.exerciseId, jawabanUser);
 
-                      Logger().i(result);
+              //         Logger().i(result);
 
-                      setState(() {
-                        isLoading = false;
-                      });
+              //         setState(() {
+              //           isLoading = false;
+              //         });
 
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ExerciseResultScreen(
-                            userAnswers: [result],
-                            topicId: widget.topicId,
-                            topicTitle: widget.topicTitle,
-                            totalExercise: widget.totalExercise,
-                            totalLesson: widget.totalLesson,
-                          ),
-                        ),
-                      );
-                    },
+              //         Navigator.pop(context);
+              //         Navigator.pushReplacement(
+              //           context,
+              //           MaterialPageRoute(
+              //             builder: (context) => ExerciseResultScreen(
+              //               userAnswers: [result],
+              //               topicId: widget.topicId,
+              //               topicTitle: widget.topicTitle,
+              //               totalExercise: widget.totalExercise,
+              //               totalLesson: widget.totalLesson,
+              //             ),
+              //           ),
+              //         );
+              //       },
+              // child: isLoading
+              //     ? const SizedBox(
+              //         height: 20,
+              //         width: 20,
+              //         child: CircularProgressIndicator(
+              //           color: Colors.white,
+              //           strokeWidth: 2,
+              //         ),
+              //       )
+              //     : const Text(
+              //         'Yes, Submit',
+              //         style: TextStyle(
+              //           color: Colors.white,
+              //           fontWeight: FontWeight.bold,
+              //         ),
+              //       ),
+              onPressed: isLoading ? null : _submitExercise,
               child: isLoading
                   ? const SizedBox(
                       height: 20,

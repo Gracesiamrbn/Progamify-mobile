@@ -75,7 +75,6 @@ class ExerciseResultScreenState extends State<ExerciseResultScreen> {
 
             const SizedBox(height: 10),
 
-            // Gambar (Ganti dengan asset yang sesuai)
             Center(
               child: Image.asset(
                 'assets/icons/exam_icon.png', // Ganti dengan path gambarmu
