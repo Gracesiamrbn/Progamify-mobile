@@ -41,7 +41,7 @@ class PublicProfileScreen extends StatelessWidget {
             child: Center(
               child: Hero(
                 tag: user['name'],
-                child: SvgPicture.asset(
+                child: SvgPicture.network(
                   user['avatar'],
                   width: 200,
                   height: 200,
