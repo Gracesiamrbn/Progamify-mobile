@@ -32,13 +32,8 @@ class LoginScreenState extends State<LoginScreen> {
   Future<void> _checkLogin() async {
     String? token = await _authService.getToken();
     if (token != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MainScreen()),
-      );
-    } else {
       Map<String, dynamic> checkUser = await UserService().getCurrentUser();
-      if (checkUser["error"] != null) {
+      if (checkUser["error"] == null) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const MainScreen()),

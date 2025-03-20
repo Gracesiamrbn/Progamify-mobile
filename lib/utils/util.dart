@@ -1,3 +1,5 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class Util {
   List<Map<String, dynamic>> convertToDynamicMapList(dynamic data) {
     if (data == null) {
@@ -30,5 +32,12 @@ class Util {
     } catch (e) {
       return inputDateTime;
     }
+  }
+
+  String getLinkLaravel(String link) {
+    final String baseUrl =
+        dotenv.env["LARAVEL_STORAGE_URL"] ?? "http://10.0.0.2/storage/";
+
+    return "$baseUrl$link";
   }
 }

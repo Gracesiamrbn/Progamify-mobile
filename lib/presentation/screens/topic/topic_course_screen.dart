@@ -117,6 +117,7 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context);
+
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
