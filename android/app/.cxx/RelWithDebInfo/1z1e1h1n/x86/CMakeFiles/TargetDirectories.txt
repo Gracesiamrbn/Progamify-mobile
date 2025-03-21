@@ -1,0 +1,2 @@
+E:/TA-14/New Clone Mobile/progamify-mobile/android/app/.cxx/RelWithDebInfo/1z1e1h1n/x86/CMakeFiles/edit_cache.dir
+E:/TA-14/New Clone Mobile/progamify-mobile/android/app/.cxx/RelWithDebInfo/1z1e1h1n/x86/CMakeFiles/rebuild_cache.dir
