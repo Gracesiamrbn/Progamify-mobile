@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
 import 'package:progamify/api/quest_service.dart';
 import 'package:logger/logger.dart';
 import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:shimmer_animation/shimmer_animation.dart';
 
 class QuestExcerciseScreen extends StatefulWidget {
   final int userId;
@@ -28,8 +30,8 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
   final logger = Logger();
 
   // Timer
-  int _seconds = 2 * 60;
-  late Timer _timer;
+  int _seconds = 0;
+  Timer? _timer;
 
   // Audio
   final AudioPlayer _audioPlayer = AudioPlayer();
@@ -42,12 +44,18 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
   @override
   void initState() {
     super.initState();
-    // logger.i("initState: Fetching quest data for user ${widget.userId}");
-    _questionsFuture = Future.delayed(
-      const Duration(seconds: 2),
-      () => QuestService().getQuest(widget.userId),
-    );
-    _startTimer();
+
+    _questionsFuture = Future.delayed(const Duration(seconds: 2), () async {
+      var data = await QuestService().getQuest(widget.userId);
+      int fetchedTimer = (data["timer"] ?? 2) * 60;
+
+      setState(() {
+        _seconds = fetchedTimer;
+      });
+
+      _startTimer();
+      return data;
+    });
   }
 
   void _playSoundEffect(audioPath) async {
@@ -72,13 +80,14 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
   }
 
   void _startTimer() {
+    _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_seconds > 0) {
         setState(() {
           _seconds--;
         });
       } else {
-        _timer.cancel();
+        timer.cancel();
         _submitAnswers();
       }
     });
@@ -90,31 +99,134 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
     });
     try {
       var response = await QuestService().submitQuest(questId, jawabanUser);
-      _showSubmissionResult(response);
-      _timer.cancel();
+      // _showSubmissionResult(response);
+      _showResultDialog(
+        context,
+        result?["quest"]["is_correct"] ?? false,
+        'audio/correct-answer-new.mp3',
+        'audio/070-challenge-lose.mp3',
+        result?["quest"]['answer']['exp_gained'],
+        result?["quest"]['answer']['point_gained'],
+        result?["badge"],
+      );
+      _timer?.cancel();
     } catch (e) {
       // logger.e("Submission failed: $e");
     }
   }
 
-  void _showSubmissionResult(Map<String, dynamic> response) {
+  void _showBadges(List<dynamic> badges, int index) {
+    if (index >= badges.length) return;
+
+    var badge = badges[index]["Badge"];
+
+    _playSoundEffect('audio/mixkit-winning-chimes-2015.wav');
+
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
-        return AlertDialog(
-          title: const Text("Kuis Selesai"),
-          content: Text(
-            "Anda mendapatkan skor: ${response['score']}",
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                setState(() {});
-              },
-              child: const Text("OK"),
-            ),
-          ],
+        return TweenAnimationBuilder(
+          tween: Tween<double>(begin: 0.8, end: 1.0),
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutBack,
+          builder: (context, double scale, child) {
+            return Transform.scale(
+              scale: scale,
+              child: Dialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        "Anda mendapat Badge!",
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFCD7F32),
+                        ),
+                      ),
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          SizedBox(
+                            width: 240,
+                            height: 240,
+                            child: Lottie.asset(
+                              'assets/animation/Animation - 1740145323974.json',
+                              fit: BoxFit.contain,
+                              repeat: true,
+                            ),
+                          ),
+                          SvgPicture.asset(
+                            badge["picture"]!,
+                            width: 120,
+                            height: 120,
+                          ),
+                        ],
+                      ),
+                      Text(
+                        badge["title"]!,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                          fontFamily: 'Inter',
+                          color: Color(0xFFFFBB28),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        badge["description"]!,
+                        style: const TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 16,
+                          color: Colors.black54,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            _stopSoundEffect();
+
+                            Future.delayed(const Duration(milliseconds: 300),
+                                () {
+                              _showBadges(badges, index + 1);
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFF9A215),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          child: const Text(
+                            "Lanjutkan",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Inter',
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
         );
       },
     );
@@ -123,7 +235,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
   @override
   void dispose() {
     _audioPlayer.dispose();
-    _timer.cancel();
+    _timer?.cancel();
     _textController.dispose();
     super.dispose();
   }
@@ -136,194 +248,220 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Map<String, dynamic>>(
-      future: _questionsFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          _playSoundEffect('audio/spongebob-bubble-transition.mp3');
-          return _buildLoadingScreen();
-        }
-
-        if (snapshot.hasError) {
-          _stopSoundEffect();
-          return Center(child: Text('Snapshot hasError: ${snapshot.error}'));
-        }
-
-        if (!snapshot.hasData || snapshot.hasError) {
-          _stopSoundEffect();
-          return const Center(child: Text('No questions available.'));
-        } else {
-          _stopSoundEffect();
-
-          final response = snapshot.data!;
-
-          questId = response["ID"];
-
-          final question = response["content"];
-
-          final type = response["type"];
-
-          Map<String, dynamic> questions = {};
-          if (type == "multiple_choice") {
-            List<Map<String, dynamic>> options = [];
-            response["answers"].forEach((answer) {
-              var option = {"id": answer["ID"], "text": answer["content"]};
-              options.add(option);
-            });
-            questions = {
-              'id': response["ID"],
-              'question': response["content"],
-              'options': options,
-              'correctAnswer': 1,
-              'explanation': response["feedback"],
-              'exp': response["exp"],
-              'pts': response["point"],
-              'type': response["type"]
-            };
-          } else if (type == "true_false") {
-            questions = {
-              'id': response["ID"],
-              'question': response["content"],
-              'options': ["True", "False"],
-              'correctAnswer': 0,
-              'explanation': response["feedback"],
-              'exp': response["exp"],
-              'pts': response["point"],
-              'type': response["type"]
-            };
-          } else if (type == "essay") {
-            questions = {
-              'id': response["ID"],
-              'question': response["content"],
-              'correctAnswer': 0,
-              'explanation': response["feedback"],
-              'exp': response["exp"],
-              'pts': response["point"],
-              'type': type
-            };
-          } else if (type == "short_answer") {
-            questions = {
-              'id': response["ID"],
-              'question': response["content"],
-              'correctAnswer': '-',
-              'explanation': response["feedback"],
-              'exp': response["exp"],
-              'pts': response["point"],
-              'type': 'shortAnswer'
-            };
-          } else if (question["type"] == "multiple_answer") {
-            List<Map<String, dynamic>> options = [];
-            question["answers"].forEach((answer) {
-              var option = {"id": answer["ID"], "text": answer["content"]};
-              options.add(option);
-            });
-            questions = {
-              'id': response["ID"],
-              'question': response["content"],
-              'options': options,
-              'correctAnswer': 1,
-              'explanation': response["feedback"],
-              'exp': response["exp"],
-              'pts': response["point"],
-              'type': "multiple_answer"
-            };
+    return WillPopScope(
+        onWillPop: () async {
+          if (isPreview) {
+            return true;
           } else {
-            logger.w("Unknown question type: ${response["type"]}");
+            _showExitConfirmationDialog();
+            return false;
           }
-          return Scaffold(
-            appBar: AppBar(
-              automaticallyImplyLeading: false,
-              backgroundColor: const Color(0xFFE7F4E8),
-              elevation: 0,
-              title: Row(
-                children: [
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.green.shade400,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      response['difficulty'] ?? 'Easy',
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.yellow.shade700,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      _formatTime(_seconds),
-                      style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: () {
-                      if (isPreview) {
-                        Navigator.pop(context);
-                      } else {
-                        _showExitConfirmationDialog();
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 15, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(10),
+        },
+        child: FutureBuilder<Map<String, dynamic>>(
+          future: _questionsFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              _playSoundEffect('audio/spongebob-bubble-transition.mp3');
+              return _buildLoadingScreen();
+            }
+
+            if (snapshot.hasError) {
+              _stopSoundEffect();
+              return Center(
+                  child: Text('Snapshot hasError: ${snapshot.error}'));
+            }
+
+            if (!snapshot.hasData || snapshot.hasError) {
+              _stopSoundEffect();
+              return const Center(child: Text('No questions available.'));
+            } else {
+              _stopSoundEffect();
+
+              final response = snapshot.data!;
+
+              questId = response["ID"];
+
+              final question = response["content"];
+
+              final type = response["type"];
+
+              Map<String, dynamic> questions = {};
+              if (type == "multiple_choice") {
+                List<Map<String, dynamic>> options = [];
+                response["answers"].forEach((answer) {
+                  var option = {"id": answer["ID"], "text": answer["content"]};
+                  options.add(option);
+                });
+                questions = {
+                  'id': response["ID"],
+                  'question': response["content"],
+                  'options': options,
+                  'correctAnswer': 1,
+                  'explanation': response["feedback"],
+                  'exp': response["exp"],
+                  'pts': response["point"],
+                  'type': response["type"]
+                };
+              } else if (type == "true_false") {
+                questions = {
+                  'id': response["ID"],
+                  'question': response["content"],
+                  'options': ["True", "False"],
+                  'correctAnswer': 0,
+                  'explanation': response["feedback"],
+                  'exp': response["exp"],
+                  'pts': response["point"],
+                  'type': response["type"]
+                };
+              } else if (type == "essay") {
+                questions = {
+                  'id': response["ID"],
+                  'question': response["content"],
+                  'correctAnswer': 0,
+                  'explanation': response["feedback"],
+                  'exp': response["exp"],
+                  'pts': response["point"],
+                  'type': type
+                };
+              } else if (type == "short_answer") {
+                questions = {
+                  'id': response["ID"],
+                  'question': response["content"],
+                  'correctAnswer': '-',
+                  'explanation': response["feedback"],
+                  'exp': response["exp"],
+                  'pts': response["point"],
+                  'type': 'shortAnswer'
+                };
+              } else if (type == "multiple_answer") {
+                logger.i("Processing multiple_answer question...");
+
+                List<Map<String, dynamic>> options = [];
+                response["answers"].forEach((answer) {
+                  var option = {"id": answer["ID"], "text": answer["content"]};
+                  options.add(option);
+
+                  // Log setiap jawaban yang diproses
+                  logger.d(
+                      "Added answer option: ID=${answer["ID"]}, Text=${answer["content"]}");
+                });
+
+                // Log hasil list options setelah semua jawaban diproses
+                logger.i("Final options list: $options");
+
+                questions = {
+                  'id': response["ID"],
+                  'question': response["content"],
+                  'options': options,
+                  'correctAnswer': 1,
+                  'explanation': response["feedback"],
+                  'exp': response["exp"],
+                  'pts': response["point"],
+                  'type': "multiple_answer"
+                };
+
+                // Log informasi akhir tentang pertanyaan yang diproses
+                logger.i(
+                    "Question processed successfully: ID=${response["ID"]}, Type=multiple_answer");
+              } else {
+                logger.w("Unknown question type: ${response["type"]}");
+              }
+              return Scaffold(
+                appBar: AppBar(
+                  automaticallyImplyLeading: false,
+                  backgroundColor: const Color(0xFFE7F4E8),
+                  elevation: 0,
+                  title: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade400,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          response['difficulty'] ?? 'Easy',
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15),
+                        ),
                       ),
-                      child: const Row(
-                        children: [
-                          Text(
-                            'Exit',
-                            style: TextStyle(color: Colors.white, fontSize: 17),
+                      const SizedBox(width: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.yellow.shade700,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          _formatTime(_seconds),
+                          style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      const Spacer(),
+                      GestureDetector(
+                        onTap: () {
+                          if (isPreview) {
+                            Navigator.pop(context);
+                          } else {
+                            _showExitConfirmationDialog();
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 15, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          SizedBox(width: 4),
-                          Icon(Icons.exit_to_app, color: Colors.white),
-                        ],
+                          child: const Row(
+                            children: [
+                              Text(
+                                'Exit',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 17),
+                              ),
+                              SizedBox(width: 4),
+                              Icon(Icons.exit_to_app, color: Colors.white),
+                            ],
+                          ),
+                        ),
                       ),
+                    ],
+                  ),
+                ),
+                body: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Html(data: response["content"], style: {
+                          "p": Style(
+                              fontSize: FontSize(18),
+                              textAlign: TextAlign.justify),
+                        }),
+                        const SizedBox(height: 20),
+                        if (isPreview)
+                          _buildPreviewMode(questions, result?["quest"])
+                        else
+                          _buildAnswerMode(questions)
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ),
-            body: SingleChildScrollView(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Html(data: response["content"], style: {
-                      "p": Style(
-                          fontSize: FontSize(18), textAlign: TextAlign.justify),
-                    }),
-                    const SizedBox(height: 20),
-                    if (isPreview)
-                      _buildPreviewMode(questions, result)
-                    else
-                      _buildAnswerMode(questions),
-                  ],
                 ),
-              ),
-            ),
-          );
-        }
-      },
-    );
+              );
+            }
+          },
+        ));
   }
 
   Widget _buildLoadingScreen() {
@@ -380,7 +518,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
             backgroundColor: Colors.blue,
             minimumSize: const Size(double.infinity, 50),
           ),
-          onPressed: selectedAnswer != null
+          onPressed: ((selectedAnswer != null) || (selectedAnswers.isNotEmpty))
               ? () => _showConfirmationDialog(questions)
               : null,
           child: const Text(
@@ -393,17 +531,23 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
   }
 
   Widget _buildPreviewMode(dynamic question, dynamic result) {
+    if (result == null) {
+      Navigator.of(context).pop();
+    }
+
     final String type = question['type'];
     final options = question['options'] ?? [];
-    debugPrint("📌 result: $result");
-    final int? correctAnswerId = result['answer']['correct_answer_id'];
-    final int? correctAnswerIndex = result['answer']['correct_answer_index'];
-    final List<int>? correctAnswers = result['answer']['correct_answers'];
-    final int? userAnswerId = result['answer']['user_answer_id'];
-    final int? userAnswerIndex = result['answer']['user_answer_index'];
-    final List<int>? userAnswers = result['answer']['user_answers'];
-    final String? textAnswer = result['answer']['user_answer'];
-    final String? explanation = result['answer']['feedback'];
+    debugPrint("📌 resultnya di buildpreview: $result");
+    final answer = result?['answer'] ?? {};
+
+    // final int? correctAnswerId = answer['correct_answer_id'];P
+    final int? correctAnswerIndex = answer['correct_answer_index'];
+    // final List<int>? correctAnswers = answer['correct_answers'];
+    // final int? userAnswerId = answer['user_answer_id'];
+    // final int? userAnswerIndex = answer['user_answer_index'];
+    // final List<int>? userAnswers = answer['user_answers'];
+    final String? textAnswer = answer['user_answer'];
+    final String? explanation = answer['feedback'];
     final bool isCorrect = result['is_correct'];
     final int? rewardExp = result['reward_exp'];
     final int? rewardPoint = result['reward_point'];
@@ -516,17 +660,45 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
     } else if (type == 'multiple_answer') {
       return Column(
         children: [
-          const Text("Fitur preview untuk multiple answer belum tersedia."),
-          if (isCorrect)
+          ...List.generate(options.length, (index) {
+            return _buildOptionPreview(
+                question, index, options[index]["text"], correctAnswerIndex);
+          }),
+          if (isCorrect) ...[
+            const SizedBox(height: 10),
             const Text(
-              "Jawaban Anda benar",
+              "Jawaban Anda benar !",
               style: TextStyle(color: Colors.green, fontSize: 16),
-            )
-          else
+            ),
+            const SizedBox(height: 5),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("+$rewardExp",
+                    style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.purple)),
+                const SizedBox(width: 5),
+                Image.asset('assets/icons/exp_point.png',
+                    width: 20, height: 20),
+                const SizedBox(width: 10),
+                Text("+$rewardPoint",
+                    style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amber)),
+                const SizedBox(width: 5),
+                Image.asset('assets/icons/coin.png', width: 20, height: 20),
+              ],
+            ),
+          ] else ...[
+            const SizedBox(height: 10),
             const Text(
-              "Jawaban Anda salah",
+              "Jawaban Anda salah :(",
               style: TextStyle(color: Colors.red, fontSize: 16),
             ),
+          ],
           if (explanation != null) _buildExplanation(explanation),
         ],
       );
@@ -1010,8 +1182,8 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                 ),
               ),
               onPressed: () async {
-                if (selectedAnswer != null) {
-                  _timer.cancel();
+                if (selectedAnswer != null || selectedAnswers.isNotEmpty) {
+                  _timer?.cancel();
                   _showLoadingDialog();
 
                   result =
@@ -1026,14 +1198,22 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                   Navigator.pop(context);
                   Navigator.pop(context);
 
-                  if (result != null) {
-                    bool isCorrect = result?["is_correct"] ?? false;
+                  if (result?["quest"] != null) {
+                    bool isCorrect = result?["quest"]["is_correct"] ?? false;
                     String correctPath = 'audio/correct-answer-new.mp3';
                     String wrongPath = 'audio/070-challenge-lose.mp3';
-                    int expGain = result?['answer']['exp_gained'];
-                    int pointGain = result?['answer']['point_gained'];
-                    _showResultDialog(context, isCorrect, correctPath,
-                        wrongPath, expGain, pointGain);
+                    int expGain = result?["quest"]['answer']['exp_gained'];
+                    int pointGain = result?["quest"]['answer']['point_gained'];
+                    List<dynamic> badges = result?['badge'] ?? [];
+                    _showResultDialog(
+                      context,
+                      isCorrect,
+                      correctPath,
+                      wrongPath,
+                      expGain,
+                      pointGain,
+                      badges,
+                    );
                   }
                 }
               },
@@ -1159,7 +1339,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
         selectedAnswers.forEach((ans) {
           answers.add({
             "answer_id": question["options"][ans]["id"],
-            "answer_text": question["options"][ans]["text"],
+            // "answer_text": question["options"][ans]["text"],
           });
         });
       }
@@ -1196,8 +1376,14 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
     );
   }
 
-  void _showResultDialog(BuildContext context, bool isCorrect,
-      String correctPath, String wrongPath, int expGain, int poinGain) {
+  void _showResultDialog(
+      BuildContext context,
+      bool isCorrect,
+      String correctPath,
+      String wrongPath,
+      int expGain,
+      int poinGain,
+      List<dynamic> badges) {
     if (isCorrect) {
       _playSoundEffect(correctPath);
     } else {
@@ -1268,6 +1454,12 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                       onPressed: () {
                         _stopSoundEffect();
                         Navigator.pop(context);
+
+                        Future.delayed(const Duration(milliseconds: 300), () {
+                          if (badges != null || badges.isNotEmpty) {
+                            _showBadges(badges, 0);
+                          }
+                        });
                       },
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),

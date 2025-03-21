@@ -30,35 +30,41 @@ class AuthService {
     }
   }
 
-  Future<bool> register(
+  Future<String?> register(
       String email,
       String password,
       String passwordConfirmation,
       String name,
       int angkatan,
-      String nim) async {
-    final response = await http.post(
-      Uri.parse("$baseUrl/users/register"),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "email": email,
-        "password": password,
-        "password_confirmation": passwordConfirmation,
-        "name": name,
-        "angkatan": angkatan,
-        "nim": nim
-      }),
-    );
+      String nim,
+      int avatarId) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/users/register"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "email": email,
+          "password": password,
+          "password_confirmation": passwordConfirmation,
+          "name": name,
+          "angkatan": angkatan,
+          "nim": nim,
+          "avatar_id": avatarId,
+        }),
+      );
 
-    if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      if (data["user"] != null) {
-        return true;
-      } else {
-        return false;
+
+      if (response.statusCode == 201) {
+        return null; // Sukses, tidak ada error
+      } else if (response.statusCode == 400) {
+        return data["error"] ??
+            "Registration failed"; // Ambil pesan error dari backend
       }
-    } else {
-      return false;
+
+      return "Unexpected error: ${response.statusCode}"; // Tangani status lain
+    } catch (e) {
+      return "Network error: $e"; // Jika ada kesalahan jaringan atau parsing
     }
   }
 
