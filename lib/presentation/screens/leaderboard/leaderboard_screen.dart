@@ -286,8 +286,10 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                     shape: BoxShape.circle,
                   ),
                   child: ClipOval(
-                    child: SvgPicture.asset(
+                    child: SvgPicture.network(
                       user['avatar'],
+                      width: 40,
+                      height: 40,
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -455,15 +457,26 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                         ),
                         const SizedBox(width: 12),
                         ClipOval(
-                          child: Hero(
-                            tag: user['name'],
-                            child: SvgPicture.asset(
-                              user['avatar'],
-                              width: 40,
-                              height: 40,
-                              fit: BoxFit.cover,
+                          child: SizedBox(
+                            width: 40,
+                            height: 40,
+                            child: Hero(
+                              tag: user['name'],
+                              child: SvgPicture.network(
+                                user['avatar'],
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
+                          // child: Hero(
+                          //   tag: user['name'],
+                          //   child: SvgPicture.network(
+                          //     user['avatar'],
+                          //     width: 40,
+                          //     height: 40,
+                          //     fit: BoxFit.cover,
+                          //   ),
+                          // ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(

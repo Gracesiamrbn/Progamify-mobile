@@ -46,10 +46,15 @@ class ExerciseScreenState extends State<ExerciseScreen> {
       isLoading = true;
     });
 
+    Navigator.pop(context);
+
+    _showSubmitDialog();
+
+    Logger().i(isLoading);
+
     try {
       var result = await ExerciseService()
           .submitExercise(widget.exerciseId, jawabanUser);
-      Logger().i(result);
 
       Navigator.pop(context);
       Navigator.pushReplacement(
@@ -389,7 +394,7 @@ class ExerciseScreenState extends State<ExerciseScreen> {
                       ElevatedButton.icon(
                         onPressed: currentQuestionIndex < questions.length - 1
                             ? () => _nextQuestion(questions)
-                            : () => _showSubmitDialog(questions),
+                            : () => _showSubmitDialog(),
                         icon: Icon(
                             currentQuestionIndex < questions.length - 1
                                 ? Icons.arrow_forward
@@ -524,7 +529,7 @@ class ExerciseScreenState extends State<ExerciseScreen> {
     }
   }
 
-  void _showSubmitDialog(dynamic questions) {
+  void _showSubmitDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -583,59 +588,25 @@ class ExerciseScreenState extends State<ExerciseScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              // onPressed: isLoading
-              //     ? null
-              //     : () async {
-              //         setState(() {
-              //           isLoading = true;
-              //         });
+              onPressed: isLoading
+                  ? null
+                  : () async {
+                      setState(() {
+                        isLoading = true;
+                      });
 
-              //         var result = await ExerciseService()
-              //             .submitExercise(widget.exerciseId, jawabanUser);
+                      await _submitExercise();
 
-              //         Logger().i(result);
-
-              //         setState(() {
-              //           isLoading = false;
-              //         });
-
-              //         Navigator.pop(context);
-              //         Navigator.pushReplacement(
-              //           context,
-              //           MaterialPageRoute(
-              //             builder: (context) => ExerciseResultScreen(
-              //               userAnswers: [result],
-              //               topicId: widget.topicId,
-              //               topicTitle: widget.topicTitle,
-              //               totalExercise: widget.totalExercise,
-              //               totalLesson: widget.totalLesson,
-              //             ),
-              //           ),
-              //         );
-              //       },
-              // child: isLoading
-              //     ? const SizedBox(
-              //         height: 20,
-              //         width: 20,
-              //         child: CircularProgressIndicator(
-              //           color: Colors.white,
-              //           strokeWidth: 2,
-              //         ),
-              //       )
-              //     : const Text(
-              //         'Yes, Submit',
-              //         style: TextStyle(
-              //           color: Colors.white,
-              //           fontWeight: FontWeight.bold,
-              //         ),
-              //       ),
-              onPressed: isLoading ? null : _submitExercise,
+                      setState(() {
+                        isLoading = false;
+                      });
+                    },
               child: isLoading
                   ? const SizedBox(
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(
-                        color: Colors.white,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                         strokeWidth: 2,
                       ),
                     )

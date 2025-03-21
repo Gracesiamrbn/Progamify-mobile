@@ -19,12 +19,18 @@ class ProfileHeader extends StatelessWidget {
         background: Stack(
           alignment: Alignment.center,
           children: [
-            SvgPicture.asset(
+            SvgPicture.network(
               avatarPath,
-              width: double.infinity,
-              height: 200,
               fit: BoxFit.cover,
-            ),
+              placeholderBuilder: (BuildContext context) =>
+                  const CircularProgressIndicator(),
+            )
+            // SvgPicture.asset(
+            //   avatarPath,
+            //   width: double.infinity,
+            //   height: 200,
+            //   fit: BoxFit.cover,
+            // ),
           ],
         ),
       ),

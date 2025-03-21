@@ -15,7 +15,16 @@ class MarketScreen extends StatefulWidget {
 class MarketScreenState extends State<MarketScreen> {
   int selectedTabIndex = 0;
   int selectedAvatarIndex = 0;
+  int selectedAvatarId = 0;
+  int selectedGiftId = 0;
   int selectedGiftIndex = 0;
+  dynamic selectedAvatar = {
+    "id": 1,
+    "owned": true,
+    "image":
+        "http://194.163.40.203:9000/storage/avatars/images/hE8k9Z47JBMSlCnpnfgkn1zbL1Yw8AqPl8eSMZy2.svg"
+  };
+  dynamic selectedGift;
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +38,7 @@ class MarketScreenState extends State<MarketScreen> {
           MarketSelectedItem(
             selectedIndex:
                 selectedTabIndex == 0 ? selectedAvatarIndex : selectedGiftIndex,
+            selectedItem: selectedTabIndex == 0 ? selectedAvatar : selectedGift,
             selectedTabIndex: selectedTabIndex,
           ),
           MarketTabSelector(
@@ -45,12 +55,14 @@ class MarketScreenState extends State<MarketScreen> {
               selectedIndex: selectedTabIndex == 0
                   ? selectedAvatarIndex
                   : selectedGiftIndex,
-              onItemSelected: (index) {
+              onItemSelected: (data) {
                 setState(() {
                   if (selectedTabIndex == 0) {
-                    selectedAvatarIndex = index;
+                    selectedAvatarIndex = data["index"];
+                    selectedAvatar = data["item"];
                   } else {
-                    selectedGiftIndex = index;
+                    selectedGiftIndex = data["index"];
+                    selectedGift = data["item"];
                   }
                 });
               },
@@ -59,6 +71,7 @@ class MarketScreenState extends State<MarketScreen> {
           MarketPurchaseButton(
             selectedIndex:
                 selectedTabIndex == 0 ? selectedAvatarIndex : selectedGiftIndex,
+            selectedItem: selectedTabIndex == 0 ? selectedAvatar : selectedGift,
           ),
           const SizedBox(height: 8),
         ],

@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart';
 import 'package:progamify/api/auth_service.dart';
+import 'package:progamify/utils/util.dart';
 
 class LeaderboardService {
   final String baseUrl = dotenv.env["BASE_URL_API"] ?? "http://10.0.0.2/api";
@@ -24,9 +26,12 @@ class LeaderboardService {
           rawList.cast<Map<String, dynamic>>();
 
       leaderboard = leaderboard.map((player) {
-        player['avatar'] = 'assets/avatars/avatar_male_1.svg';
+        player['avatar'] =
+            Util().getLinkLaravel(player['avatar']['picture_url']);
         return player;
       }).toList();
+
+      Logger().i(leaderboard);
 
       return leaderboard;
     } else {

@@ -4,12 +4,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 class MarketSelectedItem extends StatelessWidget {
   final int selectedIndex;
   final int selectedTabIndex;
+  final dynamic selectedItem;
 
-  const MarketSelectedItem({
-    super.key,
-    required this.selectedIndex,
-    required this.selectedTabIndex,
-  });
+  const MarketSelectedItem(
+      {super.key,
+      required this.selectedIndex,
+      required this.selectedTabIndex,
+      required this.selectedItem});
 
   @override
   Widget build(BuildContext context) {
@@ -21,12 +22,18 @@ class MarketSelectedItem extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: selectedTabIndex == 0
-            ? SvgPicture.asset(
-                "assets/avatars/avatar_jumbotron_${selectedIndex + 1}.svg",
+            ? SvgPicture.network(
+                selectedItem["image"] ?? "",
                 fit: BoxFit.contain,
                 placeholderBuilder: (context) =>
                     const Center(child: CircularProgressIndicator()),
               )
+            // SvgPicture.asset(
+            //     "assets/avatars/avatar_jumbotron_${selectedIndex + 1}.svg",
+            //     fit: BoxFit.contain,
+            //     placeholderBuilder: (context) =>
+            //         const Center(child: CircularProgressIndicator()),
+            //   )
             : Image.asset(
                 "assets/gifts/gift_${selectedIndex + 1}.png",
                 fit: BoxFit.contain,
