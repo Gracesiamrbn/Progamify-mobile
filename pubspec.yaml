@@ -78,12 +78,8 @@ flutter:
   #   - images/a_dot_ham.jpeg
 
   assets:
-    - assets/logo.png
+    - assets/logo.png 
     - assets/logo_dark.png
-    - assets/icons/setting_icon.png
-    - assets/stats_container.svg
-    - assets/stats_container_alt1.svg
-    - assets/icons/shop_icon.png
     - assets/icons/
     - assets/images/
     - assets/badges/

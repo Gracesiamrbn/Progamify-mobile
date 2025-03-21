@@ -540,8 +540,9 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
     debugPrint("📌 resultnya di buildpreview: $result");
     final answer = result?['answer'] ?? {};
 
-    // final int? correctAnswerId = answer['correct_answer_id'];P
+    // final int? correctAnswerId = answer['correct_answer_id'];
     final int? correctAnswerIndex = answer['correct_answer_index'];
+    final List<dynamic>? correctAnswersIndex = answer['correct_answers_index'];
     // final List<int>? correctAnswers = answer['correct_answers'];
     // final int? userAnswerId = answer['user_answer_id'];
     // final int? userAnswerIndex = answer['user_answer_index'];
@@ -551,6 +552,9 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
     final bool isCorrect = result['is_correct'];
     final int? rewardExp = result['reward_exp'];
     final int? rewardPoint = result['reward_point'];
+    final int? expGained = answer['exp_gained'];
+    final int? pointGained = answer['point_gained'];
+    final String? correctAnswer = answer['correct_answer'];
 
     if (type == 'essay' || type == 'shortAnswer') {
       return Column(
@@ -602,8 +606,30 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
           ] else
             const Text(
               "Jawaban Anda salah",
-              style: TextStyle(color: Colors.red, fontSize: 16),
+              style: TextStyle(
+                  color: Colors.red, fontSize: 16, fontWeight: FontWeight.bold),
             ),
+          const SizedBox(height: 18),
+          const Center(
+            child: Text(
+              "Jawaban Yang Benar : ",
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.grey),
+              ),
+              child: Text('$correctAnswer')),
           if (explanation != null) _buildExplanation(explanation),
         ],
       );
@@ -661,8 +687,8 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
       return Column(
         children: [
           ...List.generate(options.length, (index) {
-            return _buildOptionPreview(
-                question, index, options[index]["text"], correctAnswerIndex);
+            return _buildCheckboxPreview(question, index,
+                options[index]["text"], correctAnswersIndex ?? []);
           }),
           if (isCorrect) ...[
             const SizedBox(height: 10),
@@ -674,7 +700,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text("+$rewardExp",
+                Text("+$expGained",
                     style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -683,7 +709,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                 Image.asset('assets/icons/exp_point.png',
                     width: 20, height: 20),
                 const SizedBox(width: 10),
-                Text("+$rewardPoint",
+                Text("+$pointGained",
                     style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -806,6 +832,71 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
           const SizedBox(width: 10),
           Flexible(
             fit: FlexFit.loose,
+            child: Html(
+              data: text,
+              style: {"p": Style(fontSize: FontSize(16))},
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCheckboxPreview(dynamic question, int index, String text,
+      List<dynamic> correctAnswersIndex) {
+    bool isSelected = selectedAnswers.contains(index);
+    bool isCorrect = correctAnswersIndex.contains(index);
+
+    Color bgColor;
+    Color circleColor;
+    Color borderColor;
+
+    if (isSelected) {
+      bgColor = isCorrect ? const Color(0xFF44C4A1) : const Color(0xFFEB4747);
+      circleColor =
+          isCorrect ? const Color(0xFF00A58C) : const Color(0xFFDD051D);
+      borderColor = Colors.transparent;
+    } else if (isCorrect) {
+      bgColor = const Color(0xFFD0FFD0);
+      circleColor = const Color(0xFFD0FFD0);
+      borderColor = const Color(0xFF00A58C);
+    } else {
+      bgColor = Colors.white;
+      circleColor = Colors.grey;
+      borderColor = Colors.transparent;
+    }
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: borderColor),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            blurRadius: 5,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Checkbox(
+            value: isSelected,
+            onChanged: null, // Preview, jadi tidak bisa diubah
+          ),
+          const SizedBox(width: 10),
+          CircleAvatar(
+            backgroundColor: circleColor,
+            child: Text(
+              String.fromCharCode(65 + index), // A, B, C, D...
+              style: const TextStyle(color: Colors.black),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
             child: Html(
               data: text,
               style: {"p": Style(fontSize: FontSize(16))},
@@ -1200,7 +1291,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
 
                   if (result?["quest"] != null) {
                     bool isCorrect = result?["quest"]["is_correct"] ?? false;
-                    String correctPath = 'audio/correct-answer-new.mp3';
+                    String correctPath = 'audio/success-1-6297.mp3';
                     String wrongPath = 'audio/070-challenge-lose.mp3';
                     int expGain = result?["quest"]['answer']['exp_gained'];
                     int pointGain = result?["quest"]['answer']['point_gained'];

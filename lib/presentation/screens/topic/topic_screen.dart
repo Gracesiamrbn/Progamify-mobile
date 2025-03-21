@@ -30,7 +30,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
 
     try {
       final String baseUrl =
-          dotenv.env["BASE_URL_API"] ?? "http://10.0.0.2/api";
+          dotenv.env["BASE_URL_API"] ?? "http://194.163.40.203:8080/api";
       final response = await http.get(
         Uri.parse('$baseUrl/topics'),
         headers: {

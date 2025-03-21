@@ -6,7 +6,7 @@ import 'package:progamify/api/auth_service.dart';
 import 'package:progamify/utils/util.dart';
 
 class GiftService {
-  final String baseUrl = dotenv.env["BASE_URL_API"] ?? "http://10.0.0.2/api";
+  final String baseUrl = dotenv.env["BASE_URL_API"] ?? "http://194.163.40.203:8080/api";
   final AuthService authService = AuthService();
 
   Future<List<Map<String, dynamic>>> getGifts() async {
