@@ -6,7 +6,9 @@ import '../../widgets/market_selected_item.dart';
 import '../../widgets/market_purchase_button.dart';
 
 class MarketScreen extends StatefulWidget {
-  const MarketScreen({super.key});
+  final int selectedTabIndex;
+
+  const MarketScreen({super.key, this.selectedTabIndex = 0});
 
   @override
   MarketScreenState createState() => MarketScreenState();
@@ -24,7 +26,11 @@ class MarketScreenState extends State<MarketScreen> {
     "image":
         "http://194.163.40.203:9000/storage/avatars/images/hE8k9Z47JBMSlCnpnfgkn1zbL1Yw8AqPl8eSMZy2.svg"
   };
-  dynamic selectedGift;
+  dynamic selectedGift = {
+    "id": 1,
+    "image":
+        "http://194.163.40.203:9000/storage/gift/images/3Y76ezVM8unT5p1PLKsSPUyxLNyNGdqEZih7SH5b.png"
+  };
 
   @override
   Widget build(BuildContext context) {
