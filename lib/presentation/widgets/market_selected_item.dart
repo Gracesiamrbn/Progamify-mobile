@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:logger/logger.dart';
 
 class MarketSelectedItem extends StatelessWidget {
   final int selectedIndex;
@@ -14,6 +15,9 @@ class MarketSelectedItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Logger().i(selectedItem);
+    Logger().i(selectedIndex);
+    Logger().i(selectedTabIndex);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       width: double.infinity,
@@ -34,8 +38,8 @@ class MarketSelectedItem extends StatelessWidget {
             //     placeholderBuilder: (context) =>
             //         const Center(child: CircularProgressIndicator()),
             //   )
-            : Image.asset(
-                "assets/gifts/gift_${selectedIndex + 1}.png",
+            : Image.network(
+                selectedItem["image"] ?? "",
                 fit: BoxFit.contain,
               ),
       ),

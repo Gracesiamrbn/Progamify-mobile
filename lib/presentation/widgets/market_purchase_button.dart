@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:progamify/api/avatar_service.dart';
+import 'package:progamify/api/gift_service.dart';
 import 'package:progamify/api/user_service.dart';
 import 'package:progamify/presentation/screens/profile/market_screen.dart';
 
@@ -141,7 +142,71 @@ class MarketPurchaseButtonState extends State<MarketPurchaseButton> {
           ),
         ),
       );
+    } else {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: ElevatedButton(
+            onPressed: widget.selectedIndex >= 0 && !_isLoading
+                ? () async {
+                    setState(() {
+                      _isLoading = true;
+                    });
+
+                    try {
+                      await GiftService().buyGift(widget.selectedItem["id"]);
+                      _showDialog("Success", "Gift purchased successfully.");
+                    } on HttpException catch (e) {
+                      if (e.message.contains("400")) {
+                        _showDialog("Failed",
+                            "Unable to purchase gift. Please check your balance or try again.",
+                            success: false);
+                      } else {
+                        _showDialog("Failed",
+                            "Unable to purchase gift. Please check your balance or try again.",
+                            success: false);
+                      }
+                    } catch (e) {
+                      _showDialog("Failed",
+                          "Unable to purchase gift. Please check your balance or try again.",
+                          success: false);
+                    }
+
+                    setState(() {
+                      _isLoading = false;
+                    });
+                  }
+                : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor:
+                  widget.selectedIndex >= 0 ? Colors.orange : Colors.grey,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: _isLoading
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Text(
+                    "Purchase",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+          ),
+        ),
+      );
     }
-    return const SizedBox.shrink();
+    // return const SizedBox.shrink();
   }
 }
