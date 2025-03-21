@@ -374,10 +374,12 @@ class _BadgesTabState extends State<BadgesTab> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return const Center(child: Text("Failed to load badges"));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          } else if (!snapshot.hasData ||
+              snapshot.data!.isEmpty ||
+              snapshot.data == null) {
             return const Center(child: Text("No badges available"));
+          } else if (snapshot.hasError) {
+            return Center(child: Text("Error: ${snapshot.error}"));
           }
 
           final badges = snapshot.data!;
@@ -408,11 +410,11 @@ class _BadgesTabState extends State<BadgesTab> {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: Image.asset(
+                            child: SvgPicture.asset(
                               badge["picture"],
                               width: 120,
                               height: 120,
-                              fit: BoxFit.cover,
+                              fit: BoxFit.contain,
                             ),
                           ),
                         ),
@@ -427,7 +429,7 @@ class _BadgesTabState extends State<BadgesTab> {
                               border: Border.all(color: Colors.white, width: 2),
                             ),
                             child: Text(
-                              badge["count"].toString(),
+                              'x${badge["count"].toString()}',
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 12,
@@ -475,11 +477,11 @@ class _BadgesTabState extends State<BadgesTab> {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
+                child: SvgPicture.asset(
                   badge["picture"],
                   width: 150,
                   height: 150,
-                  fit: BoxFit.cover,
+                  fit: BoxFit.contain,
                 ),
               ),
               const SizedBox(height: 10),
@@ -516,9 +518,26 @@ class _BadgesTabState extends State<BadgesTab> {
             ],
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Tutup"),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                child: const Text(
+                  "Tutup",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             ),
           ],
         );
