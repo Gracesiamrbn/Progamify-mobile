@@ -954,23 +954,34 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.grey[200],
+          color: Colors.blue,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.grey),
+          boxShadow: [
+            // 🔥 Tambahkan shadow
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
+            ),
+          ],
+          // border: Border.all(color: Colors.grey),
         ),
         child: Html(
           data: """
-          <h3 style="margin-bottom: 8px;">Penjelasan:</h3>
+          <h3 style="margin-bottom: 8px; text-align: center;">Penjelasan:</h3>
           <p>$explanation</p>
         """,
           style: {
             "h3": Style(
               fontSize: FontSize(18),
               fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
             "p": Style(
               fontSize: FontSize(16),
               textAlign: TextAlign.justify,
+              color: Colors.white
             ),
           },
         ),

@@ -1,19 +1,21 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:progamify/presentation/screens/navigation/bottom_navigation.dart';
 import 'package:progamify/api/badge_service.dart';
+import '../screens/profile/public_badges_screen.dart';
 
-class BadgesSection extends StatefulWidget {
+class PublicBadgesSection extends StatefulWidget {
+  final int userId;
   final String title;
 
-  const BadgesSection({super.key, this.title = "Quest Badges"});
+  const PublicBadgesSection(
+      {super.key, required this.userId, this.title = "Quest Badges"});
 
   @override
-  _BadgesSectionState createState() => _BadgesSectionState();
+  _PublicBadgesSectionState createState() => _PublicBadgesSectionState();
 }
 
-class _BadgesSectionState extends State<BadgesSection> {
+class _PublicBadgesSectionState extends State<PublicBadgesSection> {
   final BadgesService _badgesService = BadgesService();
   List<Map<String, dynamic>> _badges = [];
   bool _isLoading = true;
@@ -57,7 +59,7 @@ class _BadgesSectionState extends State<BadgesSection> {
 
   Future<void> _fetchBadges() async {
     try {
-      final data = await _badgesService.getBadges();
+      final data = await _badgesService.getBadgesByUserId(widget.userId);
 
       if (data.isEmpty) {
         setState(() {
@@ -81,6 +83,7 @@ class _BadgesSectionState extends State<BadgesSection> {
       });
     } catch (e) {
       setState(() {
+        _badges = defaultBadges;
         _isLoading = false;
       });
     }
@@ -185,11 +188,11 @@ class _BadgesSectionState extends State<BadgesSection> {
                 ),
                 recognizer: TapGestureRecognizer()
                   ..onTap = () {
-                    Navigator.pushReplacement(
+                    Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) =>
-                            const MainScreen(currentIndex: 1, tabIndex: 1),
+                            PublicBadgeScreen(userId: widget.userId),
                       ),
                     );
                   },

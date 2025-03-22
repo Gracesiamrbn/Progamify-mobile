@@ -123,14 +123,16 @@ class _QuestTabState extends State<QuestTab> {
       color: Colors.orange[50],
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 20),
-            _buildQuestHeader(),
-            const SizedBox(height: 20),
-            _buildInstructionContainer(context),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
+              _buildQuestHeader(),
+              const SizedBox(height: 20),
+              _buildInstructionContainer(context),
+            ],
+          ),
         ),
       ),
     );
@@ -567,7 +569,8 @@ class _BadgesTabState extends State<BadgesTab> {
                 padding:
                     const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
                 decoration: BoxDecoration(
-                  color: (badge["count"] == 0) ? Colors.grey.shade400 : Colors.red,
+                  color:
+                      (badge["count"] == 0) ? Colors.grey.shade400 : Colors.red,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -586,9 +589,8 @@ class _BadgesTabState extends State<BadgesTab> {
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: (badge["count"] == 0)
-                      ? Colors.grey
-                      : Colors.orange,
+                  backgroundColor:
+                      (badge["count"] == 0) ? Colors.grey : Colors.orange,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
