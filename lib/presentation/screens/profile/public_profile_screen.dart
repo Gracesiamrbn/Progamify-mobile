@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:logger/logger.dart';
 import '../../widgets/profile_info.dart';
+import '../../widgets/public_badges_section.dart';
 import '../../widgets/summary_boxes.dart';
 import '../../widgets/summary_grid.dart';
-import '../../widgets/badges_section.dart';
 
 class PublicProfileScreen extends StatelessWidget {
   final Map<String, dynamic> user;
@@ -27,14 +27,13 @@ class PublicProfileScreen extends StatelessWidget {
                 Navigator.pop(context);
               },
             ),
-            title: const Text(
-              'Profile',
-              style: TextStyle(
+            title: Text(
+              user['name'],
+              style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Inter'),
             ),
-            // centerTitle: true,
             pinned: true,
           ),
           SliverToBoxAdapter(
@@ -62,10 +61,10 @@ class PublicProfileScreen extends StatelessWidget {
                 SummaryBoxes(
                   exp: user['total_exp'],
                   level: user['level_id'],
-                  totalLesson: 0,
+                  totalLesson: user["total_lesson_taken"] ?? 0,
                 ),
                 const SummaryGrid(),
-                const BadgesSection(),
+                PublicBadgesSection(userId: user['ID']),
               ],
             ),
           ),

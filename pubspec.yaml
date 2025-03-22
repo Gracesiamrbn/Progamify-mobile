@@ -80,10 +80,6 @@ flutter:
   assets:
     - assets/logo.png
     - assets/logo_dark.png
-    - assets/icons/setting_icon.png
-    - assets/stats_container.svg
-    - assets/stats_container_alt1.svg
-    - assets/icons/shop_icon.png
     - assets/icons/
     - assets/images/
     - assets/badges/
@@ -127,3 +123,23 @@ flutter_icons:
   ios: true
   image_path: "assets/app_icon.png" # Sesuaikan dengan lokasi gambar ikon
   adaptive_icon_background: "#ffffff" # Opsional (untuk Android adaptive icon)
+
+# Splash Screen
+flutter_native_splash:
+  android: true
+  ios: true
+  web: false
+
+  color: "#ffffff"
+  image: "assets/logo.png"
+  # branding: "assets/branding.png"
+
+  color_dark: "#1b263b"
+  image_dark: "assets/logo_dark.png"
+  # branding_dark: "assets/branding.png"
+
+  android_12:
+    image: "assets/logo.png"
+    icon_background_color: "#d1e8ff"
+    # branding: "assets/branding.png"
+    # branding_dark: "assets/branding.png"

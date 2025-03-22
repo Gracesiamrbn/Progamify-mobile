@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AuthService {
-  final String baseUrl = dotenv.env["BASE_URL_API"] ?? "http://10.0.2.2/api";
+  final String baseUrl = dotenv.env["BASE_URL_API"] ?? "http://194.163.40.203:8080/api";
 
   Future<bool> login(String email, String password) async {
     final response = await http.post(

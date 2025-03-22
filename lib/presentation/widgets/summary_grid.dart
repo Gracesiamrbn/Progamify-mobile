@@ -89,7 +89,6 @@ class SummaryGrid extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 8),
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -159,6 +158,7 @@ class SummaryGrid extends StatelessWidget {
               );
             },
           ),
+          const SizedBox(height: 8,),
           Align(
             alignment: Alignment.centerRight,
             child: RichText(

@@ -123,14 +123,16 @@ class _QuestTabState extends State<QuestTab> {
       color: Colors.orange[50],
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 20),
-            _buildQuestHeader(),
-            const SizedBox(height: 20),
-            _buildInstructionContainer(context),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
+              _buildQuestHeader(),
+              const SizedBox(height: 20),
+              _buildInstructionContainer(context),
+            ],
+          ),
         ),
       ),
     );
@@ -366,6 +368,46 @@ class _BadgesTabState extends State<BadgesTab> {
   }
 
   Widget build(BuildContext context) {
+    // Daftar badge default (jika belum diperoleh)
+    final List<Map<String, dynamic>> defaultBadges = [
+      {
+        "id": 1,
+        "title": "Quest Beginner",
+        "description": "Complete 10 quest for the first time",
+        "picture": "assets/badges/quest_beginner_grey.svg"
+      },
+      {
+        "id": 2,
+        "title": "Warrior",
+        "description": "Fall seven times, rise eight times",
+        "picture": "assets/badges/warrior_grey.svg"
+      },
+      {
+        "id": 3,
+        "title": "Triple Win",
+        "description": "Complete 3 consecutive quests perfectly",
+        "picture": "assets/badges/triple_win_grey.svg"
+      },
+      {
+        "id": 4,
+        "title": "Ultimate Five",
+        "description": "Complete 5 consecutive streaks perfectly",
+        "picture": "assets/badges/ultimate_five_grey.svg"
+      },
+      {
+        "id": 5,
+        "title": "Legendary Ten",
+        "description": "Complete 10 consecutive quests perfectly",
+        "picture": "assets/badges/legendary_ten_grey.svg"
+      },
+      {
+        "id": 6,
+        "title": "Unstoppable Challenger",
+        "description": "No Skips No Excuses - 7 days of quest mastery",
+        "picture": "assets/badges/unstoppable_challenger_grey.svg"
+      }
+    ];
+
     return Container(
       color: Colors.orange[50],
       padding: const EdgeInsets.all(16.0),
@@ -377,27 +419,47 @@ class _BadgesTabState extends State<BadgesTab> {
           } else if (!snapshot.hasData ||
               snapshot.data!.isEmpty ||
               snapshot.data == null) {
-            return const Center(child: Text("No badges available"));
           } else if (snapshot.hasError) {
             return Center(child: Text("Error: ${snapshot.error}"));
           }
 
-          final badges = snapshot.data!;
+          // Data API yang didapat
+          final apiBadges = snapshot.data ?? [];
+
+          // Gabungkan data API dengan default badges
+          final combinedBadges = defaultBadges.map((defaultBadge) {
+            // Cek apakah badge ini ada di API
+            final foundBadge = apiBadges.firstWhere(
+              (badge) => badge["id"] == defaultBadge["id"],
+              orElse: () => defaultBadge, // Jika tidak ada, pakai default badge
+            );
+
+            // Jika ditemukan di API, pakai gambar aslinya & tambahkan count
+            return {
+              "id": foundBadge["id"],
+              "title": foundBadge["title"],
+              "description": foundBadge["description"],
+              "picture": foundBadge.containsKey("count")
+                  ? foundBadge["picture"]
+                  : defaultBadge["picture"],
+              "count":
+                  foundBadge["count"] ?? 0, // Default count 0 jika tidak ada
+            };
+          }).toList();
 
           return GridView.builder(
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2, // 2 item per baris
+              crossAxisCount: 2,
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
               childAspectRatio: 0.8,
             ),
-            itemCount: badges.length,
+            itemCount: combinedBadges.length,
             itemBuilder: (context, index) {
-              final badge = badges[index];
+              final badge = combinedBadges[index];
 
               return GestureDetector(
-                onTap: () => _showBadgePopup(
-                    context, badge), // Klik untuk tampilkan popup
+                onTap: () => _showBadgePopup(context, badge),
                 child: Column(
                   children: [
                     Stack(
@@ -418,26 +480,29 @@ class _BadgesTabState extends State<BadgesTab> {
                             ),
                           ),
                         ),
-                        Positioned(
-                          top: 5,
-                          right: 5,
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 2),
-                            ),
-                            child: Text(
-                              'x${badge["count"].toString()}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
+                        // Tampilkan count hanya jika lebih dari 0
+                        if (badge["count"] > 0)
+                          Positioned(
+                            top: 5,
+                            right: 5,
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                                border:
+                                    Border.all(color: Colors.white, width: 2),
+                              ),
+                              child: Text(
+                                'x${badge["count"]}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
-                        ),
                       ],
                     ),
                     const SizedBox(height: 5),
@@ -504,7 +569,8 @@ class _BadgesTabState extends State<BadgesTab> {
                 padding:
                     const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
                 decoration: BoxDecoration(
-                  color: Colors.red,
+                  color:
+                      (badge["count"] == 0) ? Colors.grey.shade400 : Colors.red,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -523,7 +589,8 @@ class _BadgesTabState extends State<BadgesTab> {
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
+                  backgroundColor:
+                      (badge["count"] == 0) ? Colors.grey : Colors.orange,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),

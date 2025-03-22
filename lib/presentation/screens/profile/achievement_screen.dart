@@ -56,13 +56,20 @@ class AchievementScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue,
-        title: const Text('Achievement', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF4285F4),
+        elevation: 2,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
+        ),
+        title: const Text(
+          'Achievement',
+          style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Inter'),
         ),
       ),
       body: ListView.builder(
