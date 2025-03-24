@@ -1,56 +1,71 @@
 import 'package:flutter/material.dart';
 import '../../widgets/achievement.dart';
+import '../../../api/achievement_service.dart';
 
-class AchievementScreen extends StatelessWidget {
+class AchievementScreen extends StatefulWidget {
   const AchievementScreen({super.key});
 
-  static List<Map<String, String>> achievements = [
+  @override
+  _AchievementScreenState createState() => _AchievementScreenState();
+}
+
+class _AchievementScreenState extends State<AchievementScreen> {
+  List<Map<String, dynamic>> achievements = [];
+
+  final List<Map<String, dynamic>> defaultAchievements = [
     {
-      "title": "First Step",
-      "description": "Fully complete one Topic",
-      "icon": "assets/achievement/walk_beginner.svg",
+      "id": 1,
+      "title": "Achievement Collector",
+      "description": "Achieve the first 3 achievements",
+      "picture": "assets/achievement/achievement_grey.svg",
     },
     {
-      "title": "Badge Collector",
-      "description": "Earn your first Badge",
-      "icon": "assets/achievement/badge_.svg",
+      "id": 2,
+      "title": "Ambitious Learner",
+      "description": "Learning for 30 consecutive days",
+      "picture": "assets/achievement/achievement_grey.svg",
     },
     {
-      "title": "Avatar Explorer",
-      "description": "Unlock your first Avatar.",
-      "icon": "assets/achievement/Beginner.svg",
+      "id": 3,
+      "title": "The Ultimate Achievement Hunter",
+      "description": "Collect all available achievements",
+      "picture": "assets/achievement/achievement_grey.svg",
     },
     {
-      "title": "Badge Hunter",
-      "description": "Collect 5 Badges.",
-      "icon": "assets/achievement/badge_junior.svg",
-    },
-    {
-      "title": "Avatar Upgrader",
-      "description": "Unlock 3 avatars",
-      "icon": "assets/achievement/junior.svg",
-    },
-    {
-      "title": "Topic Conqueror",
-      "description": "Fully complete 5 Topics.",
-      "icon": "assets/achievement/walk_junior.svg",
-    },
-    {
-      "title": "Perfectionist ",
-      "description": "Achieve a perfect score (100%) in a Topic",
-      "icon": "assets/achievement/ok_.svg",
-    },
-    {
-      "title": "The Ultimate Badge Hunter",
-      "description": "Collect all available Badges.",
-      "icon": "assets/achievement/badge_expert.svg",
-    },
-    {
+      "id": 4,
       "title": "The Final Boss",
-      "description": "Complete every Topic & Exercise in the platform.",
-      "icon": "assets/achievement/verif_expert.svg",
+      "description": "Complete all the course",
+      "picture": "assets/achievement/achievement_grey.svg",
     },
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAchievements();
+  }
+
+  Future<void> _fetchAchievements() async {
+    try {
+      // Ambil data dari API
+      List<Map<String, dynamic>> apiAchievements = await AchievementsService().getAchievements();
+
+      // Buat daftar ID dari response API
+      Set<int> apiAchievementIds = apiAchievements.map((e) => e["id"] as int).toSet();
+
+      // Filter defaultAchievements yang ID-nya tidak ada di API
+      List<Map<String, dynamic>> missingAchievements = defaultAchievements
+          .where((achievement) => !apiAchievementIds.contains(achievement["id"]))
+          .toList();
+
+      // Gabungkan hasil API + default yang hilang
+      setState(() {
+        achievements = [...apiAchievements, ...missingAchievements];
+      });
+    } catch (e) {
+      print("Error fetching achievements: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,21 +80,24 @@ class AchievementScreen extends StatelessWidget {
           },
         ),
         title: const Text(
-          'Achievement',
+          'My Achievement',
           style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Inter'),
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Inter',
+          ),
         ),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: achievements.length,
-        itemBuilder: (context, index) {
-          final achievement = achievements[index];
-          return AchievementItem(achievement: achievement);
-        },
-      ),
+      body: achievements.isEmpty
+          ? const Center(child: CircularProgressIndicator()) // Loading state
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: achievements.length,
+              itemBuilder: (context, index) {
+                final achievement = achievements[index];
+                return AchievementItem(achievement: achievement);
+              },
+            ),
     );
   }
 }

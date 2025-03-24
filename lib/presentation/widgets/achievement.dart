@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
 
 class AchievementItem extends StatelessWidget {
-  final Map<String, String> achievement;
+  final Map<String, dynamic> achievement;
 
   const AchievementItem({super.key, required this.achievement});
 
@@ -54,9 +54,9 @@ class AchievementItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Hero(
-              tag: achievement["icon"]!,
+              tag: achievement["id"]!,
               child: SvgPicture.asset(
-                achievement["icon"]!,
+                achievement["picture"]!,
                 width: 64,
                 height: 64,
               ),
@@ -92,7 +92,7 @@ class AchievementItem extends StatelessWidget {
 }
 
 class _PopupScreen extends StatelessWidget {
-  final Map<String, String> achievement;
+  final Map<String, dynamic> achievement;
 
   const _PopupScreen({required this.achievement});
 
@@ -108,12 +108,15 @@ class _PopupScreen extends StatelessWidget {
             left: -100,
             right: -100,
             child: Center(
-              child: Lottie.asset(
-                'assets/animation/Animation - 1740191982184.json',
-                repeat: false,
-                fit: BoxFit.cover,
-                width: MediaQuery.of(context).size.width + 200,
-              ),
+              child: achievement["picture"] ==
+                      "assets/achievement/achievement_grey.svg"
+                  ? const SizedBox()
+                  : Lottie.asset(
+                      'assets/animation/Animation - 1740191982184.json',
+                      repeat: false,
+                      fit: BoxFit.cover,
+                      width: MediaQuery.of(context).size.width + 200,
+                    ),
             ),
           ),
 
@@ -125,9 +128,9 @@ class _PopupScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Hero(
-                    tag: achievement["icon"]!,
+                    tag: achievement["id"]!,
                     child: SvgPicture.asset(
-                      achievement["icon"]!,
+                      achievement["picture"]!,
                       width: 210,
                       height: 210,
                     ),
@@ -169,7 +172,8 @@ class _PopupScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.8),
+                  color:
+                       Colors.grey.withOpacity(0.2),
                 ),
                 child: const Icon(Icons.close, size: 30, color: Colors.black54),
               ),
