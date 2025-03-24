@@ -1,8 +1,6 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:progamify/api/badge_service.dart';
-import 'package:progamify/presentation/screens/navigation/bottom_navigation.dart';
 
 class PublicBadgeScreen extends StatefulWidget {
   final int userId;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:progamify/api/auth_service.dart';
+import 'package:progamify/api/topic_service.dart';
 import 'topic_detail_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -66,23 +67,35 @@ class _TopicsScreenState extends State<TopicsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFEAF2FF),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16)
-              .copyWith(top: 20, bottom: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(),
-              const SizedBox(height: 16),
-              Expanded(child: _buildTopicList()),
-            ],
-          ),
-        ),
-      ),
-    );
+    return FutureBuilder<List<Map<String, dynamic>>>(
+        future: TopicService().listTopics(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else {
+            final listTopics = snapshot.data!;
+
+            return Scaffold(
+              backgroundColor: const Color(0xFFEAF2FF),
+              body: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16)
+                      .copyWith(top: 20, bottom: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeader(),
+                      const SizedBox(height: 16),
+                      Expanded(child: _buildTopicList(listTopics)),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }
+        });
   }
 
   Widget _buildHeader() {
@@ -114,15 +127,23 @@ class _TopicsScreenState extends State<TopicsScreen> {
     );
   }
 
-  Widget _buildTopicList() {
+  Widget _buildTopicList(List<Map<String, dynamic>> topics) {
+    List<bool> lockedStatus = List.generate(topics.length, (index) => false);
+
+    for (int i = 1; i < topics.length; i++) {
+      int prevTotalSections = topics[i - 1]['sections'];
+      int prevCompletedSections = topics[i - 1]['completed'];
+
+      if (prevCompletedSections < prevTotalSections) {
+        lockedStatus[i] =
+            true; // Topik ini terkunci jika sebelumnya belum selesai
+      }
+    }
+
     return ListView.builder(
       itemCount: topics.length,
       itemBuilder: (context, index) {
-        bool isLocked = !previousCompleted;
-        int totalSections = topics[index]['sections'];
-        int completedSections = topics[index]['completed'];
-        previousCompleted = completedSections >= totalSections;
-        return _buildTopicCard(topics[index], isLocked);
+        return _buildTopicCard(topics[index], lockedStatus[index]);
       },
     );
   }

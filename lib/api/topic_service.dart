@@ -4,7 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:progamify/api/auth_service.dart';
 
 class TopicService {
-  final String baseUrl = dotenv.env["BASE_URL_API"] ?? "http://194.163.40.203:8080/api";
+  final String baseUrl =
+      dotenv.env["BASE_URL_API"] ?? "http://194.163.40.203:8080/api";
   final AuthService authService = AuthService();
 
   Future<List<Map<String, dynamic>>> listTopics() async {
@@ -19,7 +20,27 @@ class TopicService {
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      var data = json.decode(response.body);
+
+      if (data != null) {
+        List<Map<String, dynamic>> topics = List<Map<String, dynamic>>.from(
+          data.map((topic) {
+            return {
+              'id': topic['id'],
+              'title': topic['name'] ?? 'Untitled Topic',
+              'sections': topic['total_lessons'] + topic['total_exercises'],
+              'completed':
+                  topic['total_take_lessons'] + topic['total_take_exercises'],
+              'total_lessons': topic['total_lessons'],
+              'total_exercises': topic['total_exercises']
+            };
+          }),
+        );
+
+        return topics;
+      }
+
+      return [];
     } else {
       throw Exception('Failed to load topic data');
     }

@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart';
 import 'package:progamify/api/auth_service.dart';
+import 'package:progamify/utils/util.dart';
 
 class DiscussionService {
-  final String baseUrl = dotenv.env["BASE_URL_API"] ?? "http://194.163.40.203:8080/api";
+  final String baseUrl =
+      dotenv.env["BASE_URL_API"] ?? "http://194.163.40.203:8080/api";
   final AuthService authService = AuthService();
 
   Future<List<Map<String, String>>> getDiscussions(int lessonId) async {
@@ -24,12 +27,14 @@ class DiscussionService {
         List<Map<String, String>> discussions = List<Map<String, String>>.from(
           data.map((item) {
             return {
-              'id': "${item['id']}",
+              'id': "${item['ID']}",
               'content': item['content'] as String,
-              'date': item['date'] as String,
-              'name': item['name'] as String,
+              'date': Util().formatDateTime(item['CreatedAt']),
+              'name': item['user']['name'] as String,
               'title': item['title'] as String,
-              'replies': "${item['replies']}"
+              'replies': "${item['replies'].length}",
+              'picture':
+                  Util().getLinkLaravel(item['user']['avatar']['picture_url'])
             };
           }),
         );
@@ -54,7 +59,7 @@ class DiscussionService {
 
     if (response.statusCode == 200) {
       var data = json.decode(response.body);
-
+      Logger().i(data);
       return data;
     } else {
       throw Exception('Failed to load discussion data');
