@@ -17,8 +17,8 @@ class _AchievementScreenState extends State<AchievementScreen> {
   final List<Map<String, dynamic>> defaultAchievements = [
     {
       "id": 1,
-      "title": "Achievement Collector",
-      "description": "Achieve the first 3 achievements",
+      "title": "Badge Collector",
+      "description": "Achieve the first 3 badges",
       "picture": "assets/achievement/achievement_grey.svg",
     },
     {
@@ -29,8 +29,8 @@ class _AchievementScreenState extends State<AchievementScreen> {
     },
     {
       "id": 3,
-      "title": "The Ultimate Achievement Hunter",
-      "description": "Collect all available achievements",
+      "title": "The Ultimate Badge Hunter",
+      "description": "Collect all available badges",
       "picture": "assets/achievement/achievement_grey.svg",
     },
     {
