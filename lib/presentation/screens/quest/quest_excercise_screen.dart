@@ -108,6 +108,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
         result?["quest"]['answer']['exp_gained'],
         result?["quest"]['answer']['point_gained'],
         result?["badge"],
+        result?["achievement"],
       );
       _timer?.cancel();
     } catch (e) {
@@ -115,8 +116,14 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
     }
   }
 
-  void _showBadges(List<dynamic> badges, int index) {
-    if (index >= badges.length) return;
+  void _showBadges(
+      List<dynamic> badges, int index, List<dynamic> achievements) {
+    if (index >= badges.length) {
+      if (achievements != null || achievements.isNotEmpty) {
+        _showAchievement(achievements);
+      }
+      return;
+    }
 
     var badge = badges[index]["Badge"];
 
@@ -200,7 +207,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
 
                             Future.delayed(const Duration(milliseconds: 300),
                                 () {
-                              _showBadges(badges, index + 1);
+                              _showBadges(badges, index + 1, achievements);
                             });
                           },
                           style: ElevatedButton.styleFrom(
@@ -979,10 +986,9 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               color: Colors.white,
             ),
             "p": Style(
-              fontSize: FontSize(16),
-              textAlign: TextAlign.justify,
-              color: Colors.white
-            ),
+                fontSize: FontSize(16),
+                textAlign: TextAlign.justify,
+                color: Colors.white),
           },
         ),
       ),
@@ -1307,15 +1313,9 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                     int expGain = result?["quest"]['answer']['exp_gained'];
                     int pointGain = result?["quest"]['answer']['point_gained'];
                     List<dynamic> badges = result?['badge'] ?? [];
-                    _showResultDialog(
-                      context,
-                      isCorrect,
-                      correctPath,
-                      wrongPath,
-                      expGain,
-                      pointGain,
-                      badges,
-                    );
+                    List<dynamic> achievements = result?['achievement'] ?? [];
+                    _showResultDialog(context, isCorrect, correctPath,
+                        wrongPath, expGain, pointGain, badges, achievements);
                   }
                 }
               },
@@ -1485,7 +1485,8 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
       String wrongPath,
       int expGain,
       int poinGain,
-      List<dynamic> badges) {
+      List<dynamic> badges,
+      List<dynamic> achievements) {
     if (isCorrect) {
       _playSoundEffect(correctPath);
     } else {
@@ -1559,7 +1560,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
 
                         Future.delayed(const Duration(milliseconds: 300), () {
                           if (badges != null || badges.isNotEmpty) {
-                            _showBadges(badges, 0);
+                            _showBadges(badges, 0, achievements);
                           }
                         });
                       },
@@ -1647,6 +1648,125 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showAchievement(List<dynamic> achievements, {int index = 0}) {
+    if (index >= achievements.length) {
+      return; // Jika sudah menampilkan semua achievements, hentikan
+    }
+
+    var achievement = achievements[index];
+
+    _playSoundEffect('audio/mixkit-winning-chimes-2015.wav');
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return TweenAnimationBuilder(
+          tween: Tween<double>(begin: 0.8, end: 1.0),
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutBack,
+          builder: (context, double scale, child) {
+            return Transform.scale(
+              scale: scale,
+              child: Dialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        "Achievement Unlocked!",
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFCD7F32),
+                        ),
+                      ),
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          SizedBox(
+                            width: 240,
+                            height: 240,
+                            child: Lottie.asset(
+                              'assets/animation/Animation - 1740191982184.json',
+                              fit: BoxFit.contain,
+                              repeat: false,
+                            ),
+                          ),
+                          SvgPicture.asset(
+                            achievement["picture"]!,
+                            width: 120,
+                            height: 120,
+                          ),
+                        ],
+                      ),
+                      Text(
+                        achievement["title"]!,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                          fontFamily: 'Inter',
+                          color: Color(0xFFFFBB28),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        achievement["description"]!,
+                        style: const TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 16,
+                          color: Colors.black54,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            _stopSoundEffect();
+
+                            Future.delayed(const Duration(milliseconds: 300),
+                                () {
+                              _showAchievement(achievements, index: index + 1);
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFF9A215),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          child: const Text(
+                            "Lanjutkan",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Inter',
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
