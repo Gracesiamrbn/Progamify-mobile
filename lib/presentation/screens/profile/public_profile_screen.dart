@@ -4,7 +4,7 @@ import 'package:logger/logger.dart';
 import '../../widgets/profile_info.dart';
 import '../../widgets/public_badges_section.dart';
 import '../../widgets/summary_boxes.dart';
-import '../../widgets/summary_grid.dart';
+import '../../widgets/public_summary_grid.dart';
 
 class PublicProfileScreen extends StatelessWidget {
   final Map<String, dynamic> user;
@@ -63,7 +63,7 @@ class PublicProfileScreen extends StatelessWidget {
                   level: user['level_id'],
                   totalLesson: user["total_lesson_taken"] ?? 0,
                 ),
-                const SummaryGrid(),
+                PublicSummaryGrid(userId: user['ID'],),
                 PublicBadgesSection(userId: user['ID']),
               ],
             ),

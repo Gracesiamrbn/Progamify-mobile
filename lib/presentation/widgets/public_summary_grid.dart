@@ -2,24 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
-import 'package:progamify/presentation/screens/profile/achievement_screen.dart';
+import 'package:progamify/presentation/screens/profile/public_achievement_screen.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 
 import '../../api/achievement_service.dart';
 
-class SummaryGrid extends StatefulWidget {
+class PublicSummaryGrid extends StatefulWidget {
   final String title;
+  final int userId;
 
-  const SummaryGrid({
+  const PublicSummaryGrid({
     super.key,
-    this.title = "Summary",
+    required this.userId,
+    this.title = "PublicSummary",
   });
 
   @override
-  _SummaryGridState createState() => _SummaryGridState();
+  _PublicSummaryGridState createState() => _PublicSummaryGridState();
 }
 
-class _SummaryGridState extends State<SummaryGrid> {
+class _PublicSummaryGridState extends State<PublicSummaryGrid> {
   final AchievementsService _achievementsService = AchievementsService();
   List<Map<String, dynamic>> _achievements = [];
   bool _isLoading = true;
@@ -27,8 +29,8 @@ class _SummaryGridState extends State<SummaryGrid> {
   final defaultAchievements = [
     {
       "id": 1,
-      "title": "Achievement Collector",
-      "description": "Achieve the first 3 achievements",
+      "title": "Badge Collector",
+      "description": "Achieve the first 3 badges",
       "picture": "assets/achievement/achievement_grey.svg",
     },
     {
@@ -39,8 +41,8 @@ class _SummaryGridState extends State<SummaryGrid> {
     },
     {
       "id": 3,
-      "title": "The Ultimate Achievement Hunter",
-      "description": "Collect all available achievements",
+      "title": "The Ultimate Badge Hunter",
+      "description": "Collect all available badges",
       "picture": "assets/achievement/achievement_grey.svg",
     },
     {
@@ -59,7 +61,8 @@ class _SummaryGridState extends State<SummaryGrid> {
 
   Future<void> _fetchAchievements() async {
     try {
-      final data = await _achievementsService.getAchievements();
+      final data =
+          await _achievementsService.getAchievementsByUserId(widget.userId);
 
       if (data.isEmpty) {
         setState(() {
@@ -83,6 +86,7 @@ class _SummaryGridState extends State<SummaryGrid> {
       });
     } catch (e) {
       setState(() {
+        _achievements = defaultAchievements;
         _isLoading = false;
       });
     }
@@ -169,7 +173,7 @@ class _SummaryGridState extends State<SummaryGrid> {
                           children: [
                             Hero(
                               tag: achievement[
-                                  "id"]!,
+                                  "id"]!, 
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(50),
                                 child: SvgPicture.asset(
@@ -228,7 +232,9 @@ class _SummaryGridState extends State<SummaryGrid> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const AchievementScreen(),
+                        builder: (context) => PublicAchievementScreen(
+                          userId: widget.userId,
+                        ),
                       ),
                     );
                   },
@@ -320,21 +326,6 @@ class _PopupScreen extends StatelessWidget {
         fit: StackFit.expand,
         alignment: Alignment.center,
         children: [
-          Positioned(
-            left: -100,
-            right: -100,
-            child: Center(
-              child: achievement["picture"] ==
-                      "assets/achievement/achievement_grey.svg"
-                  ? const SizedBox()
-                  : Lottie.asset(
-                      'assets/animation/Animation - 1740191982184.json',
-                      repeat: false,
-                      fit: BoxFit.cover,
-                      width: MediaQuery.of(context).size.width + 200,
-                    ),
-            ),
-          ),
           Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),

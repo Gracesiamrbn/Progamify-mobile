@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:progamify/presentation/screens/navigation/bottom_navigation.dart';
 import 'package:progamify/api/badge_service.dart';
+import 'package:shimmer_animation/shimmer_animation.dart';
 
 class BadgesSection extends StatefulWidget {
   final String title;
@@ -126,7 +127,7 @@ class _BadgesSectionState extends State<BadgesSection> {
           ),
           const SizedBox(height: 8),
           _isLoading
-              ? const CircularProgressIndicator()
+              ? buildSkeletonBadgeRow()
               : Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: _badges.map((badge) {
@@ -282,6 +283,30 @@ class _BadgesSectionState extends State<BadgesSection> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget buildSkeletonBadgeRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: List.generate(4, (index) {
+        return Shimmer(
+          color: Colors.grey[100]!,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300]!,
+                  borderRadius: BorderRadius.circular(50),
+                ),
+              ),
+            ],
+          ),
+        );
+      }),
     );
   }
 }
