@@ -302,24 +302,18 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
                                 Row(
                                   children: [
                                     CircleAvatar(
-                                        backgroundColor: Colors.grey,
-                                        radius: 10,
-                                        child: ClipOval(
-                                          child: SvgPicture.asset(
-                                            "assets/avatars/avatar_jumbotron_1.svg",
-                                            fit: BoxFit.cover,
-                                          ),
-                                        )),
-                                    // child: ClipOval(
-                                    //   child: SvgPicture.network(
-                                    //     "http://194.163.40.203:9000/storage/market/images/2gvDExwSaeKV33LG1zLOYn0SCyT9rzYclEESaOb3.svg",
-                                    //     fit: BoxFit.cover,
-                                    //     placeholderBuilder: (BuildContext
-                                    //             context) =>
-                                    //         const CircularProgressIndicator(),
-                                    //   ),
-                                    // ),
-                                    // ),
+                                      backgroundColor: Colors.grey,
+                                      radius: 10,
+                                      child: ClipOval(
+                                        child: SvgPicture.network(
+                                          discussions[index]["picture"]!,
+                                          fit: BoxFit.cover,
+                                          placeholderBuilder: (BuildContext
+                                                  context) =>
+                                              const CircularProgressIndicator(),
+                                        ),
+                                      ),
+                                    ),
                                     const SizedBox(width: 8),
                                     Text(
                                       discussions[index]['name']!,

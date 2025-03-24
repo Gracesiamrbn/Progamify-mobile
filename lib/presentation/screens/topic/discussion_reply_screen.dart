@@ -71,8 +71,6 @@ class DiscussionReplyScreenState extends State<DiscussionReplyScreen> {
 
           if (snapshot.hasData && snapshot.data!.isNotEmpty) {
             Map<String, dynamic> discussions = snapshot.data!;
-            // List<Map<String, dynamic>> replies =
-            //     Util().convertToDynamicMapList(discussions["replies"]);
             var replies = discussions["replies"] ?? [];
 
             return Scaffold(
@@ -94,15 +92,17 @@ class DiscussionReplyScreenState extends State<DiscussionReplyScreen> {
                     Row(
                       children: [
                         CircleAvatar(
-                          backgroundColor: Colors.grey,
-                          radius: 14,
-                          child: SvgPicture.asset(
-                            "assets/avatars/avatar_male_1.svg",
-                            width: 40,
-                            height: 40,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
+                            backgroundColor: Colors.grey,
+                            radius: 14,
+                            child: ClipOval(
+                              child: SvgPicture.network(
+                                Util().getLinkLaravel(discussions["user"]
+                                    ["avatar"]["picture_url"]),
+                                width: 40,
+                                height: 40,
+                                fit: BoxFit.cover,
+                              ),
+                            )),
                         const SizedBox(width: 8),
                         Text(
                           widget.author,
@@ -177,6 +177,8 @@ class DiscussionReplyScreenState extends State<DiscussionReplyScreen> {
                             date: Util()
                                 .formatDateTime(replies[index]["CreatedAt"]),
                             content: replies[index]["content"],
+                            picture: Util().getLinkLaravel(replies[index]
+                                ["detail_user"]["avatar"]["picture_url"]),
                           );
                         },
                       ),
@@ -207,11 +209,13 @@ class DiscussionReplyScreenState extends State<DiscussionReplyScreen> {
                         CircleAvatar(
                           backgroundColor: Colors.grey,
                           radius: 14,
-                          child: SvgPicture.asset(
-                            "assets/avatars/avatar_male_1.svg",
-                            width: 40,
-                            height: 40,
-                            fit: BoxFit.cover,
+                          child: ClipOval(
+                            child: SvgPicture.asset(
+                              "",
+                              width: 40,
+                              height: 40,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -283,9 +287,13 @@ class _ReplyItem extends StatelessWidget {
   final String name;
   final String date;
   final String content;
+  final String picture;
 
   const _ReplyItem(
-      {required this.name, required this.date, required this.content});
+      {required this.name,
+      required this.date,
+      required this.content,
+      required this.picture});
 
   @override
   Widget build(BuildContext context) {
@@ -300,15 +308,16 @@ class _ReplyItem extends StatelessWidget {
             Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: Colors.grey,
-                  radius: 10,
-                  child: SvgPicture.asset(
-                    "assets/avatars/avatar_male_1.svg",
-                    width: 40,
-                    height: 40,
-                    fit: BoxFit.cover,
-                  ),
-                ),
+                    backgroundColor: Colors.grey,
+                    radius: 10,
+                    child: ClipOval(
+                      child: SvgPicture.network(
+                        picture,
+                        width: 40,
+                        height: 40,
+                        fit: BoxFit.cover,
+                      ),
+                    )),
                 const SizedBox(width: 8),
                 Text(
                   name,

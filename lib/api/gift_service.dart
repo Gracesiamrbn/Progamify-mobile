@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:logger/logger.dart';
 import 'package:progamify/api/auth_service.dart';
 import 'package:progamify/utils/util.dart';
 
 class GiftService {
-  final String baseUrl = dotenv.env["BASE_URL_API"] ?? "http://194.163.40.203:8080/api";
+  final String baseUrl =
+      dotenv.env["BASE_URL_API"] ?? "http://194.163.40.203:8080/api";
   final AuthService authService = AuthService();
 
   Future<List<Map<String, dynamic>>> getGifts() async {
@@ -58,6 +58,41 @@ class GiftService {
       return json.decode(response.body);
     } else {
       throw Exception("Failed to buy gift");
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getUserGift() async {
+    String? token = await authService.getToken();
+    final response = await http.get(Uri.parse('$baseUrl/gifts/user'), headers: {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    });
+
+    if (response.statusCode == 200) {
+      var data = json.decode(response.body);
+
+      if (data != null) {
+        List<Map<String, dynamic>> vouchers = List<Map<String, dynamic>>.from(
+          data.map((item) {
+            return {
+              'id': item['ID'],
+              'image':
+                  Util().getLinkLaravel(item['gift']['picture_url'] as String),
+              'price': item['gift']['price'],
+              'title': item['gift']['title'] as String,
+              'user_name': item["user"]["name"] as String,
+              'created_at': item["CreatedAt"],
+              'is_active': item["is_active"],
+            };
+          }),
+        );
+
+        return vouchers;
+      }
+
+      return [];
+    } else {
+      throw Exception("Failed to get vouchers");
     }
   }
 }

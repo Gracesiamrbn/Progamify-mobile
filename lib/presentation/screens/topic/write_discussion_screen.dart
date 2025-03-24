@@ -4,6 +4,7 @@ import 'package:logger/logger.dart';
 import 'package:progamify/api/discussion_service.dart';
 import 'package:progamify/api/user_service.dart';
 import 'package:progamify/presentation/screens/topic/topic_course_screen.dart';
+import 'package:progamify/utils/util.dart';
 
 class WriteDiscussionScreen extends StatefulWidget {
   final int lessonId;
@@ -158,11 +159,14 @@ class WriteDiscussionScreenState extends State<WriteDiscussionScreen> {
                         CircleAvatar(
                           radius: 20,
                           backgroundColor: Colors.grey,
-                          child: SvgPicture.asset(
-                            "assets/avatars/avatar_male_1.svg",
-                            width: 40,
-                            height: 40,
-                            fit: BoxFit.cover,
+                          child: ClipOval(
+                            child: SvgPicture.network(
+                              Util().getLinkLaravel(
+                                  user["detail_avatar"]["picture_url"]),
+                              width: 40,
+                              height: 40,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 10),
