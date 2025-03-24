@@ -27,8 +27,8 @@ class _SummaryGridState extends State<SummaryGrid> {
   final defaultAchievements = [
     {
       "id": 1,
-      "title": "Achievement Collector",
-      "description": "Achieve the first 3 achievements",
+      "title": "Badge Collector",
+      "description": "Achieve the first 3 badges",
       "picture": "assets/achievement/achievement_grey.svg",
     },
     {
@@ -39,8 +39,8 @@ class _SummaryGridState extends State<SummaryGrid> {
     },
     {
       "id": 3,
-      "title": "The Ultimate Achievement Hunter",
-      "description": "Collect all available achievements",
+      "title": "The Ultimate Badge Hunter",
+      "description": "Collect all available badges",
       "picture": "assets/achievement/achievement_grey.svg",
     },
     {
@@ -83,6 +83,7 @@ class _SummaryGridState extends State<SummaryGrid> {
       });
     } catch (e) {
       setState(() {
+        _achievements = defaultAchievements;
         _isLoading = false;
       });
     }

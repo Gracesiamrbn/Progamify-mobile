@@ -10,7 +10,9 @@ class AchievementScreen extends StatefulWidget {
 }
 
 class _AchievementScreenState extends State<AchievementScreen> {
-  List<Map<String, dynamic>> achievements = [];
+  final AchievementsService _achievementsService = AchievementsService();
+  List<Map<String, dynamic>> _achievements = [];
+  bool _isLoading = true;
 
   final List<Map<String, dynamic>> defaultAchievements = [
     {
@@ -47,23 +49,33 @@ class _AchievementScreenState extends State<AchievementScreen> {
 
   Future<void> _fetchAchievements() async {
     try {
-      // Ambil data dari API
-      List<Map<String, dynamic>> apiAchievements = await AchievementsService().getAchievements();
+      final data = await _achievementsService.getAchievements();
 
-      // Buat daftar ID dari response API
-      Set<int> apiAchievementIds = apiAchievements.map((e) => e["id"] as int).toSet();
+      if (data.isEmpty) {
+        setState(() {
+          _achievements = defaultAchievements;
+          _isLoading = false;
+        });
+        return;
+      }
 
-      // Filter defaultAchievements yang ID-nya tidak ada di API
-      List<Map<String, dynamic>> missingAchievements = defaultAchievements
-          .where((achievement) => !apiAchievementIds.contains(achievement["id"]))
-          .toList();
+      Map<int, Map<String, dynamic>> achievementMap = {
+        for (var achievement in data) achievement['id']: achievement
+      };
 
-      // Gabungkan hasil API + default yang hilang
       setState(() {
-        achievements = [...apiAchievements, ...missingAchievements];
+        _achievements = defaultAchievements.map((achievement) {
+          return achievementMap.containsKey(achievement["id"])
+              ? achievementMap[achievement["id"]]!
+              : achievement;
+        }).toList();
+        _isLoading = false;
       });
     } catch (e) {
-      print("Error fetching achievements: $e");
+      setState(() {
+        _achievements = defaultAchievements;
+        _isLoading = false;
+      });
     }
   }
 
@@ -88,13 +100,13 @@ class _AchievementScreenState extends State<AchievementScreen> {
           ),
         ),
       ),
-      body: achievements.isEmpty
+      body: _isLoading
           ? const Center(child: CircularProgressIndicator()) // Loading state
           : ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: achievements.length,
+              itemCount: _achievements.length,
               itemBuilder: (context, index) {
-                final achievement = achievements[index];
+                final achievement = _achievements[index];
                 return AchievementItem(achievement: achievement);
               },
             ),
