@@ -85,6 +85,25 @@ class VoucherScreenState extends State<VoucherScreen> {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (snapshot.hasData && snapshot.data!.isEmpty) {
+            return Scaffold(
+              appBar: AppBar(
+                title: const Text(
+                  'My Voucher',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                ),
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                centerTitle: true,
+                elevation: 5,
+              ),
+              body: Center(
+                child: Text(
+                  'Kamu tidak memiliki voucher',
+                  style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                ),
+              ),
+            );
           } else {
             final vouchers = snapshot.data!;
 
