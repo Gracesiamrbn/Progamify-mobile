@@ -17,88 +17,93 @@ class SettingsScreen extends StatelessWidget {
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Profile Section
-            ElevatedButton(
-              onPressed: () {
-                // Action for Profile
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SettingProfileScreen(),
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[300], // Light grey background
-                minimumSize:
-                    const Size(double.infinity, 50), // Full width button
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: const Align(
-                alignment: Alignment.centerLeft, // Rata kiri
-                child: Text(
-                  'Profile',
-                  style: AppStyles.cardTitleStyle,
-                ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text(
+              'Akun',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[700],
               ),
             ),
-            const SizedBox(height: 16),
+          ),
 
-            // Change Password Section
-            ElevatedButton(
-              onPressed: () {
-                // Action for Change Password
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ChangePasswordScreen(),
+          // List Preferensi
+          Card(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+              side: BorderSide(color: Colors.grey.shade300, width: 1),
+            ),
+            child: Column(
+              children: [
+                ListTile(
+                  title: const Text(
+                    'Data Diri',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, fontFamily: 'Inter'),
                   ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[300], // Light grey background
-                minimumSize:
-                    const Size(double.infinity, 50), // Full width button
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SettingProfileScreen(),
+                      ),
+                    );
+                  },
                 ),
-              ),
-              child: const Align(
-                alignment: Alignment.centerLeft, // Rata kiri
-                child: Text(
-                  'Change Password',
-                  style: AppStyles.cardTitleStyle,
+                const Divider(height: 1),
+                ListTile(
+                  title: const Text(
+                    'Ganti Kata Sandi',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ChangePasswordScreen(),
+                      ),
+                    );
+                  },
                 ),
-              ),
+              ],
             ),
-            const Spacer(),
+          ),
 
-            // Sign Out Button
-            ElevatedButton(
-              onPressed: () {
-                authService.logout(context);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red, // Red background
-                minimumSize:
-                    const Size(double.infinity, 50), // Full width button
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+          const Spacer(),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  authService.logout(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text(
+                  'Keluar',
+                  style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
-              child: const Text(
-                'Sign Out',
-                style: TextStyle(fontSize: 18, color: Colors.white),
-              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
