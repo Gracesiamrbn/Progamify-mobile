@@ -290,17 +290,64 @@ class _QuestTabState extends State<QuestTab> {
           const SizedBox(height: 10),
           const Text(
             'Complete a random quest to upgrade your level and gain a badge. The higher your level, the harder the quest you’ll likely get.',
-            style: TextStyle(fontSize: 14),
+            style: TextStyle(fontSize: 14, fontFamily: 'Inter'),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'There are 3 types of quest: easy, medium, hard. When you achieve certain criteria, you will gain a badge.',
-            style: TextStyle(fontSize: 14),
+          RichText(
+            text: const TextSpan(
+              style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.black,
+                  fontFamily: 'Inter'), // Default style
+              children: [
+                TextSpan(text: 'There are 3 types of quest: '),
+                TextSpan(
+                  text: 'easy',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: Colors.green),
+                ),
+                TextSpan(text: ', '),
+                TextSpan(
+                  text: 'medium',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromARGB(255, 255, 211, 13)),
+                ),
+                TextSpan(text: ', '),
+                TextSpan(
+                  text: 'hard',
+                  style:
+                      TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
+          RichText(
+            text: const TextSpan(
+              style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.black,
+                  fontFamily: 'Inter'), // Default style
+              children: [
+                TextSpan(
+                    text:
+                        'When you achieve certain criteria, you will gain a '),
+                TextSpan(
+                  text: 'badge.',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: Colors.amber),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
           const Text(
             'Click the play icon button to start today’s random quest.',
-            style: TextStyle(fontSize: 14),
+            style: TextStyle(
+              fontSize: 14,
+              fontStyle: FontStyle.italic,
+            ),
           ),
           const SizedBox(height: 10),
           Align(

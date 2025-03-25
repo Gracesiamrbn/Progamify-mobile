@@ -168,7 +168,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                         ),
                         const SizedBox(height: 20),
                         const Text(
-                          '🎉 Selamat! 🎉',
+                          '🎉 Congratulations! 🎉',
                           style: TextStyle(
                             fontSize: 22,
                             fontFamily: 'Inter',
@@ -186,7 +186,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                         ),
                         const SizedBox(height: 10),
                         const Text(
-                          'Kamu mendapat peringkat pertama di leaderboard!',
+                          'You are in first place on the leaderboard!',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'Inter',
@@ -212,7 +212,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                         });
                       },
                       child: const Text(
-                        'Lihat Leaderboard',
+                        'See Leaderboard',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
