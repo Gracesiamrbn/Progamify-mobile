@@ -82,6 +82,7 @@ class _BadgesSectionState extends State<BadgesSection> {
       });
     } catch (e) {
       setState(() {
+        _badges = defaultBadges;
         _isLoading = false;
       });
     }

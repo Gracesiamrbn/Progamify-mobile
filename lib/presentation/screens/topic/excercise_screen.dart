@@ -54,6 +54,13 @@ class ExerciseScreenState extends State<ExerciseScreen> {
       var result = await ExerciseService()
           .submitExercise(widget.exerciseId, jawabanUser);
 
+      Logger().i("Result: $result");
+
+      // Cek apakah result memiliki achievement
+      if (result["achievement"] != null && result["achievement"].isNotEmpty) {
+        await _showPopUpAchievement(result["achievement"]);
+      }
+
       Navigator.pop(context);
       Navigator.pushReplacement(
         context,
@@ -879,6 +886,35 @@ class ExerciseScreenState extends State<ExerciseScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> _showPopUpAchievement(List<dynamic> achievements) async {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Achievement Unlocked!"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: achievements.map((ach) {
+              return ListTile(
+                leading: Icon(Icons.emoji_events, color: Colors.amber),
+                title: Text(ach["title"]),
+                subtitle: Text(ach["description"]),
+              );
+            }).toList(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
     );
   }
 }

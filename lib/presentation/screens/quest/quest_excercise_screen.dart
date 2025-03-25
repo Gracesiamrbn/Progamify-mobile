@@ -6,7 +6,6 @@ import 'package:progamify/api/quest_service.dart';
 import 'package:logger/logger.dart';
 import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:shimmer_animation/shimmer_animation.dart';
 
 class QuestExcerciseScreen extends StatefulWidget {
   final int userId;
@@ -25,6 +24,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
   Map<String, dynamic> jawabanUser = {};
   late Future<Map<String, dynamic>> _questionsFuture;
   Map<String, dynamic>? result;
+  final Logger log = Logger();
 
   // Logger
   final logger = Logger();
@@ -119,8 +119,13 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
   void _showBadges(
       List<dynamic> badges, int index, List<dynamic> achievements) {
     if (index >= badges.length) {
-      if (achievements != null || achievements.isNotEmpty) {
+      log.i("Semua badge telah ditampilkan.");
+      if (achievements != null && achievements.isNotEmpty) {
+        print("Menampilkan achievements...");
+        print('achievements: $achievements');
         _showAchievement(achievements);
+      } else {
+        print("Tidak ada achievements untuk ditampilkan.");
       }
       return;
     }
@@ -1653,12 +1658,12 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
 
   void _showAchievement(List<dynamic> achievements, {int index = 0}) {
     if (index >= achievements.length) {
-      return; // Jika sudah menampilkan semua achievements, hentikan
+      return;
     }
 
-    var achievement = achievements[index];
+    var achievement = achievements[index]["Achievement"];
 
-    _playSoundEffect('audio/mixkit-winning-chimes-2015.wav');
+    _playSoundEffect('audio/tadaa-47995.mp3');
 
     showDialog(
       context: context,
@@ -1672,95 +1677,121 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
             return Transform.scale(
               scale: scale,
               child: Dialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        "Achievement Unlocked!",
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFFCD7F32),
+                backgroundColor: Colors.transparent,
+                insetPadding: EdgeInsets.zero,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      left: -100,
+                      right: -100,
+                      child: Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                        ),
+                        child: Lottie.asset(
+                          'assets/animation/Animation - 1740191982184.json',
+                          fit: BoxFit.cover,
+                          repeat: true,
+                          width: MediaQuery.of(context).size.width + 200,
                         ),
                       ),
-                      Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          SizedBox(
-                            width: 240,
-                            height: 240,
-                            child: Lottie.asset(
-                              'assets/animation/Animation - 1740191982184.json',
-                              fit: BoxFit.contain,
-                              repeat: false,
+                    ),
+                    Positioned.fill(
+                      child: Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: const BoxDecoration(
+                          color: Colors.transparent,
+                        ),
+                        child: Column(
+                          children: [
+                            // Bagian tengah tetap rata tengah
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text(
+                                    "Achievement Unlocked!",
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFFCD7F32),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  SvgPicture.asset(
+                                    achievement["picture"]!,
+                                    width: 120,
+                                    height: 120,
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Text(
+                                    achievement["title"]!,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20,
+                                      fontFamily: 'Inter',
+                                      color: Color(0xFFFFBB28),
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    achievement["description"]!,
+                                    style: const TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 16,
+                                      color: Colors.black54,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          SvgPicture.asset(
-                            achievement["picture"]!,
-                            width: 120,
-                            height: 120,
-                          ),
-                        ],
-                      ),
-                      Text(
-                        achievement["title"]!,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                          fontFamily: 'Inter',
-                          color: Color(0xFFFFBB28),
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        achievement["description"]!,
-                        style: const TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 16,
-                          color: Colors.black54,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            _stopSoundEffect();
+                            // Tombol di bawah
+                            Align(
+                              alignment: Alignment.bottomCenter,
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                    _stopSoundEffect();
 
-                            Future.delayed(const Duration(milliseconds: 300),
-                                () {
-                              _showAchievement(achievements, index: index + 1);
-                            });
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFF9A215),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                                    Future.delayed(
+                                      const Duration(milliseconds: 300),
+                                      () {
+                                        _showAchievement(achievements,
+                                            index: index + 1);
+                                      },
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFF9A215),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 14),
+                                  ),
+                                  child: const Text(
+                                    "Lanjutkan",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Inter',
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                          ),
-                          child: const Text(
-                            "Lanjutkan",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Inter',
-                              color: Colors.white,
-                            ),
-                          ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             );
