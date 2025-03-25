@@ -24,7 +24,7 @@ class SettingsScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
-              'Akun',
+              'Account',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -44,7 +44,7 @@ class SettingsScreen extends StatelessWidget {
               children: [
                 ListTile(
                   title: const Text(
-                    'Data Diri',
+                    'Profile',
                     style: TextStyle(
                         fontWeight: FontWeight.bold, fontFamily: 'Inter'),
                   ),
@@ -61,7 +61,7 @@ class SettingsScreen extends StatelessWidget {
                 const Divider(height: 1),
                 ListTile(
                   title: const Text(
-                    'Ganti Kata Sandi',
+                    'Change Password',
                     style: TextStyle(
                         fontWeight: FontWeight.bold, fontFamily: 'Inter'),
                   ),
@@ -97,7 +97,7 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ),
                 child: const Text(
-                  'Keluar',
+                  'Sign Out',
                   style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
