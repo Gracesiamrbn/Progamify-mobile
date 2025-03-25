@@ -33,7 +33,7 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
     jawabanUser = ExerciseService()
         .convertJawabanUserStringToInt(widget.userAnswers["answers"]);
 
-    Logger().i(jawabanUser);
+    Logger().i('jawaban user= $jawabanUser');
 
     if (jawabanUser[currentQuestionIndex] != null) {
       selectedAnswer = jawabanUser[currentQuestionIndex]["user_answer_index"];
@@ -140,6 +140,7 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
 
         final response = snapshot.data!;
         final questionsData = response["questions"];
+        // print('questionsData: $questionsData');
 
         List<Map<String, dynamic>> questions = [];
         for (int i = 0; i < questionsData.length; i++) {
@@ -240,7 +241,7 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    '+$exp exp',
+                    '$exp exp',
                     style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -256,7 +257,7 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    '+$pts pts',
+                    '$pts pts',
                     style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -345,6 +346,54 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
                   const SizedBox(height: 20),
                   _buildOptions(questions),
                   const SizedBox(height: 20),
+                  const Text(
+                    "Reward Gain",
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Text(
+                        "+${jawabanUser[question["q_index"]]?["exp_gained"] ?? 0}",
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.deepPurple),
+                      ),
+                      const SizedBox(
+                        width: 5,
+                      ),
+                      Image.asset("assets/icons/exp_point_1.png", height: 20),
+                      const SizedBox(width: 10),
+                      Text(
+                        "+${jawabanUser[question["q_index"]]?["point_gained"] ?? 0}",
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.amber),
+                      ),
+                      const SizedBox(
+                        width: 5,
+                      ),
+                      Image.asset("assets/icons/coin.png", height: 20),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  const Text(
+                    "Correct Answer:",
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  _buildExplanation(questions[currentQuestionIndex]['explanation'] ??
+                      'Isi Jawaban Anda!'),
+                  const SizedBox(
+                    height: 20,
+                  ),
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -699,6 +748,47 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
               color: isSelected ? Colors.white : Colors.black,
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExplanation(String explanation) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.blue,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            // 🔥 Tambahkan shadow
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
+            ),
+          ],
+          // border: Border.all(color: Colors.grey),
+        ),
+        child: Html(
+          data: """
+          <h3 style="margin-bottom: 8px; text-align: center;">Penjelasan:</h3>
+          <p>$explanation</p>
+        """,
+          style: {
+            "h3": Style(
+              fontSize: FontSize(18),
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+            "p": Style(
+                fontSize: FontSize(16),
+                textAlign: TextAlign.justify,
+                color: Colors.white),
+          },
         ),
       ),
     );
