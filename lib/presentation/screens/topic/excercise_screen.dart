@@ -50,8 +50,6 @@ class ExerciseScreenState extends State<ExerciseScreen> {
 
     _showSubmitDialog();
 
-    Logger().i(isLoading);
-
     try {
       var result = await ExerciseService()
           .submitExercise(widget.exerciseId, jawabanUser);

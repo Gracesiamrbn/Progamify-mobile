@@ -103,21 +103,11 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.blue[300],
-        title: Text(
-          widget.lessonTitle,
-          style: GoogleFonts.inter(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
+    return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          if (!didPop) {
             Navigator.pop(context);
-
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
@@ -130,50 +120,79 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
                 ),
               ),
             );
-          },
-        ),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Lesson'),
-            Tab(text: 'Discussion'),
-          ],
-          indicatorColor: Colors.blue.shade700,
-          labelColor: Colors.black,
-          unselectedLabelColor: Colors.black,
-        ),
-      ),
-      body: Container(
-        color: Colors.white70,
-        child: TabBarView(
-          controller: _tabController,
-          children: [
-            _buildLessonContent(),
-            _buildDiscussionContent(),
-          ],
-        ),
-      ),
-      floatingActionButton: _tabController.index == 1
-          ? FloatingActionButton(
-              backgroundColor: Colors.blue[300],
+          }
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.blue[300],
+            title: Text(
+              widget.lessonTitle,
+              style: GoogleFonts.inter(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
               onPressed: () {
-                Navigator.push(
+                Navigator.pop(context);
+
+                Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => WriteDiscussionScreen(
-                            lessonId: widget.lessonId,
-                            topicTitle: widget.topicTitle,
-                            lessonTitle: widget.lessonTitle,
-                            topicId: widget.topicId,
-                            totalLesson: widget.totalLesson,
-                            totalExercise: widget.totalExercise,
-                          )),
+                    builder: (context) => TopicDetailScreen(
+                      topicTitle: widget.topicTitle,
+                      topicId: widget.topicId,
+                      totalLesson: widget.totalLesson,
+                      totalExercise: widget.totalExercise,
+                      isReload: true,
+                    ),
+                  ),
                 );
               },
-              child: const Icon(Icons.add, size: 32, color: Colors.white),
-            )
-          : null, // Tidak menampilkan tombol di tab "Lesson"
-    );
+            ),
+            bottom: TabBar(
+              controller: _tabController,
+              tabs: const [
+                Tab(text: 'Lesson'),
+                Tab(text: 'Discussion'),
+              ],
+              indicatorColor: Colors.blue.shade700,
+              labelColor: Colors.black,
+              unselectedLabelColor: Colors.black,
+            ),
+          ),
+          body: Container(
+            color: Colors.white70,
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildLessonContent(),
+                _buildDiscussionContent(),
+              ],
+            ),
+          ),
+          floatingActionButton: _tabController.index == 1
+              ? FloatingActionButton(
+                  backgroundColor: Colors.blue[300],
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => WriteDiscussionScreen(
+                                lessonId: widget.lessonId,
+                                topicTitle: widget.topicTitle,
+                                lessonTitle: widget.lessonTitle,
+                                topicId: widget.topicId,
+                                totalLesson: widget.totalLesson,
+                                totalExercise: widget.totalExercise,
+                              )),
+                    );
+                  },
+                  child: const Icon(Icons.add, size: 32, color: Colors.white),
+                )
+              : null, // Tidak menampilkan tombol di tab "Lesson"
+        ));
   }
 
   Widget _buildLessonContent() {
