@@ -272,7 +272,7 @@ class _BadgesSectionState extends State<BadgesSection> {
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
                 child: const Text(
-                  "Tutup",
+                  "Close",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 16,

@@ -89,7 +89,7 @@ class _PublicBadgeScreenState extends State<PublicBadgeScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
                 child: const Text(
-                  "Tutup",
+                  "Close",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -281,60 +281,6 @@ class _PublicBadgeScreenState extends State<PublicBadgeScreen> {
               },
             );
           },
-        ),
-      ),
-    );
-  }
-}
-
-class BadgePopup extends StatelessWidget {
-  final Map<String, dynamic> badge;
-  const BadgePopup({super.key, required this.badge});
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SvgPicture.asset(
-              badge["picture"],
-              width: 120,
-              height: 120,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              badge["title"],
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              badge["description"],
-              style: const TextStyle(fontSize: 14),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                ),
-                child: const Text(
-                  "Tutup",
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );
