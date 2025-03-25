@@ -59,4 +59,39 @@ class UserService {
       throw Exception("Failed to change user's avatar");
     }
   }
+
+  Future<Map<String, dynamic>> changePassword(
+      String password, String newPassword, String newPasswordConfirm) async {
+    // Cek apakah password baru dan konfirmasi password cocok
+    if (newPassword != newPasswordConfirm) {
+      throw Exception("New password and confirmation do not match.");
+    }
+
+    String? token = await authService.getToken();
+
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/users/password'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          "password": password,
+          "new_password": newPassword,
+          "new_password_confirmation": newPasswordConfirm,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        var errorResponse = json.decode(response.body);
+        throw Exception(errorResponse['error'] ?? 'Unknown error');
+      }
+    } catch (e) {
+      // Tangani kesalahan jaringan atau kesalahan lain
+      throw Exception(e);
+    }
+  }
 }
