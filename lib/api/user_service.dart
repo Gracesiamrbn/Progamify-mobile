@@ -94,4 +94,29 @@ class UserService {
       throw Exception(e);
     }
   }
+
+  Future<Map<String, int>> getUserTotalLesson(int userId) async {
+    String? token = await authService.getToken();
+    final response = await http.get(
+      Uri.parse('$baseUrl/users/totalLesson/$userId'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      var data = json.decode(response.body);
+      if (data != null) {
+        Map<String, int> totalLesson = {
+          "total_lesson_taken": data["total_lesson_taken"]
+        };
+        return totalLesson;
+      }
+
+      return {"total_lesson_taken": 0};
+    } else {
+      throw Exception('Failed to get user total lesson taken');
+    }
+  }
 }

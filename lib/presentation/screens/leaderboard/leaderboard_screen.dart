@@ -468,15 +468,6 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                               ),
                             ),
                           ),
-                          // child: Hero(
-                          //   tag: user['name'],
-                          //   child: SvgPicture.network(
-                          //     user['avatar'],
-                          //     width: 40,
-                          //     height: 40,
-                          //     fit: BoxFit.cover,
-                          //   ),
-                          // ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(

@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:logger/logger.dart';
+import 'package:progamify/api/user_service.dart';
 import '../../widgets/profile_info.dart';
 import '../../widgets/public_badges_section.dart';
 import '../../widgets/summary_boxes.dart';
 import '../../widgets/public_summary_grid.dart';
 
-class PublicProfileScreen extends StatelessWidget {
+class PublicProfileScreen extends StatefulWidget {
   final Map<String, dynamic> user;
 
   const PublicProfileScreen({super.key, required this.user});
 
   @override
+  PublicProfileScreenState createState() => PublicProfileScreenState();
+}
+
+class PublicProfileScreenState extends State<PublicProfileScreen> {
+  @override
   Widget build(BuildContext context) {
-    Logger().i(user);
     return Scaffold(
       backgroundColor: const Color(0xFFF0F4FA),
       body: CustomScrollView(
@@ -28,7 +32,7 @@ class PublicProfileScreen extends StatelessWidget {
               },
             ),
             title: Text(
-              user['name'],
+              widget.user['name'],
               style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -39,9 +43,9 @@ class PublicProfileScreen extends StatelessWidget {
           SliverToBoxAdapter(
             child: Center(
               child: Hero(
-                tag: user['name'],
+                tag: widget.user['name'],
                 child: SvgPicture.network(
-                  user['avatar'],
+                  widget.user['avatar'],
                   width: 200,
                   height: 200,
                   fit: BoxFit.cover,
@@ -54,17 +58,31 @@ class PublicProfileScreen extends StatelessWidget {
               children: [
                 const SizedBox(height: 20),
                 ProfileInfo(
-                  name: user['name'],
+                  name: widget.user['name'],
                   details:
-                      "${user['nim']} | ${user['email']} | ${user['angkatan']}",
+                      "${widget.user['nim']} | ${widget.user['email']} | ${widget.user['angkatan']}",
                 ),
-                SummaryBoxes(
-                  exp: user['total_exp'],
-                  level: user['level_id'],
-                  totalLesson: user["total_lesson_taken"] ?? 0,
+                FutureBuilder<Map<String, int>>(
+                    future: UserService().getUserTotalLesson(62),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      } else {
+                        final totalLessonData =
+                            snapshot.data!["total_lesson_taken"];
+                        return SummaryBoxes(
+                          exp: widget.user['total_exp'],
+                          level: widget.user['level_id'],
+                          totalLesson: totalLessonData ?? 0,
+                        );
+                      }
+                    }),
+                PublicSummaryGrid(
+                  userId: widget.user['ID'],
                 ),
-                PublicSummaryGrid(userId: user['ID'],),
-                PublicBadgesSection(userId: user['ID']),
+                PublicBadgesSection(userId: widget.user['ID']),
               ],
             ),
           ),

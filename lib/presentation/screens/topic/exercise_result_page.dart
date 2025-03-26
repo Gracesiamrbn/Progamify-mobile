@@ -37,6 +37,7 @@ class ExerciseResultScreenState extends State<ExerciseResultScreen> {
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop) {
           if (widget.topicId != null) {
+            Navigator.pop(context);
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
@@ -59,6 +60,7 @@ class ExerciseResultScreenState extends State<ExerciseResultScreen> {
             icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () {
               if (widget.topicId != null) {
+                Navigator.pop(context);
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
