@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:progamify/api/auth_service.dart';
-import '../../../core/theme/app_styles.dart';
+import 'package:progamify/presentation/screens/navigation/bottom_navigation.dart';
 import 'setting_profile_screen.dart';
 import 'change_password_screen.dart';
 
@@ -16,6 +16,17 @@ class SettingsScreen extends StatelessWidget {
         title: const Text('Settings'),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const MainScreen(currentIndex: 3)),
+            );
+          },
+        ),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -95,6 +95,36 @@ class UserService {
     }
   }
 
+  Future<Map<String, dynamic>> updateUser(
+      String name, String nim, int angkatan) async {
+    String? token = await authService.getToken();
+
+    try {
+      final response = await http.put(
+        Uri.parse('$baseUrl/users/current'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          "name": name,
+          "nim": nim,
+          "angkatan": angkatan,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        var errorResponse = json.decode(response.body);
+        throw Exception(errorResponse['error'] ?? 'Unknown error');
+      }
+    } catch (e) {
+      // Tangani kesalahan jaringan atau kesalahan lain
+      throw Exception(e);
+    }
+  }
+
   Future<Map<String, int>> getUserTotalLesson(int userId) async {
     String? token = await authService.getToken();
     final response = await http.get(

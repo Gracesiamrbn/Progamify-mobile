@@ -10,10 +10,50 @@ class SettingProfileScreen extends StatefulWidget {
 }
 
 class SettingProfileScreenState extends State<SettingProfileScreen> {
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _nimController = TextEditingController();
   final TextEditingController _angkatanController = TextEditingController();
+
+  Future<void> _updateUser() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        await UserService().updateUser(
+          _nameController.text.trim(),
+          _nimController.text.trim(),
+          int.parse(_angkatanController.text.trim()),
+        );
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Success'),
+            content: const Text('User data updated successfully.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      } catch (e) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Error'),
+            content: Text(e.toString()),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,82 +82,89 @@ class SettingProfileScreenState extends State<SettingProfileScreen> {
               ),
               body: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    // Form Fields
-                    TextField(
-                      controller: _nameController,
-                      decoration: InputDecoration(
-                        labelText: 'Name',
-                        filled: true,
-                        fillColor: Colors.grey[300],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: _nameController,
+                        decoration: InputDecoration(
+                          labelText: 'Name',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Name is required';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _emailController,
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        readOnly: true,
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _nimController,
+                        decoration: InputDecoration(
+                          labelText: 'ID Student',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'ID Student is required';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _angkatanController,
+                        decoration: InputDecoration(
+                          labelText: 'Year of Join',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        keyboardType: TextInputType.number,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Year of Join is required';
+                          } else if (!RegExp(r'^\d{4}$').hasMatch(value)) {
+                            return 'Year must be 4 digits';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 30),
+                      ElevatedButton(
+                        onPressed: _updateUser,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.yellow,
+                          minimumSize: const Size(double.infinity, 50),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: const Text(
+                          'Update',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                       ),
-                      readOnly: true, //dev
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _emailController,
-                      decoration: InputDecoration(
-                        labelText: 'Email',
-                        filled: true,
-                        fillColor: Colors.grey[300],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      readOnly: true, //dev
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _nimController,
-                      decoration: InputDecoration(
-                        labelText: 'ID Student',
-                        filled: true,
-                        fillColor: Colors.grey[300],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      readOnly: true, //dev
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _angkatanController,
-                      decoration: InputDecoration(
-                        labelText: 'Year of Join',
-                        filled: true,
-                        fillColor: Colors.grey[300],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      readOnly: true, //dev
-                    ),
-                    const SizedBox(height: 30),
-
-                    // Update Button
-                    // ElevatedButton(
-                    //   onPressed: () {
-                    //     // Action for Update
-                    //   },
-                    //   style: ElevatedButton.styleFrom(
-                    //     backgroundColor: Colors.yellow, // Yellow background
-                    //     minimumSize: const Size(
-                    //         double.infinity, 50), // Full width button
-                    //     shape: RoundedRectangleBorder(
-                    //       borderRadius: BorderRadius.circular(10),
-                    //     ),
-                    //   ),
-                    //   child: const Text(
-                    //     'Update',
-                    //     style: TextStyle(
-                    //         fontSize: 18, fontWeight: FontWeight.bold),
-                    //   ),
-                    // ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             );
