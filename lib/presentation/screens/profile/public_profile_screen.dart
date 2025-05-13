@@ -63,7 +63,7 @@ class PublicProfileScreenState extends State<PublicProfileScreen> {
                       "${widget.user['nim']} | ${widget.user['email']} | ${widget.user['angkatan']}",
                 ),
                 FutureBuilder<Map<String, int>>(
-                    future: UserService().getUserTotalLesson(62),
+                    future: UserService().getUserTotalLesson(widget.user["ID"]),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());

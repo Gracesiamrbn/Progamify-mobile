@@ -80,11 +80,17 @@ class SettingProfileScreenState extends State<SettingProfileScreen> {
                 backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
               ),
-              body: Padding(
-                padding: const EdgeInsets.all(16.0),
+              body: SingleChildScrollView(
+                padding: EdgeInsets.only(
+                  left: 16.0,
+                  right: 16.0,
+                  top: 16.0,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
+                ),
                 child: Form(
                   key: _formKey,
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       TextFormField(
                         controller: _nameController,

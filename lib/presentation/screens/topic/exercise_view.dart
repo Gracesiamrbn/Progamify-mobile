@@ -119,10 +119,6 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // final question = questions[currentQuestionIndex];
-    // int exp = question['exp'];
-    // int pts = question['pts'];
-
     return FutureBuilder<Map<String, dynamic>>(
       future: _questionsFuture,
       builder: (context, snapshot) {
@@ -337,12 +333,6 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
                     "p": Style(
                         fontSize: FontSize(18), textAlign: TextAlign.justify),
                   }),
-                  // Text(
-                  //   "${question['id']}",
-                  //   style: const TextStyle(
-                  //     fontSize: 18,
-                  //   ),
-                  // ),
                   const SizedBox(height: 20),
                   _buildOptions(questions),
                   const SizedBox(height: 20),
@@ -388,12 +378,12 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
                   const SizedBox(
                     height: 20,
                   ),
-                  _buildExplanation(questions[currentQuestionIndex]['explanation'] ??
+                  _buildExplanation(questions[currentQuestionIndex]
+                          ['explanation'] ??
                       'Isi Jawaban Anda!'),
                   const SizedBox(
                     height: 20,
                   ),
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [

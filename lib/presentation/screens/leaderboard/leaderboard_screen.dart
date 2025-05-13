@@ -1,6 +1,7 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:logger/logger.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 
@@ -81,56 +82,60 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      backgroundColor: const Color(0xFFEAF2FF),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            FutureBuilder<List<Map<String, dynamic>>>(
-              future: _futureLeaderboard,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return _buildSkeletonLeaderboard();
-                } else if (snapshot.hasError) {
-                  return Center(
-                    child: Text("Terjadi kesalahan: ${snapshot.error}"),
-                  );
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text("Leaderboard kosong"));
-                }
+    return OrientationBuilder(
+      builder: (context, orientation) {
+        return Scaffold(
+          extendBodyBehindAppBar: true,
+          backgroundColor: const Color(0xFFEAF2FF),
+          body: SafeArea(
+            child: Stack(
+              children: [
+                FutureBuilder<List<Map<String, dynamic>>>(
+                  future: _futureLeaderboard,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return _buildSkeletonLeaderboard();
+                    } else if (snapshot.hasError) {
+                      return Center(
+                        child: Text("Terjadi kesalahan: ${snapshot.error}"),
+                      );
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Center(child: Text("Leaderboard kosong"));
+                    }
 
-                final leaderboard = snapshot.data!;
+                    final leaderboard = snapshot.data!;
 
-                return Column(
-                  children: [
-                    const SizedBox(height: 20),
-                    if (leaderboard.length >= 3)
-                      _buildTopThreePodium(
-                        leaderboard[0],
-                        leaderboard[1],
-                        leaderboard[2],
-                      ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Leaderboard',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Expanded(
-                      child: _buildLeaderboardList(leaderboard),
-                    ),
-                  ],
-                );
-              },
+                    return Column(
+                      children: [
+                        const SizedBox(height: 20),
+                        if (leaderboard.length >= 3)
+                          _buildTopThreePodium(
+                            leaderboard[0],
+                            leaderboard[1],
+                            leaderboard[2],
+                          ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Leaderboard',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Expanded(
+                          child: _buildLeaderboardList(leaderboard),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                if (_showWinnerPopup) _buildWinnerPopup()
+              ],
             ),
-            if (_showWinnerPopup) _buildWinnerPopup()
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -233,38 +238,35 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   }
 
   Widget _buildTopThreePodium(firstRank, secondRank, thirdRank) {
-    return SizedBox(
-      height: 180,
-      child: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                _buildPodiumUser(
-                  secondRank,
-                  size: 80,
-                  position: 2,
-                ),
-                _buildPodiumUser(
-                  firstRank,
-                  size: 100,
-                  position: 1,
-                ),
-                _buildPodiumUser(
-                  thirdRank,
-                  size: 70,
-                  position: 3,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    final orientation = MediaQuery.of(context).orientation;
+
+    if (orientation == Orientation.portrait) {
+      return SizedBox(
+        height: 180,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            _buildPodiumUser(secondRank, size: 80, position: 2),
+            _buildPodiumUser(firstRank, size: 100, position: 1),
+            _buildPodiumUser(thirdRank, size: 70, position: 3),
+          ],
+        ),
+      );
+    } else {
+      // Tampilan landscape: bisa lebih horizontal dan fleksibel
+      return SizedBox(
+        height: 160,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildPodiumUser(secondRank, size: 70, position: 2),
+            _buildPodiumUser(firstRank, size: 90, position: 1),
+            _buildPodiumUser(thirdRank, size: 60, position: 3),
+          ],
+        ),
+      );
+    }
   }
 
   Widget _buildPodiumUser(Map<String, dynamic> user,
@@ -388,6 +390,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     bool isFirstPlace = position == 1;
     bool isSecondPlace = position == 2;
     bool isThirdPlace = position == 3;
+
+    Logger().i(user);
 
     Duration shimmerDelay = isFirstPlace
         ? Duration.zero

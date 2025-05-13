@@ -107,13 +107,17 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.only(
+          left: 16.0,
+          right: 16.0,
+          top: 16.0,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
+        ),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
-              // Current Password Field
               TextFormField(
                 controller: _currentPasswordController,
                 obscureText: true,
@@ -133,8 +137,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 },
               ),
               const SizedBox(height: 16),
-
-              // New Password Field
               TextFormField(
                 controller: _newPasswordController,
                 obscureText: true,
@@ -157,8 +159,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 },
               ),
               const SizedBox(height: 16),
-
-              // Confirm Password Field
               TextFormField(
                 controller: _confirmPasswordController,
                 obscureText: true,
@@ -181,7 +181,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 },
               ),
               const SizedBox(height: 30),
-
               ElevatedButton(
                 onPressed: _isLoading ? null : _changePassword,
                 style: ElevatedButton.styleFrom(
