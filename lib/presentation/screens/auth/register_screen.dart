@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:progamify/presentation/screens/auth/login_screen.dart';
 import 'package:progamify/presentation/screens/navigation/bottom_navigation.dart';
 import '../../../api/auth_service.dart';
 import '../../widgets/text_field_style1.dart';
@@ -56,11 +57,15 @@ class RegisterScreenState extends State<RegisterScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Registration Successful!")),
         );
-        Navigator.push(
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => const RegisterScreen(),
+        //   ),
+        // );
+        Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (context) => const RegisterScreen(),
-          ),
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

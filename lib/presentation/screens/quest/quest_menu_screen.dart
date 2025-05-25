@@ -119,11 +119,11 @@ class _QuestTabState extends State<QuestTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.orange[50],
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
+    return Scaffold(
+      backgroundColor: Colors.orange[50],
+      body: SafeArea(
         child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0), // padding tunggal
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -131,6 +131,7 @@ class _QuestTabState extends State<QuestTab> {
               _buildQuestHeader(),
               const SizedBox(height: 20),
               _buildInstructionContainer(context),
+              const SizedBox(height: 20), // beri sedikit jarak bawah
             ],
           ),
         ),

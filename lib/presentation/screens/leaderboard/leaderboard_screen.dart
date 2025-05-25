@@ -562,6 +562,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         ),
         const SizedBox(height: 28),
         Expanded(
+          // add list view
           child: ListView.builder(
             itemCount: 10, // Jumlah dummy skeleton list
             itemBuilder: (context, index) {

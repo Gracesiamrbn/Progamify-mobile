@@ -24,64 +24,74 @@ class MarketScreenState extends State<MarketScreen> {
     "id": 1,
     "owned": true,
     "image":
-        "http://192.168.124.9:8000/storage/avatars/images/2jxSC7Jq8QixoTX2iXdHviVjkRWUE8xxk9vc1ii7.svg"
+        "http://10.0.2.2:8000/storage/avatars/images/2jxSC7Jq8QixoTX2iXdHviVjkRWUE8xxk9vc1ii7.svg"
   };
   dynamic selectedGift = {
     "id": 1,
     "image":
-        "http://192.168.124.9:8000/storage/gift/images/O7IC5S7HS64DOwLR0yuwUdAOkf0vxBTMwqa14YAI.png"
+        "http://10.0.2.2:8000/storage/gift/images/O7IC5S7HS64DOwLR0yuwUdAOkf0vxBTMwqa14YAI.png"
   };
 
   @override
   Widget build(BuildContext context) {
-    // int currentSelectedIndex =
-    //     selectedTabIndex == 0 ? selectedAvatarIndex : selectedGiftIndex;
-    return Scaffold(
-      backgroundColor: const Color(0xFFEAF2FF),
-      appBar: marketAppBar(context),
-      body: Column(
-        children: [
-          MarketSelectedItem(
-            selectedIndex:
-                selectedTabIndex == 0 ? selectedAvatarIndex : selectedGiftIndex,
-            selectedItem: selectedTabIndex == 0 ? selectedAvatar : selectedGift,
-            selectedTabIndex: selectedTabIndex,
+    return OrientationBuilder(
+      builder: (context, orientation) {
+        final isLandscape = orientation == Orientation.landscape;
+
+        return Scaffold(
+          backgroundColor: const Color(0xFFEAF2FF),
+          appBar: marketAppBar(context),
+          body: Column(
+            children: [
+              isLandscape
+                  ? const SizedBox(height: 1)
+                  : MarketSelectedItem(
+                      selectedIndex: selectedTabIndex == 0
+                          ? selectedAvatarIndex
+                          : selectedGiftIndex,
+                      selectedItem:
+                          selectedTabIndex == 0 ? selectedAvatar : selectedGift,
+                      selectedTabIndex: selectedTabIndex,
+                    ),
+              MarketTabSelector(
+                selectedTabIndex: selectedTabIndex,
+                onTabSelected: (index) {
+                  setState(() {
+                    selectedTabIndex = index;
+                  });
+                },
+              ),
+              Expanded(
+                child: MarketItemGrid(
+                  selectedTabIndex: selectedTabIndex,
+                  selectedIndex: selectedTabIndex == 0
+                      ? selectedAvatarIndex
+                      : selectedGiftIndex,
+                  onItemSelected: (data) {
+                    setState(() {
+                      if (selectedTabIndex == 0) {
+                        selectedAvatarIndex = data["index"];
+                        selectedAvatar = data["item"];
+                      } else {
+                        selectedGiftIndex = data["index"];
+                        selectedGift = data["item"];
+                      }
+                    });
+                  },
+                ),
+              ),
+              MarketPurchaseButton(
+                selectedIndex: selectedTabIndex == 0
+                    ? selectedAvatarIndex
+                    : selectedGiftIndex,
+                selectedItem:
+                    selectedTabIndex == 0 ? selectedAvatar : selectedGift,
+              ),
+              const SizedBox(height: 8),
+            ],
           ),
-          MarketTabSelector(
-            selectedTabIndex: selectedTabIndex,
-            onTabSelected: (index) {
-              setState(() {
-                selectedTabIndex = index;
-              });
-            },
-          ),
-          Expanded(
-            child: MarketItemGrid(
-              selectedTabIndex: selectedTabIndex,
-              selectedIndex: selectedTabIndex == 0
-                  ? selectedAvatarIndex
-                  : selectedGiftIndex,
-              onItemSelected: (data) {
-                setState(() {
-                  if (selectedTabIndex == 0) {
-                    selectedAvatarIndex = data["index"];
-                    selectedAvatar = data["item"];
-                  } else {
-                    selectedGiftIndex = data["index"];
-                    selectedGift = data["item"];
-                  }
-                });
-              },
-            ),
-          ),
-          MarketPurchaseButton(
-            selectedIndex:
-                selectedTabIndex == 0 ? selectedAvatarIndex : selectedGiftIndex,
-            selectedItem: selectedTabIndex == 0 ? selectedAvatar : selectedGift,
-          ),
-          const SizedBox(height: 8),
-        ],
-      ),
+        );
+      },
     );
   }
 }
