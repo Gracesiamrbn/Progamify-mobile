@@ -84,10 +84,18 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   Widget build(BuildContext context) {
     return OrientationBuilder(
       builder: (context, orientation) {
+        final isLandscape = orientation == Orientation.landscape;
+        final screenHeight = MediaQuery.of(context).size.height;
+        final screenWidth = MediaQuery.of(context)
+            .size
+            .width; // Tetap ada jika dibutuhkan di tempat lain
+
         return Scaffold(
-          extendBodyBehindAppBar: true,
+          extendBodyBehindAppBar:
+              true, // Biarkan ini jika Anda ingin konten di belakang AppBar
           backgroundColor: const Color(0xFFEAF2FF),
           body: SafeArea(
+            // SafeArea menjaga dari notch/status bar
             child: Stack(
               children: [
                 FutureBuilder<List<Map<String, dynamic>>>(
@@ -107,14 +115,30 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
 
                     return Column(
                       children: [
-                        const SizedBox(height: 20),
+                        // TOP 3 PODIUM
                         if (leaderboard.length >= 3)
-                          _buildTopThreePodium(
-                            leaderboard[0],
-                            leaderboard[1],
-                            leaderboard[2],
+                          SizedBox(
+                            height: isLandscape
+                                ? screenHeight * 0.3 // Tetap 30% untuk lanskap
+                                : screenHeight *
+                                    0.15, // **Mengurangi menjadi 25% untuk potret**
+                            child: _buildTopThreePodium(
+                              leaderboard[0],
+                              leaderboard[1],
+                              leaderboard[2],
+                            ),
                           ),
-                        const SizedBox(height: 16),
+
+                        // Spasi setelah podium (jika ada) atau spasi yang lebih besar jika tidak ada podium
+                        if (leaderboard.length >= 3)
+                          const SizedBox(
+                              height: 16) // Spasi kecil setelah podium
+                        else
+                          const SizedBox(
+                              height:
+                                  32), // Spasi lebih besar jika tidak ada podium, agar judul tidak terlalu ke atas
+
+                        // Judul Leaderboard
                         const Text(
                           'Leaderboard',
                           style: TextStyle(
@@ -122,7 +146,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 16), // Spasi setelah judul
+
+                        // Daftar Leaderboard
                         Expanded(
                           child: _buildLeaderboardList(leaderboard),
                         ),
@@ -139,100 +165,229 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     );
   }
 
+  // Widget _buildWinnerPopup() {
+  //   _playSoundEffect('audio/mixkit-grand-brass-fanfare-631.wav');
+  //   final screenWidth = MediaQuery.of(context).size.width;
+  //   final screenHeight = MediaQuery.of(context).size.height;
+
+  //   return Scaffold(
+  //     backgroundColor: Colors.white,
+  //     body: Stack(
+  //       children: [
+  //         Positioned.fill(
+  //           child: Lottie.asset(
+  //             'assets/animation/Animation - 1740197651611.json',
+  //             fit: BoxFit.cover,
+  //             repeat: true,
+  //           ),
+  //         ),
+  //         SafeArea(
+  //           child: SingleChildScrollView(
+  //             child: ConstrainedBox(
+  //               constraints: BoxConstraints(
+  //                 minHeight: screenHeight,
+  //               ),
+  //               child: Padding(
+  //                 padding: const EdgeInsets.all(20),
+  //                 child: Column(
+  //                   children: [
+  //                     const SizedBox(height: 20),
+  //                     Lottie.asset(
+  //                       'assets/animation/Animation - 1742200561611.json',
+  //                       width: screenWidth < 500 ? 150 : 200,
+  //                       height: screenWidth < 500 ? 150 : 200,
+  //                       repeat: false,
+  //                     ),
+  //                     const SizedBox(height: 20),
+  //                     const Text(
+  //                       '🎉 Congratulations! 🎉',
+  //                       textAlign: TextAlign.center,
+  //                       style: TextStyle(
+  //                         fontSize: 22,
+  //                         fontFamily: 'Inter',
+  //                         fontWeight: FontWeight.bold,
+  //                       ),
+  //                     ),
+  //                     const SizedBox(height: 10),
+  //                     Text(
+  //                       _winnerName,
+  //                       textAlign: TextAlign.center,
+  //                       style: const TextStyle(
+  //                         fontSize: 20,
+  //                         fontFamily: 'Inter',
+  //                         fontWeight: FontWeight.w600,
+  //                       ),
+  //                     ),
+  //                     const SizedBox(height: 10),
+  //                     const Text(
+  //                       'You are in first place on the leaderboard!',
+  //                       textAlign: TextAlign.center,
+  //                       style: TextStyle(
+  //                         fontFamily: 'Inter',
+  //                       ),
+  //                     ),
+  //                     const SizedBox(height: 30),
+  //                     Center(
+  //                       child: SizedBox(
+  //                         width: screenWidth > 600 ? 400 : double.infinity,
+  //                         child: ElevatedButton(
+  //                           style: ElevatedButton.styleFrom(
+  //                             backgroundColor: Colors.orange,
+  //                             shape: RoundedRectangleBorder(
+  //                               borderRadius: BorderRadius.circular(12),
+  //                             ),
+  //                             padding: const EdgeInsets.symmetric(vertical: 14),
+  //                           ),
+  //                           onPressed: () {
+  //                             _stopSoundEffect();
+  //                             setState(() {
+  //                               _showWinnerPopup = false;
+  //                             });
+  //                           },
+  //                           child: const Text(
+  //                             'See Leaderboard',
+  //                             style: TextStyle(
+  //                               fontSize: 18,
+  //                               fontWeight: FontWeight.bold,
+  //                               fontFamily: 'Inter',
+  //                               color: Colors.white,
+  //                             ),
+  //                           ),
+  //                         ),
+  //                       ),
+  //                     ),
+  //                     const SizedBox(height: 20),
+  //                   ],
+  //                 ),
+  //               ),
+  //             ),
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
   Widget _buildWinnerPopup() {
+    // Make sure context is passed here
     _playSoundEffect('audio/mixkit-grand-brass-fanfare-631.wav');
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      color: Colors.white,
-      child: Center(
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: Lottie.asset(
-                'assets/animation/Animation - 1740197651611.json',
-                fit: BoxFit.cover,
-                repeat: true,
-              ),
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Stack(
+        children: [
+          // Background Lottie animation remains in Positioned.fill
+          Positioned.fill(
+            child: Lottie.asset(
+              'assets/animation/Animation - 1740197651611.json',
+              fit: BoxFit.cover,
+              repeat: true,
             ),
-            Container(
-              padding: const EdgeInsets.all(20),
-              width: double.infinity,
-              height: double.infinity,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Lottie.asset(
-                          'assets/animation/Animation - 1742200561611.json',
-                          width: 200,
-                          height: 200,
-                          repeat: false,
+          ),
+          // Main content column
+          SafeArea(
+            child: Column(
+              // This is the main column controlling layout
+              children: [
+                Expanded(
+                  // This makes the content take up all available space
+                  child: SingleChildScrollView(
+                    // Allows the content within to scroll
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment
+                              .center, // Center content vertically
+                          mainAxisSize:
+                              MainAxisSize.min, // Take minimum space needed
+                          children: [
+                            const SizedBox(height: 20), // Top spacing
+                            Lottie.asset(
+                              'assets/animation/Animation - 1742200561611.json',
+                              width: screenWidth < 500 ? 150 : 200,
+                              height: screenWidth < 500 ? 150 : 200,
+                              repeat: false,
+                            ),
+                            const SizedBox(height: 20),
+                            const Text(
+                              '🎉 Congratulations! 🎉',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              _winnerName, // Ensure _winnerName is accessible
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            const Text(
+                              'You are in first place on the leaderboard!',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                              ),
+                            ),
+                            // No SizedBox here to push content down before the button
+                            // const SizedBox(height: 30), // This was pushing down, remove it.
+                          ],
                         ),
-                        const SizedBox(height: 20),
-                        const Text(
-                          '🎉 Congratulations! 🎉',
+                      ),
+                    ),
+                  ),
+                ),
+                // The button is now directly under the Expanded, so it's fixed
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 20), // Add horizontal and bottom padding
+                  child: Center(
+                    child: SizedBox(
+                      width: screenWidth > 600 ? 400 : double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        onPressed: () {
+                          _stopSoundEffect();
+                          setState(() {
+                            _showWinnerPopup = false;
+                          });
+                        },
+                        child: const Text(
+                          'See Leaderboard',
                           style: TextStyle(
-                            fontSize: 22,
-                            fontFamily: 'Inter',
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          _winnerName,
-                          style: const TextStyle(
-                            fontSize: 20,
                             fontFamily: 'Inter',
-                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
                           ),
-                        ),
-                        const SizedBox(height: 10),
-                        const Text(
-                          'You are in first place on the leaderboard!',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      onPressed: () {
-                        _stopSoundEffect();
-                        setState(() {
-                          _showWinnerPopup = false;
-                        });
-                      },
-                      child: const Text(
-                        'See Leaderboard',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Inter',
-                          color: Colors.white,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                ],
-              ),
+                ),
+                // const SizedBox(height: 20), // This was for previous structure, remove if button padding handles it
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -562,7 +717,6 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         ),
         const SizedBox(height: 28),
         Expanded(
-          // add list view
           child: ListView.builder(
             itemCount: 10, // Jumlah dummy skeleton list
             itemBuilder: (context, index) {

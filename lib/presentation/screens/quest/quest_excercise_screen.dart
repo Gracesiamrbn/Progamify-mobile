@@ -1484,14 +1484,15 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
   }
 
   void _showResultDialog(
-      BuildContext context,
-      bool isCorrect,
-      String correctPath,
-      String wrongPath,
-      int expGain,
-      int poinGain,
-      List<dynamic> badges,
-      List<dynamic> achievements) {
+    BuildContext context,
+    bool isCorrect,
+    String correctPath,
+    String wrongPath,
+    int expGain,
+    int poinGain,
+    List<dynamic> badges,
+    List<dynamic> achievements,
+  ) {
     if (isCorrect) {
       _playSoundEffect(correctPath);
     } else {
@@ -1508,52 +1509,69 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
           body: SafeArea(
             child: Column(
               children: [
+                // Wrap the main content in a SingleChildScrollView for responsiveness
                 Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Lottie.asset(
-                        isCorrect
-                            ? 'assets/animation/Animation - 1742010178937.json'
-                            : 'assets/animation/Animation - 1742010214972.json',
-                        width: 275,
-                        height: 275,
-                        fit: BoxFit.contain,
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        isCorrect
-                            ? "Yey, jawaban kamu benar!"
-                            : "Oops, jawaban kamu salah!",
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                  child: SingleChildScrollView(
+                    // <--- Added SingleChildScrollView here
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 10), // Optional: add some horizontal padding
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize
+                          .min, // Use min to let Column take only necessary space
+                      children: [
+                        Lottie.asset(
+                          isCorrect
+                              ? 'assets/animation/Animation - 1742010178937.json'
+                              : 'assets/animation/Animation - 1742010214972.json',
+                          width:
+                              275, // You might consider using a percentage of screen width or remove fixed width/height for more flexibility
+                          height:
+                              275, // and let it scale based on available space
+                          fit: BoxFit.contain,
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                      if (isCorrect) ...[
                         const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _buildRewardBox(
-                                "Exp Gain",
-                                expGain,
-                                const Color(0xFF9E6FD7),
-                                'assets/icons/exp_point.png'),
-                            const SizedBox(width: 16),
-                            _buildRewardBox(
-                                "Poin Gain",
-                                poinGain,
-                                const Color(0xFFECB751),
-                                'assets/icons/coin.png'),
-                          ],
+                        Text(
+                          isCorrect
+                              ? "Yey, jawaban kamu benar!"
+                              : "Oops, jawaban kamu salah!",
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
+                        if (isCorrect) ...[
+                          const SizedBox(height: 20),
+                          // Use Wrap instead of Row for reward boxes to handle limited width
+                          Wrap(
+                            // <--- Changed to Wrap
+                            alignment: WrapAlignment
+                                .center, // Center the items in the wrap
+                            spacing: 16.0, // Horizontal space between items
+                            runSpacing:
+                                16.0, // Vertical space between lines of items
+                            children: [
+                              _buildRewardBox(
+                                  "Exp Gain",
+                                  expGain,
+                                  const Color(0xFF9E6FD7),
+                                  'assets/icons/exp_point.png'),
+                              _buildRewardBox(
+                                  "Poin Gain",
+                                  poinGain,
+                                  const Color(0xFFECB751),
+                                  'assets/icons/coin.png'),
+                            ],
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
+                // The bottom button remains outside the scroll view so it's always visible
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: SizedBox(
@@ -1564,7 +1582,8 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                         Navigator.pop(context);
 
                         Future.delayed(const Duration(milliseconds: 300), () {
-                          if (badges != null || badges.isNotEmpty) {
+                          // Added a null check for badges and check if it's not empty
+                          if (badges != null && badges.isNotEmpty) {
                             _showBadges(badges, 0, achievements);
                           }
                         });
