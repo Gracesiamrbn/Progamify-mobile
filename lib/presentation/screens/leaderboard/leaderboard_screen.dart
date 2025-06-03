@@ -112,6 +112,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                     }
 
                     final leaderboard = snapshot.data!;
+                    Logger().i('Leaderboard data: $leaderboard');
 
                     return Column(
                       children: [
@@ -164,109 +165,6 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
       },
     );
   }
-
-  // Widget _buildWinnerPopup() {
-  //   _playSoundEffect('audio/mixkit-grand-brass-fanfare-631.wav');
-  //   final screenWidth = MediaQuery.of(context).size.width;
-  //   final screenHeight = MediaQuery.of(context).size.height;
-
-  //   return Scaffold(
-  //     backgroundColor: Colors.white,
-  //     body: Stack(
-  //       children: [
-  //         Positioned.fill(
-  //           child: Lottie.asset(
-  //             'assets/animation/Animation - 1740197651611.json',
-  //             fit: BoxFit.cover,
-  //             repeat: true,
-  //           ),
-  //         ),
-  //         SafeArea(
-  //           child: SingleChildScrollView(
-  //             child: ConstrainedBox(
-  //               constraints: BoxConstraints(
-  //                 minHeight: screenHeight,
-  //               ),
-  //               child: Padding(
-  //                 padding: const EdgeInsets.all(20),
-  //                 child: Column(
-  //                   children: [
-  //                     const SizedBox(height: 20),
-  //                     Lottie.asset(
-  //                       'assets/animation/Animation - 1742200561611.json',
-  //                       width: screenWidth < 500 ? 150 : 200,
-  //                       height: screenWidth < 500 ? 150 : 200,
-  //                       repeat: false,
-  //                     ),
-  //                     const SizedBox(height: 20),
-  //                     const Text(
-  //                       '🎉 Congratulations! 🎉',
-  //                       textAlign: TextAlign.center,
-  //                       style: TextStyle(
-  //                         fontSize: 22,
-  //                         fontFamily: 'Inter',
-  //                         fontWeight: FontWeight.bold,
-  //                       ),
-  //                     ),
-  //                     const SizedBox(height: 10),
-  //                     Text(
-  //                       _winnerName,
-  //                       textAlign: TextAlign.center,
-  //                       style: const TextStyle(
-  //                         fontSize: 20,
-  //                         fontFamily: 'Inter',
-  //                         fontWeight: FontWeight.w600,
-  //                       ),
-  //                     ),
-  //                     const SizedBox(height: 10),
-  //                     const Text(
-  //                       'You are in first place on the leaderboard!',
-  //                       textAlign: TextAlign.center,
-  //                       style: TextStyle(
-  //                         fontFamily: 'Inter',
-  //                       ),
-  //                     ),
-  //                     const SizedBox(height: 30),
-  //                     Center(
-  //                       child: SizedBox(
-  //                         width: screenWidth > 600 ? 400 : double.infinity,
-  //                         child: ElevatedButton(
-  //                           style: ElevatedButton.styleFrom(
-  //                             backgroundColor: Colors.orange,
-  //                             shape: RoundedRectangleBorder(
-  //                               borderRadius: BorderRadius.circular(12),
-  //                             ),
-  //                             padding: const EdgeInsets.symmetric(vertical: 14),
-  //                           ),
-  //                           onPressed: () {
-  //                             _stopSoundEffect();
-  //                             setState(() {
-  //                               _showWinnerPopup = false;
-  //                             });
-  //                           },
-  //                           child: const Text(
-  //                             'See Leaderboard',
-  //                             style: TextStyle(
-  //                               fontSize: 18,
-  //                               fontWeight: FontWeight.bold,
-  //                               fontFamily: 'Inter',
-  //                               color: Colors.white,
-  //                             ),
-  //                           ),
-  //                         ),
-  //                       ),
-  //                     ),
-  //                     const SizedBox(height: 20),
-  //                   ],
-  //                 ),
-  //               ),
-  //             ),
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   Widget _buildWinnerPopup() {
     // Make sure context is passed here
@@ -533,7 +431,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                 opacity: isVisible ? 1.0 : 0.0,
                 child: Transform.scale(
                   scale: isVisible ? 1.0 : 0.0,
-                  child: _buildLeaderboardItem(user, index + 1),
+                  child: _buildLeaderboardItem(user),
                 ),
               );
             });
@@ -541,10 +439,10 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     );
   }
 
-  Widget _buildLeaderboardItem(Map<String, dynamic> user, int position) {
-    bool isFirstPlace = position == 1;
-    bool isSecondPlace = position == 2;
-    bool isThirdPlace = position == 3;
+  Widget _buildLeaderboardItem(Map<String, dynamic> user) {
+    bool isFirstPlace = user['rank'] == 1;
+    bool isSecondPlace = user['rank'] == 2;
+    bool isThirdPlace = user['rank'] == 3;
 
     Logger().i(user);
 
@@ -583,7 +481,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   margin:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   decoration: BoxDecoration(
-                    color: _getItemColor(position),
+                    color: _getItemColor(user['rank']),
                     borderRadius: BorderRadius.circular(12),
                     gradient: isFirstPlace
                         ? LinearGradient(
@@ -601,7 +499,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                           width: 30,
                           child: !isFirstPlace
                               ? Text(
-                                  '#$position',
+                                  '#${user['rank']}',
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -696,8 +594,22 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         return const Color(0xFFD3D3D3);
       case 3:
         return const Color(0xFFE6B8A2);
-      default:
+      case 4:
         return const Color(0xFFC8E2F3);
+      case 5:
+        return const Color(0xFFC8E2F3);
+      case 6:
+        return const Color(0xFFC8E2F3);
+      case 7:
+        return const Color(0xFFC8E2F3);
+      case 8:
+        return const Color(0xFFC8E2F3);
+      case 9:
+        return const Color(0xFFC8E2F3);
+      case 10:
+        return const Color(0xFFC8E2F3);
+      default:
+        return const Color(0x9DB9B9B9);
     }
   }
 

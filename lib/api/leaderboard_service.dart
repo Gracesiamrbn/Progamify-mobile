@@ -6,7 +6,8 @@ import 'package:progamify/api/auth_service.dart';
 import 'package:progamify/utils/util.dart';
 
 class LeaderboardService {
-  final String baseUrl = dotenv.env["BASE_URL_API"] ?? "http://194.163.40.203:8080/api";
+  final String baseUrl =
+      dotenv.env["BASE_URL_API"] ?? "http://194.163.40.203:8080/api";
   final AuthService authService = AuthService();
 
   Future<List<Map<String, dynamic>>> getLeaderboard() async {
@@ -22,13 +23,17 @@ class LeaderboardService {
 
     if (response.statusCode == 200) {
       List<dynamic> rawList = json.decode(response.body);
-      List<Map<String, dynamic>> leaderboard =
-          rawList.cast<Map<String, dynamic>>();
 
-      leaderboard = leaderboard.map((player) {
-        player['avatar'] =
-            Util().getLinkLaravel(player['avatar']['picture_url']);
-        return player;
+      List<Map<String, dynamic>> leaderboard =
+          rawList.map<Map<String, dynamic>>((entry) {
+        final user = entry['user'];
+        final rank = entry['rank'];
+        user['avatar'] = Util().getLinkLaravel(user['avatar']['picture_url']);
+
+        return {
+          ...user,
+          'rank': rank,
+        };
       }).toList();
 
       Logger().i(leaderboard);
