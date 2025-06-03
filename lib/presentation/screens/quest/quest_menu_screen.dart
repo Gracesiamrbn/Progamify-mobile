@@ -456,6 +456,13 @@ class _BadgesTabState extends State<BadgesTab> {
       }
     ];
 
+    final orientation = MediaQuery.of(context).orientation;
+    double aspectRatio = 0.8; // Default for portrait
+
+    if (orientation == Orientation.landscape) {
+      aspectRatio = 2.0;
+    }
+
     return Container(
       color: Colors.orange[50],
       padding: const EdgeInsets.all(16.0),
@@ -496,11 +503,11 @@ class _BadgesTabState extends State<BadgesTab> {
           }).toList();
 
           return GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
-              childAspectRatio: 0.8,
+              childAspectRatio: aspectRatio,
             ),
             itemCount: combinedBadges.length,
             itemBuilder: (context, index) {

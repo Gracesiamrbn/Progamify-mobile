@@ -25,34 +25,35 @@ class DiscussionReplyScreen extends StatefulWidget {
 
 class DiscussionReplyScreenState extends State<DiscussionReplyScreen> {
   final TextEditingController _controller = TextEditingController();
-  String? _errorMessage;
+  final GlobalKey<FormState> _formKey =
+      GlobalKey<FormState>(); // Added a GlobalKey for the Form
   bool _isLoading = false;
 
   void _submitReply() async {
-    String value = _controller.text.trim();
-    if (value.isEmpty) {
+    if (_formKey.currentState!.validate()) {
+      // Validate the form
       setState(() {
-        _errorMessage = "Answer's Field must be filled";
+        _isLoading = true;
       });
-      return;
-    }
 
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      await DiscussionService().submitReply(widget.discId, value);
-      _controller.clear();
-    } catch (e) {
-      setState(() {
-        _errorMessage = "Failed to submit reply: $e";
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      try {
+        await DiscussionService()
+            .submitReply(widget.discId, _controller.text.trim());
+        _controller.clear();
+        // Optionally, you might want to refresh the replies here after a successful submission
+        // For example, by calling setState to rebuild the FutureBuilder.
+        // However, a more robust solution might involve notifying the FutureBuilder
+        // to re-fetch data or using a state management solution.
+      } catch (e) {
+        // You can use a SnackBar or AlertDialog for error feedback here
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to submit reply: $e")),
+        );
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -64,12 +65,9 @@ class DiscussionReplyScreenState extends State<DiscussionReplyScreen> {
             AsyncSnapshot<Map<String, dynamic>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
+          } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
-          }
-
-          if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+          } else {
             Map<String, dynamic> discussions = snapshot.data!;
             var replies = discussions["replies"] ?? [];
 
@@ -133,23 +131,27 @@ class DiscussionReplyScreenState extends State<DiscussionReplyScreen> {
                           fontSize: 14, color: Colors.black87),
                     ),
                     const SizedBox(height: 16),
-                    TextField(
-                      controller: _controller,
-                      decoration: InputDecoration(
-                        hintText: 'Type your answer...',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
+                    Form(
+                      // Wrap the TextFormField in a Form widget
+                      key: _formKey, // Assign the GlobalKey
+                      child: TextFormField(
+                        // Changed to TextFormField
+                        controller: _controller,
+                        decoration: InputDecoration(
+                          hintText: 'Type your answer...',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
+                        validator: (value) {
+                          // Added validator
+                          if (value == null || value.trim().isEmpty) {
+                            return "Answer's field must be filled";
+                          }
+                          return null;
+                        },
                       ),
                     ),
-                    if (_errorMessage != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: Text(
-                          _errorMessage!,
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                      ),
                     const SizedBox(height: 10),
                     Align(
                       alignment: Alignment.centerRight,
@@ -181,97 +183,6 @@ class DiscussionReplyScreenState extends State<DiscussionReplyScreen> {
                                 ["detail_user"]["avatar"]["picture_url"]),
                           );
                         },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          } else {
-            return Scaffold(
-              appBar: AppBar(
-                backgroundColor: Colors.blue[300],
-                title: const Text('Discussion'),
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-              ),
-              body: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          backgroundColor: Colors.grey,
-                          radius: 14,
-                          child: ClipOval(
-                            child: SvgPicture.asset(
-                              "",
-                              width: 40,
-                              height: 40,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          widget.author,
-                          style: GoogleFonts.inter(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const Spacer(),
-                        Text(
-                          widget.date,
-                          style: GoogleFonts.inter(
-                              fontSize: 12, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      widget.discussionTitle,
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      widget.discussionContent,
-                      style: GoogleFonts.inter(
-                          fontSize: 14, color: Colors.black87),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Type your answer...',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue[300],
-                          foregroundColor: Colors.white,
-                        ),
-                        child: const Text('Reply'),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Expanded(
-                      child: ListView(
-                        children: const [],
                       ),
                     ),
                   ],

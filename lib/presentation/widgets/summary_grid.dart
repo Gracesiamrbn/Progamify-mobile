@@ -152,6 +152,7 @@ class _SummaryGridState extends State<SummaryGrid> {
                     mainAxisSpacing: 8,
                   ),
                   itemCount: _achievements.length,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                   itemBuilder: (context, index) {
                     final achievement = _achievements[index];
 
@@ -169,8 +170,7 @@ class _SummaryGridState extends State<SummaryGrid> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Hero(
-                              tag: achievement[
-                                  "id"]!,
+                              tag: achievement["id"]!,
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(50),
                                 child: SvgPicture.asset(
@@ -210,9 +210,7 @@ class _SummaryGridState extends State<SummaryGrid> {
                     );
                   },
                 ),
-          const SizedBox(
-            height: 8,
-          ),
+          const SizedBox(height: 8),
           Align(
             alignment: Alignment.centerRight,
             child: RichText(
@@ -343,11 +341,10 @@ class _PopupScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Hero(
-                    tag: achievement["id"]!, 
+                    tag: achievement["id"]!,
                     child: SvgPicture.asset(
                       achievement["picture"]!,
-                      width:
-                          210,
+                      width: 210,
                       height: 210,
                     ),
                   ),

@@ -127,7 +127,7 @@ class _SummaryBoxesState extends State<SummaryBoxes> {
               );
             }).toList(),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 6),
         ],
       ),
     );
