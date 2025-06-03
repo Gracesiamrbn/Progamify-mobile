@@ -27,20 +27,23 @@ class WriteDiscussionScreen extends StatefulWidget {
 }
 
 class WriteDiscussionScreenState extends State<WriteDiscussionScreen> {
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController titleController = TextEditingController();
   final TextEditingController questionController = TextEditingController();
 
   Future<void> _submitDiscussion() async {
-    _showLoadingDialog();
+    if (_formKey.currentState!.validate()) {
+      _showLoadingDialog();
 
-    try {
-      await DiscussionService().submitDiscussion(
-          widget.lessonId, titleController.text, questionController.text);
-      Navigator.pop(context); // Close loading dialog
-      _showSuccessDialog();
-    } catch (error) {
-      Navigator.pop(context); // Close loading dialog
-      _showErrorDialog(error.toString());
+      try {
+        await DiscussionService().submitDiscussion(
+            widget.lessonId, titleController.text, questionController.text);
+        Navigator.pop(context); // Close loading dialog
+        _showSuccessDialog();
+      } catch (error) {
+        Navigator.pop(context); // Close loading dialog
+        _showErrorDialog(error.toString());
+      }
     }
   }
 
@@ -126,171 +129,117 @@ class WriteDiscussionScreenState extends State<WriteDiscussionScreen> {
             AsyncSnapshot<Map<String, dynamic>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
+          } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
-          }
-
-          if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+          } else {
             Map<String, dynamic> user = snapshot.data!;
 
             Logger().i(user);
 
             return Scaffold(
-              appBar: AppBar(
-                backgroundColor: Colors.blue,
-                title: const Text("Add Discussion",
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
+                appBar: AppBar(
+                  backgroundColor: Colors.blue,
+                  title: const Text("Add Discussion",
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  leading: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
                 ),
-              ),
-              body: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                body: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundColor: Colors.grey,
-                          child: ClipOval(
-                            child: SvgPicture.network(
-                              Util().getLinkLaravel(
-                                  user["detail_avatar"]["picture_url"]),
-                              width: 40,
-                              height: 40,
-                              fit: BoxFit.cover,
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundColor: Colors.grey,
+                              child: ClipOval(
+                                child: SvgPicture.network(
+                                  Util().getLinkLaravel(
+                                      user["detail_avatar"]["picture_url"]),
+                                  width: 40,
+                                  height: 40,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
                             ),
-                          ),
+                            const SizedBox(width: 10),
+                            Text(
+                              user["name"],
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 10),
-                        Text(
-                          user["name"],
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16),
-                        ),
+                        Form(
+                            key: _formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 20),
+                                const Text("Title",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18)),
+                                TextFormField(
+                                  // Changed to TextFormField
+                                  controller: titleController,
+                                  decoration: const InputDecoration(
+                                    hintText: "Type your title...",
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  validator: (value) {
+                                    // Added validator
+                                    if (value == null || value.isEmpty) {
+                                      return 'Title cannot be empty';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 20),
+                                const Text("Question",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18)),
+                                TextFormField(
+                                  // Changed to TextFormField
+                                  controller: questionController,
+                                  maxLines: 5,
+                                  decoration: const InputDecoration(
+                                    hintText: "Type your question...",
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  validator: (value) {
+                                    // Added validator
+                                    if (value == null || value.isEmpty) {
+                                      return 'Question cannot be empty';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 20),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: ElevatedButton(
+                                    onPressed: _submitDiscussion,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.blue,
+                                    ),
+                                    child: const Text("Post"),
+                                  ),
+                                ),
+                              ],
+                            ))
                       ],
                     ),
-                    const SizedBox(height: 20),
-                    const Text("Title",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 18)),
-                    TextField(
-                      controller: titleController,
-                      decoration: const InputDecoration(
-                        hintText: "Type your title...",
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    const Text("Question",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 18)),
-                    TextField(
-                      controller: questionController,
-                      maxLines: 5,
-                      decoration: const InputDecoration(
-                        hintText: "Type your question...",
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: ElevatedButton(
-                        onPressed: _submitDiscussion,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                        ),
-                        child: const Text("Post"),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          } else {
-            return Scaffold(
-              appBar: AppBar(
-                backgroundColor: Colors.blue,
-                title: const Text("Add Discussion",
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-              ),
-              body: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundColor: Colors.grey,
-                          child: SvgPicture.asset(
-                            "assets/avatars/avatar_male_1.svg",
-                            width: 40,
-                            height: 40,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        const Text(
-                          'Enrico Sirait',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    const Text("Title",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 18)),
-                    TextField(
-                      controller: titleController,
-                      decoration: const InputDecoration(
-                        hintText: "Type your title...",
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    const Text("Question",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 18)),
-                    TextField(
-                      controller: questionController,
-                      maxLines: 5,
-                      decoration: const InputDecoration(
-                        hintText: "Type your question...",
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: ElevatedButton(
-                        onPressed: _submitDiscussion,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                        ),
-                        child: const Text("Post"),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
+                  ),
+                ));
           }
         });
   }
