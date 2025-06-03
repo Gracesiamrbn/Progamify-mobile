@@ -82,14 +82,16 @@ class DiscussionReplyScreenState extends State<DiscussionReplyScreen> {
                   },
                 ),
               ),
-              body: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        CircleAvatar(
+              body: SingleChildScrollView(
+                // Wrap with SingleChildScrollView
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          CircleAvatar(
                             backgroundColor: Colors.grey,
                             radius: 14,
                             child: ClipOval(
@@ -100,78 +102,86 @@ class DiscussionReplyScreenState extends State<DiscussionReplyScreen> {
                                 height: 40,
                                 fit: BoxFit.cover,
                               ),
-                            )),
-                        const SizedBox(width: 8),
-                        Text(
-                          widget.author,
-                          style: GoogleFonts.inter(
-                            fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        const Spacer(),
-                        Text(
-                          widget.date,
-                          style: GoogleFonts.inter(
-                              fontSize: 12, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      widget.discussionTitle,
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      widget.discussionContent,
-                      style: GoogleFonts.inter(
-                          fontSize: 14, color: Colors.black87),
-                    ),
-                    const SizedBox(height: 16),
-                    Form(
-                      // Wrap the TextFormField in a Form widget
-                      key: _formKey, // Assign the GlobalKey
-                      child: TextFormField(
-                        // Changed to TextFormField
-                        controller: _controller,
-                        decoration: InputDecoration(
-                          hintText: 'Type your answer...',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
+                          const SizedBox(width: 8),
+                          Text(
+                            widget.author,
+                            style: GoogleFonts.inter(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        validator: (value) {
-                          // Added validator
-                          if (value == null || value.trim().isEmpty) {
-                            return "Answer's field must be filled";
-                          }
-                          return null;
-                        },
+                          const Spacer(),
+                          Text(
+                            widget.date,
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: ElevatedButton(
-                        onPressed: _submitReply,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue[300],
-                          foregroundColor: Colors.white,
+                      const SizedBox(height: 10),
+                      Text(
+                        widget.discussionTitle,
+                        style: GoogleFonts.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
-                        child: _isLoading
-                            ? const CircularProgressIndicator(
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.white),
-                              )
-                            : const Text('Reply'),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Expanded(
-                      child: ListView.builder(
+                      const SizedBox(height: 10),
+                      Text(
+                        widget.discussionContent,
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Form(
+                        key: _formKey,
+                        child: TextFormField(
+                          controller: _controller,
+                          decoration: InputDecoration(
+                            hintText: 'Type your answer...',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return "Answer's field must be filled";
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: ElevatedButton(
+                          onPressed: _submitReply,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue[300],
+                            foregroundColor: Colors.white,
+                          ),
+                          child: _isLoading
+                              ? const CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                )
+                              : const Text('Reply'),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // For the ListView.builder, consider if it should also be
+                      // shrinkWrap: true and physics: NeverScrollableScrollPhysics()
+                      // if you want its content to scroll with the SingleChildScrollView.
+                      // Otherwise, it will have its own scroll.
+                      ListView.builder(
+                        shrinkWrap: true, // Add this
+                        physics:
+                            const NeverScrollableScrollPhysics(), // Add this
                         itemCount: replies.length,
                         itemBuilder: (context, index) {
                           return _ReplyItem(
@@ -184,8 +194,8 @@ class DiscussionReplyScreenState extends State<DiscussionReplyScreen> {
                           );
                         },
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             );

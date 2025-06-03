@@ -294,8 +294,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     final orientation = MediaQuery.of(context).orientation;
 
     if (orientation == Orientation.portrait) {
-      return SizedBox(
-        height: 180,
+      return SafeArea(
+          child: SingleChildScrollView(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -305,11 +305,24 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             _buildPodiumUser(thirdRank, size: 70, position: 3),
           ],
         ),
-      );
+      ));
     } else {
       // Tampilan landscape: bisa lebih horizontal dan fleksibel
-      return SizedBox(
-        height: 160,
+      // return SafeArea(
+      //     child: SingleChildScrollView(
+      //         child: SizedBox(
+      //   height: 160,
+      //   child: Row(
+      //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      //     children: [
+      //       _buildPodiumUser(secondRank, size: 70, position: 2),
+      //       _buildPodiumUser(firstRank, size: 90, position: 1),
+      //       _buildPodiumUser(thirdRank, size: 60, position: 3),
+      //     ],
+      //   ),
+      // )));
+      return SafeArea(
+          child: SingleChildScrollView(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -318,7 +331,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             _buildPodiumUser(thirdRank, size: 60, position: 3),
           ],
         ),
-      );
+      ));
     }
   }
 
@@ -443,8 +456,6 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     bool isFirstPlace = user['rank'] == 1;
     bool isSecondPlace = user['rank'] == 2;
     bool isThirdPlace = user['rank'] == 3;
-
-    Logger().i(user);
 
     Duration shimmerDelay = isFirstPlace
         ? Duration.zero

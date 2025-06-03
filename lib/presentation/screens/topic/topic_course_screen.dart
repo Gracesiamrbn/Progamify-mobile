@@ -339,12 +339,16 @@ class TopicCourseScreenState extends State<TopicCourseScreen>
                                       style: GoogleFonts.inter(
                                         fontWeight: FontWeight.bold,
                                       ),
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                     const Spacer(),
                                     Text(
                                       discussions[index]['date']!,
+                                      softWrap: true,
                                       style: GoogleFonts.inter(
                                           fontSize: 12, color: Colors.grey),
+                                      textAlign: TextAlign.end,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ],
                                 ),

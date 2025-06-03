@@ -50,7 +50,11 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             children: [
               Container(
                 width: double.infinity,
-                height: MediaQuery.of(context).size.height * 0.25,
+                // height: MediaQuery.of(context).size.height * 0.25,
+                height:
+                    MediaQuery.of(context).orientation == Orientation.portrait
+                        ? MediaQuery.of(context).size.height * 0.25
+                        : 140.0,
                 color: Colors.blue[200],
                 child: Stack(
                   alignment: Alignment.center,
@@ -65,7 +69,11 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                       textAlign: TextAlign.center,
                     ),
                     Positioned(
-                      top: MediaQuery.of(context).size.height * 0.18,
+                      // top: MediaQuery.of(context).size.height * 0.18,
+                      top: MediaQuery.of(context).orientation ==
+                              Orientation.portrait
+                          ? MediaQuery.of(context).size.height * 0.18
+                          : 90.0,
                       left: MediaQuery.of(context).size.width * 0.07,
                       right: MediaQuery.of(context).size.width * 0.07,
                       child: Container(
