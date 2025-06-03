@@ -592,7 +592,8 @@ class _BadgesTabState extends State<BadgesTab> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          content: Column(
+          content: SingleChildScrollView(
+              child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ClipRRect(
@@ -637,7 +638,7 @@ class _BadgesTabState extends State<BadgesTab> {
                 ),
               ),
             ],
-          ),
+          )),
           actions: [
             SizedBox(
               width: double.infinity,

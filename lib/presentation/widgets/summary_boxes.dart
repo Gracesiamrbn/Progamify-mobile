@@ -57,7 +57,7 @@ class _SummaryBoxesState extends State<SummaryBoxes> {
               icon: "assets/icons/treasure.png"),
           BoxItem(
               value: "${widget.totalLesson}",
-              label: "lesson done",
+              label: "Lesson done",
               icon: "assets/icons/topic.png"),
         ];
 
@@ -102,6 +102,7 @@ class _SummaryBoxesState extends State<SummaryBoxes> {
                             height: 40,
                           ),
                           const SizedBox(height: 8),
+
                           Text(
                             item.value,
                             style: const TextStyle(
@@ -119,6 +120,33 @@ class _SummaryBoxesState extends State<SummaryBoxes> {
                               color: Colors.black87,
                             ),
                           ),
+                          // LayoutBuilder(
+                          //   builder: (context, constraints) {
+                          //     double dynamicFontSize = constraints.maxWidth / 6;
+                          //     return Text(
+                          //       item.value,
+                          //       style: TextStyle(
+                          //         fontSize: dynamicFontSize,
+                          //         fontWeight: FontWeight.bold,
+                          //         fontFamily: 'Inter',
+                          //         color: Colors.black,
+                          //       ),
+                          //     );
+                          //   },
+                          // ),
+                          // LayoutBuilder(
+                          //   builder: (context, constraints) {
+                          //     double dynamicFontSize = constraints.maxWidth / 6;
+                          //     return Text(
+                          //       item.label,
+                          //       style: TextStyle(
+                          //         fontSize: dynamicFontSize,
+                          //         fontFamily: 'Inter',
+                          //         color: Colors.black87,
+                          //       ),
+                          //     );
+                          //   },
+                          // )
                         ],
                       ),
                     ),
