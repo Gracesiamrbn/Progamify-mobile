@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:progamify/api/avatar_service.dart';
 import 'package:progamify/api/gift_service.dart';
 import 'package:progamify/api/user_service.dart';
@@ -49,6 +50,7 @@ class MarketPurchaseButtonState extends State<MarketPurchaseButton> {
   @override
   Widget build(BuildContext context) {
     if (widget.selectedItem["owned"] != null) {
+      Logger().i(widget.selectedItem);
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: SizedBox(
@@ -143,6 +145,7 @@ class MarketPurchaseButtonState extends State<MarketPurchaseButton> {
         ),
       );
     } else {
+      Logger().i(widget.selectedItem);
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: SizedBox(
