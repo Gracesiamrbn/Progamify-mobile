@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:logger/logger.dart';
 
 class MarketSelectedItem extends StatelessWidget {
   final int selectedIndex;
@@ -15,9 +14,7 @@ class MarketSelectedItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Logger().i(selectedItem);
-    Logger().i(selectedIndex);
-    Logger().i(selectedTabIndex);
+    bool isSvg = selectedItem["image"].toLowerCase().endsWith('.svg');
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       width: double.infinity,
@@ -25,19 +22,13 @@ class MarketSelectedItem extends StatelessWidget {
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
-        child: selectedTabIndex == 0
+        child: isSvg
             ? SvgPicture.network(
                 selectedItem["image"] ?? "",
                 fit: BoxFit.contain,
                 placeholderBuilder: (context) =>
                     const Center(child: CircularProgressIndicator()),
               )
-            // SvgPicture.asset(
-            //     "assets/avatars/avatar_jumbotron_${selectedIndex + 1}.svg",
-            //     fit: BoxFit.contain,
-            //     placeholderBuilder: (context) =>
-            //         const Center(child: CircularProgressIndicator()),
-            //   )
             : Image.network(
                 selectedItem["image"] ?? "",
                 fit: BoxFit.contain,

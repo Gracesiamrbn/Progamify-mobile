@@ -31,8 +31,6 @@ class MarketItemGrid extends StatelessWidget {
 
               final List<Map<String, dynamic>> items = avatars;
 
-              Logger().i(avatars);
-
               return Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -47,7 +45,7 @@ class MarketItemGrid extends StatelessWidget {
                   itemCount: items.length,
                   itemBuilder: (context, index) {
                     final item = items[index];
-
+                    bool isSvg = item["image"].toLowerCase().endsWith('.svg');
                     return GestureDetector(
                       onTap: () => onItemSelected(
                           {"index": index, "item": items[index]}),
@@ -69,7 +67,7 @@ class MarketItemGrid extends StatelessWidget {
                                 children: [
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(7),
-                                    child: selectedTabIndex == 0
+                                    child: isSvg
                                         ? SvgPicture.network(
                                             item["image"],
                                             fit: BoxFit.cover,
@@ -81,21 +79,35 @@ class MarketItemGrid extends StatelessWidget {
                                                   CircularProgressIndicator(),
                                             ),
                                           )
-                                        // SvgPicture.asset(
-                                        //     item["image"],
-                                        //     fit: BoxFit.cover,
-                                        //     width: double.infinity,
-                                        //     height: double.infinity,
-                                        //     placeholderBuilder: (context) =>
-                                        //         const Center(
-                                        //       child: CircularProgressIndicator(),
-                                        //     ),
-                                        //   )
-                                        : Image.asset(
+                                        : Image.network(
+                                            // Use Image.network for non-SVG network images
                                             item["image"],
                                             fit: BoxFit.cover,
                                             width: double.infinity,
                                             height: double.infinity,
+                                            loadingBuilder: (context, child,
+                                                loadingProgress) {
+                                              if (loadingProgress == null) {
+                                                return child;
+                                              }
+                                              return Center(
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  value: loadingProgress
+                                                              .expectedTotalBytes !=
+                                                          null
+                                                      ? loadingProgress
+                                                              .cumulativeBytesLoaded /
+                                                          loadingProgress
+                                                              .expectedTotalBytes!
+                                                      : null,
+                                                ),
+                                              );
+                                            },
+                                            errorBuilder: (context, error,
+                                                    stackTrace) =>
+                                                const Center(
+                                                    child: Icon(Icons.error)),
                                           ),
                                   ),
 
@@ -163,7 +175,7 @@ class MarketItemGrid extends StatelessWidget {
               final gifts = snapshot.data!;
 
               final List<Map<String, dynamic>> items = gifts;
-
+              Logger().i(items);
               return Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -178,7 +190,7 @@ class MarketItemGrid extends StatelessWidget {
                   itemCount: items.length,
                   itemBuilder: (context, index) {
                     final item = items[index];
-
+                    bool isSvg = item["image"].toLowerCase().endsWith('.svg');
                     return GestureDetector(
                       onTap: () => onItemSelected(
                           {"index": index, "item": items[index]}),
@@ -200,7 +212,7 @@ class MarketItemGrid extends StatelessWidget {
                                 children: [
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(7),
-                                    child: selectedTabIndex == 0
+                                    child: isSvg
                                         ? SvgPicture.network(
                                             item["image"],
                                             fit: BoxFit.cover,
@@ -213,10 +225,34 @@ class MarketItemGrid extends StatelessWidget {
                                             ),
                                           )
                                         : Image.network(
+                                            // Use Image.network for non-SVG network images
                                             item["image"],
                                             fit: BoxFit.cover,
                                             width: double.infinity,
                                             height: double.infinity,
+                                            loadingBuilder: (context, child,
+                                                loadingProgress) {
+                                              if (loadingProgress == null) {
+                                                return child;
+                                              }
+                                              return Center(
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  value: loadingProgress
+                                                              .expectedTotalBytes !=
+                                                          null
+                                                      ? loadingProgress
+                                                              .cumulativeBytesLoaded /
+                                                          loadingProgress
+                                                              .expectedTotalBytes!
+                                                      : null,
+                                                ),
+                                              );
+                                            },
+                                            errorBuilder: (context, error,
+                                                    stackTrace) =>
+                                                const Center(
+                                                    child: Icon(Icons.error)),
                                           ),
                                   ),
                                   if ((item.containsKey("owned") &&

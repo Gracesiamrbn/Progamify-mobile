@@ -11,6 +11,8 @@ class ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isSvg = avatarPath.toLowerCase().endsWith('.svg');
+
     return SliverAppBar(
       expandedHeight: 172.5,
       pinned: true,
@@ -19,18 +21,31 @@ class ProfileHeader extends StatelessWidget {
         background: Stack(
           alignment: Alignment.center,
           children: [
-            SvgPicture.network(
-              avatarPath,
-              fit: BoxFit.cover,
-              placeholderBuilder: (BuildContext context) =>
-                  const CircularProgressIndicator(),
-            )
-            // SvgPicture.asset(
-            //   avatarPath,
-            //   width: double.infinity,
-            //   height: 200,
-            //   fit: BoxFit.cover,
-            // ),
+            isSvg
+                ? SvgPicture.network(
+                    avatarPath,
+                    fit: BoxFit.cover,
+                    placeholderBuilder: (BuildContext context) =>
+                        const CircularProgressIndicator(),
+                  )
+                : Image.network(
+                    // Use Image.network for non-SVG network images
+                    avatarPath,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                              : null,
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Center(child: Icon(Icons.error)),
+                  ),
           ],
         ),
       ),

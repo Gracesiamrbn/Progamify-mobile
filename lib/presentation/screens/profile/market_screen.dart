@@ -24,12 +24,12 @@ class MarketScreenState extends State<MarketScreen> {
     "id": 1,
     "owned": true,
     "image":
-        "http://10.0.2.2:8000/storage/avatars/images/2jxSC7Jq8QixoTX2iXdHviVjkRWUE8xxk9vc1ii7.svg"
+        "http://31.97.67.152:9000/storage/avatars/images/4bCcMHTOrAcdgyqhm4T9aohCjlAr3oXeNKvMSNQD.svg"
   };
   dynamic selectedGift = {
     "id": 1,
     "image":
-        "http://10.0.2.2:8000/storage/gift/images/O7IC5S7HS64DOwLR0yuwUdAOkf0vxBTMwqa14YAI.png"
+        "http://31.97.67.152:9000/storage/gift/images/IFopLvqi8JEfMMjl8S8WEZvl6oCGBMbDWBoxfCRL.png"
   };
 
   @override

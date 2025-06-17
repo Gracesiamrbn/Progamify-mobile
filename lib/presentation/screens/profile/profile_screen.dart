@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:progamify/api/user_service.dart';
 import 'package:progamify/utils/util.dart';
 import '../../widgets/profile_header.dart';
@@ -36,6 +37,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
             final user = snapshot.data!;
+
             final avatarLink = Util().getLinkLaravel(user["detail_avatar"]
                     ["picture_url"] ??
                 'assets/images/avatar_jumbotron.svg');

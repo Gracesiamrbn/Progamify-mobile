@@ -61,7 +61,8 @@ class MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SafeArea(
+        child: Scaffold(
       extendBody: true,
       body: Column(
         children: [
@@ -85,6 +86,6 @@ class MainScreenState extends State<MainScreen> {
         ],
         onTap: _onItemTapped,
       ),
-    );
+    ));
   }
 }

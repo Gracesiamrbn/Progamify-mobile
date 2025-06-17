@@ -337,6 +337,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
 
   Widget _buildPodiumUser(Map<String, dynamic> user,
       {required double size, required int position}) {
+    bool isSvg = user['avatar'].toLowerCase().endsWith('.svg');
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
@@ -354,12 +356,19 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                     shape: BoxShape.circle,
                   ),
                   child: ClipOval(
-                    child: SvgPicture.network(
-                      user['avatar'],
-                      width: 40,
-                      height: 40,
-                      fit: BoxFit.cover,
-                    ),
+                    child: isSvg
+                        ? SvgPicture.network(
+                            user['avatar'],
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.cover,
+                          )
+                        : Image.network(
+                            user['avatar'],
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.contain,
+                          ),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -482,7 +491,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             builder: (context, snapshot) {
               bool shimmerEnabled =
                   snapshot.connectionState == ConnectionState.done;
-
+              bool isSvg = user["avatar"].toLowerCase().endsWith('.svg');
               return Shimmer(
                 duration: const Duration(seconds: 2),
                 colorOpacity: 0.3,
@@ -530,10 +539,15 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                             height: 40,
                             child: Hero(
                               tag: user['name'],
-                              child: SvgPicture.network(
-                                user['avatar'],
-                                fit: BoxFit.cover,
-                              ),
+                              child: isSvg
+                                  ? SvgPicture.network(
+                                      user['avatar'],
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Image.network(
+                                      user['avatar'],
+                                      fit: BoxFit.contain,
+                                    ),
                             ),
                           ),
                         ),
