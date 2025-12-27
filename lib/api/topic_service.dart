@@ -32,7 +32,7 @@ class TopicService {
               'completed':
                   topic['total_take_lessons'] + topic['total_take_exercises'],
               'total_lessons': topic['total_lessons'],
-              'total_exercises': topic['total_exercises']
+              'total_exercises': topic['total_exercises'],
             };
           }),
         );
