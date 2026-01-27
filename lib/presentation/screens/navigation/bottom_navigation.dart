@@ -45,7 +45,7 @@ class MainScreenState extends State<MainScreen> {
       case 3:
         return const ProfileScreen();
       default:
-        return const >();
+        return const SizedBox.shrink();
     }
   }
 
