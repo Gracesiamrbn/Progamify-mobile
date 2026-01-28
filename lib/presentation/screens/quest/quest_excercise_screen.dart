@@ -116,6 +116,28 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
     }
   }
 
+  void _takeAnotherQuest() {
+    setState(() {
+      isPreview = false;
+      selectedAnswer = null;
+      selectedAnswers.clear();
+      userAnswers.clear();
+      jawabanUser.clear();
+      result = null;
+      _seconds = 0; // Will be reset when fetching new quest
+      _timer?.cancel();
+      _questionsFuture = Future.delayed(const Duration(seconds: 2), () async {
+        var data = await QuestService().getQuest(widget.userId);
+        int fetchedTimer = (data["timer"] ?? 2) * 60;
+        setState(() {
+          _seconds = fetchedTimer;
+        });
+        _startTimer();
+        return data;
+      });
+    });
+  }
+
   void _showBadges(
       List<dynamic> badges, int index, List<dynamic> achievements) {
     if (index >= badges.length) {
@@ -643,6 +665,18 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               ),
               child: Text('$correctAnswer')),
           if (explanation != null) _buildExplanation(explanation),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              minimumSize: const Size(double.infinity, 50),
+            ),
+            onPressed: _takeAnotherQuest,
+            child: const Text(
+              'Ambil Quest Lain',
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+          ),
         ],
       );
     }
@@ -693,6 +727,18 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
             ),
           ],
           if (explanation != null) _buildExplanation(explanation),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              minimumSize: const Size(double.infinity, 50),
+            ),
+            onPressed: _takeAnotherQuest,
+            child: const Text(
+              'Ambil Quest Lain',
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+          ),
         ],
       );
     } else if (type == 'multiple_answer') {
@@ -738,6 +784,18 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
             ),
           ],
           if (explanation != null) _buildExplanation(explanation),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              minimumSize: const Size(double.infinity, 50),
+            ),
+            onPressed: _takeAnotherQuest,
+            child: const Text(
+              'Ambil Quest Lain',
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+          ),
         ],
       );
     } else {
@@ -780,6 +838,18 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               style: TextStyle(color: Colors.red, fontSize: 16),
             ),
           if (explanation != null) _buildExplanation(explanation),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              minimumSize: const Size(double.infinity, 50),
+            ),
+            onPressed: _takeAnotherQuest,
+            child: const Text(
+              'Ambil Quest Lain',
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+          ),
         ],
       );
     }

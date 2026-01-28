@@ -4,6 +4,7 @@ import 'package:logger/logger.dart';
 import 'package:progamify/api/exercise_service.dart';
 import 'package:progamify/presentation/screens/topic/exercise_view.dart';
 import 'package:progamify/presentation/screens/topic/topic_detail_screen.dart';
+import 'package:progamify/presentation/screens/topic/excercise_screen.dart';
 
 class ExerciseResultScreen extends StatefulWidget {
   final int? topicId;
@@ -66,13 +67,13 @@ class ExerciseResultScreenState extends State<ExerciseResultScreen> {
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop) {
-          if (widget.topicId != null) {
+          if (widget.topicId != null && widget.topicId != 0) {
             Navigator.pop(context);
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                   builder: (context) => TopicDetailScreen(
-                      topicId: widget.topicId ?? 0,
+                      topicId: widget.topicId!,
                       topicTitle: widget.topicTitle ?? "",
                       totalExercise: widget.totalExercise ?? 0,
                       totalLesson: widget.totalLesson ?? 0)),
@@ -89,13 +90,13 @@ class ExerciseResultScreenState extends State<ExerciseResultScreen> {
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () {
-              if (widget.topicId != null) {
+              if (widget.topicId != null && widget.topicId != 0) {
                 Navigator.pop(context);
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
                       builder: (context) => TopicDetailScreen(
-                          topicId: widget.topicId ?? 0,
+                          topicId: widget.topicId!,
                           topicTitle: widget.topicTitle ?? "",
                           totalExercise: widget.totalExercise ?? 0,
                           totalLesson: widget.totalLesson ?? 0)),
@@ -192,6 +193,36 @@ class ExerciseResultScreenState extends State<ExerciseResultScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ExerciseScreen(
+                                exerciseId: result["exercise_id"],
+                                topicId: widget.topicId ?? 0,
+                                topicTitle: widget.topicTitle ?? "",
+                                totalExercise: widget.totalExercise ?? 0,
+                                totalLesson: widget.totalLesson ?? 0,
+                              ),
+                            ),
+                          );
+                        },
+                        icon: const Text(
+                          'Kerjakan Ulang',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        label: const Icon(Icons.refresh, color: Colors.white),
+                      ),
+                      const SizedBox(width: 10),
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
