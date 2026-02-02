@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:logger/logger.dart';
@@ -214,6 +215,60 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
               'q_index': i
             };
             questions.add(q);
+          } else if (question["type"] == "matching") {
+            List<String> keywords = [];
+            List<String> explanations = [];
+            Set<String> uniqueExplanations = {};
+
+            dynamic matchingData = question["content"];
+            if (matchingData is String) {
+              try {
+                matchingData = jsonDecode(matchingData);
+              } catch (e) {
+                matchingData = [];
+              }
+            }
+
+            if (matchingData is List) {
+              matchingData.forEach((item) {
+                if (item is Map) {
+                  if (item["keyword"] != null) {
+                    keywords.add(item["keyword"].toString());
+                  }
+                  if (item["explanation"] != null) {
+                    uniqueExplanations.add(item["explanation"].toString());
+                  }
+                }
+              });
+            }
+
+            // Fallback to answers if content parsing didn't yield keywords
+            if (keywords.isEmpty && question["answers"] != null) {
+              question["answers"].forEach((answer) {
+                if (answer["keyword"] != null) {
+                  keywords.add(answer["keyword"].toString());
+                }
+                if (answer["explanation"] != null) {
+                  uniqueExplanations.add(answer["explanation"].toString());
+                }
+              });
+            }
+
+            explanations = uniqueExplanations.toList();
+
+            var q = {
+              'id': question["ID"],
+              'question': "Matching Challenge",
+              'keywords': keywords,
+              'explanations': explanations,
+              'correctAnswer': 1,
+              'explanation': question["feedback"],
+              'exp': question["exp"],
+              'pts': question["point"],
+              'type': "matching",
+              'q_index': i
+            };
+            questions.add(q);
           }
         }
 
@@ -371,13 +426,13 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
                   const SizedBox(
                     height: 20,
                   ),
-                  const Text(
-                    "Correct Answer:",
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
+                  if (question['type'] != 'matching') ...[
+                    const Text(
+                      "Correct Answer:",
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
                   _buildExplanation(questions[currentQuestionIndex]
                           ['explanation'] ??
                       'Isi Jawaban Anda!'),
@@ -615,7 +670,7 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
       );
     }
 
-    if (options.isEmpty) {
+    if (options.isEmpty && type != 'matching') {
       return const Text("No options available",
           style: TextStyle(color: Colors.red));
     }
@@ -639,6 +694,8 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
           },
         ),
       );
+    } else if (type == 'matching') {
+      return _buildMatching(question);
     } else {
       return Column(
         children: List.generate(options.length, (index) {
@@ -655,7 +712,9 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
 
     var jawaban = jawabanUser[question["q_index"]];
 
-    if (jawaban != null && jawaban["correct_answer_index"].contains(index)) {
+    if (jawaban != null &&
+        jawaban["correct_answer_index"] != null &&
+        jawaban["correct_answer_index"].contains(index)) {
       isCorrect = true;
     }
 
@@ -739,6 +798,168 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildMatching(dynamic question) {
+    final List<String> keywords = (question['keywords'] as List?)?.cast<String>() ?? [];
+    final List<String> explanations = (question['explanations'] as List?)?.cast<String>() ?? [];
+
+    return Column(
+      children: [
+        // Header
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Explanation',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              SizedBox(
+                width: 140,
+                child: Text(
+                  'Keyword',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        // Matching Items
+        ListView.builder(
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemCount: explanations.length,
+          itemBuilder: (context, index) {
+            return _buildMatchingCard(
+              question,
+              index,
+              explanations[index],
+              keywords,
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMatchingCard(
+    dynamic question,
+    int index,
+    String explanation,
+    List<String> keywords,
+  ) {
+    var jawaban = jawabanUser[question["q_index"]];
+    String? selectedKeyword;
+    
+    if (jawaban != null && jawaban["answers"] != null) {
+      final answers = jawaban["answers"] as List;
+      if (index < answers.length) {
+        selectedKeyword = answers[index]['keyword'];
+      }
+    }
+
+    // Determine correctness
+    // In this app, keywords[index] is the correct answer for explanations[index]
+    bool isCorrect = selectedKeyword == keywords[index];
+
+    Color borderColor = Colors.transparent;
+    Color bgColor = Colors.white;
+    Color textColor = Colors.black;
+
+    if (selectedKeyword != null) {
+      borderColor = isCorrect ? Colors.green.shade700 : Colors.red.shade700;
+      bgColor = isCorrect ? Colors.green : Colors.red;
+      textColor = Colors.white;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: borderColor),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Explanation Text
+          Expanded(
+            child: Html(
+              data: '${index + 1}. $explanation',
+              style: {
+                "p": Style(
+                  fontSize: FontSize(13),
+                  textAlign: TextAlign.justify,
+                  color: textColor,
+                ),
+              },
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Keyword Display (Previously Dropdown)
+          SizedBox(
+            width: 140,
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: isCorrect && selectedKeyword != null ? Colors.green.shade900 : (selectedKeyword != null ? Colors.red.shade900 : Colors.grey.shade300)),
+                  ),
+                  child: Text(
+                    selectedKeyword ?? 'Not Answered',
+                    style: const TextStyle(fontSize: 13),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                if (selectedKeyword != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    isCorrect ? 'Correct' : 'Incorrect',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: isCorrect ? Colors.green.shade100 : Colors.white,
+                    ),
+                  ),
+                ],
+                if (!isCorrect && selectedKeyword != null) ...[
+                   const SizedBox(height: 2),
+                   Text(
+                    'Correct: ${keywords[index]}',
+                    style: const TextStyle(
+                      fontSize: 9,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ]
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

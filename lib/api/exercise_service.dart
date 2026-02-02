@@ -76,6 +76,12 @@ class ExerciseService {
           "answers": value["answers"],
           "index_jawaban": value["index_jawaban"],
         };
+      } else if (value["type"] == "matching") {
+        converted[key.toString()] = {
+          "question_id": value["question_id"],
+          "answers": value["answers"],
+          "index_jawaban": value["index_jawaban"] ?? 0,
+        };
       }
     });
     return converted;

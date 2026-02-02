@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:progamify/api/exercise_service.dart';
@@ -254,6 +255,67 @@ class ExerciseScreenState extends State<ExerciseScreen> {
               'type': "multiple_answer"
             };
             questions.add(q);
+          } else if (question["type"] == "matching") {
+            List<String> keywords = [];
+            List<String> explanations = [];
+            Set<String> uniqueExplanations = {};
+
+            // Try to parse content as JSON if it's a string
+            dynamic matchingData = question["content"];
+            if (matchingData is String) {
+              try {
+                matchingData = jsonDecode(matchingData);
+              } catch (e) {
+                // If not JSON, treat as regular content
+                logger.w("Failed to parse matching content as JSON: $e");
+                matchingData = [];
+              }
+            }
+
+            // Extract from parsed data
+            if (matchingData is List) {
+              matchingData.forEach((item) {
+                if (item is Map) {
+                  if (item["keyword"] != null) {
+                    keywords.add(item["keyword"].toString());
+                  }
+                  if (item["explanation"] != null) {
+                    uniqueExplanations.add(item["explanation"].toString());
+                  }
+                }
+              });
+            }
+
+            // Also try from answers if keywords still empty
+            if (keywords.isEmpty && question["answers"] != null) {
+              question["answers"].forEach((answer) {
+                if (answer["keyword"] != null) {
+                  keywords.add(answer["keyword"].toString());
+                }
+                if (answer["explanation"] != null) {
+                  uniqueExplanations.add(answer["explanation"].toString());
+                }
+              });
+            }
+
+            explanations = uniqueExplanations.toList();
+
+            // Debug logging
+            logger.i("Matching keywords: $keywords");
+            logger.i("Matching explanations: $explanations");
+
+            var q = {
+              'id': question["ID"],
+              'question': question["content"],
+              'keywords': keywords,
+              'explanations': explanations,
+              'correctAnswer': 1,
+              'explanation': question["feedback"],
+              'exp': question["exp"],
+              'pts': question["point"],
+              'type': "matching"
+            };
+            questions.add(q);
           }
         }
 
@@ -369,11 +431,13 @@ class ExerciseScreenState extends State<ExerciseScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  Html(data: question["question"], style: {
-                    "p": Style(
-                        fontSize: FontSize(18), textAlign: TextAlign.justify),
-                  }),
-                  const SizedBox(height: 20),
+                  if (question['type'] != 'matching')
+                    Html(data: question["question"], style: {
+                      "p": Style(
+                          fontSize: FontSize(18), textAlign: TextAlign.justify),
+                    }),
+                  if (question['type'] != 'matching')
+                    const SizedBox(height: 20),
                   _buildOptions(questions),
                   const SizedBox(height: 20),
                   Row(
@@ -427,6 +491,152 @@ class ExerciseScreenState extends State<ExerciseScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildMatching(dynamic question) {
+    final List<String> keywords = question['keywords'] ?? [];
+    final List<String> explanations = question['explanations'] ?? [];
+
+    if (jawabanUser[currentQuestionIndex] == null) {
+      jawabanUser[currentQuestionIndex] = {
+        "question_id": question["id"],
+        "answers": List<Map<String, dynamic>>.filled(explanations.length, {}),
+        "type": "matching"
+      };
+    }
+
+    return Column(
+      children: [
+        // Header
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Explanation',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              SizedBox(
+                width: 140,
+                child: Text(
+                  'Keyword',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        // Matching Items - Display Explanation on Left, Keyword Dropdown on Right
+        ListView.builder(
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemCount: explanations.length,
+          itemBuilder: (context, index) {
+            return _buildMatchingCard(
+              question,
+              index,
+              explanations[index],
+              keywords,
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMatchingCard(
+    dynamic question,
+    int index,
+    String explanation,
+    List<String> keywords,
+  ) {
+    final answers = jawabanUser[currentQuestionIndex]?["answers"]
+        as List<Map<String, dynamic>>?;
+    String? selectedKeyword = answers?[index]?['keyword'];
+
+    return Container(
+      margin: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.transparent),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Explanation Text (Left Side)
+          Expanded(
+            child: Html(
+              data: '${index + 1}. $explanation',
+              style: {
+                "p": Style(
+                  fontSize: FontSize(13),
+                  textAlign: TextAlign.justify,
+                ),
+              },
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Keyword Dropdown (Right Side)
+          SizedBox(
+            width: 140,
+            child: DropdownButtonFormField<String>(
+              value: selectedKeyword,
+              hint: const Text('Select'),
+              items: keywords
+                  .map((kw) => DropdownMenuItem<String>(
+                        value: kw,
+                        child: Text(
+                          kw,
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                      ))
+                  .toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() {
+                    final answers = jawabanUser[currentQuestionIndex]
+                        ?["answers"] as List<Map<String, dynamic>>?;
+                    if (answers != null && index < answers.length) {
+                      // Save pair: {keyword: selected, explanation: static}
+                      answers[index] = {
+                        'keyword': value,
+                        'explanation': explanation,
+                      };
+                      _saveUserAnswer(currentQuestionIndex, '', 0, question);
+                    }
+                  });
+                }
+              },
+              decoration: InputDecoration(
+                isDense: true,
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -529,6 +739,19 @@ class ExerciseScreenState extends State<ExerciseScreen> {
         "answers": answers,
         "index_jawaban": indexJawaban,
         "type": question["type"]
+      };
+      jawabanUser[indexSoal] = detailJawaban;
+    } else if (question["type"] == "matching") {
+      List<Map<String, dynamic>> matchingAnswers = [];
+      if (jawabanUser[indexSoal] != null &&
+          jawabanUser[indexSoal]["answers"] != null) {
+        matchingAnswers = jawabanUser[indexSoal]["answers"];
+      }
+      Map<String, dynamic> detailJawaban = {
+        "question_id": question["id"],
+        "answers": matchingAnswers,
+        "type": question["type"],
+        "index_jawaban": 0,
       };
       jawabanUser[indexSoal] = detailJawaban;
     }
@@ -708,6 +931,10 @@ class ExerciseScreenState extends State<ExerciseScreen> {
     final question = questions[currentQuestionIndex];
     final String type = question['type'];
     final options = question['options'] ?? []; // Pastikan options tidak null
+
+    if (type == 'matching') {
+      return _buildMatching(question);
+    }
 
     if (type == 'essay') {
       TextEditingController textController = TextEditingController();
