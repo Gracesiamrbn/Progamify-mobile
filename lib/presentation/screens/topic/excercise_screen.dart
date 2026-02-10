@@ -11,27 +11,28 @@ class ExerciseScreen extends StatefulWidget {
   final String topicTitle;
   final int totalLesson;
   final int totalExercise;
-  const ExerciseScreen(
-      {super.key,
-      required this.exerciseId,
-      required this.topicId,
-      required this.topicTitle,
-      required this.totalLesson,
-      required this.totalExercise});
+
+  const ExerciseScreen({
+    super.key,
+    required this.exerciseId,
+    required this.topicId,
+    required this.topicTitle,
+    required this.totalLesson,
+    required this.totalExercise,
+  });
 
   @override
-  ExerciseScreenState createState() => ExerciseScreenState();
+  State<ExerciseScreen> createState() => _ExerciseScreenState();
 }
 
-class ExerciseScreenState extends State<ExerciseScreen> {
+class _ExerciseScreenState extends State<ExerciseScreen> {
   bool isLoading = false;
   int currentQuestionIndex = 0;
   dynamic selectedAnswer;
-  final ScrollController _scrollController = ScrollController();
   List<int> selectedAnswers = [];
-  List<Map<String, dynamic>> userAnswers = [];
   Map<int, dynamic> jawabanUser = {};
 
+  final ScrollController _scrollController = ScrollController();
   late Future<Map<String, dynamic>> _questionsFuture;
 
   final logger = Logger();
@@ -42,69 +43,28 @@ class ExerciseScreenState extends State<ExerciseScreen> {
     _questionsFuture = ExerciseService().getExercise(widget.exerciseId);
   }
 
-  Future<void> _submitExercise() async {
-    setState(() {
-      isLoading = true;
-    });
-
-    Navigator.pop(context);
-
-    _showSubmitDialog();
-
-    try {
-      var result = await ExerciseService()
-          .submitExercise(widget.exerciseId, jawabanUser);
-
-      Logger().i("Result: $result");
-
-      // Cek apakah result memiliki achievement
-      if (result["achievement"] != null && result["achievement"].isNotEmpty) {
-        await _showPopUpAchievement(result["achievement"]);
+  void _loadPreviousAnswer() {
+    final prev = jawabanUser[currentQuestionIndex];
+    if (prev != null) {
+      selectedAnswer = prev["index_jawaban"];
+      if (prev["type"] == "multiple_answer") {
+        selectedAnswers = List<int>.from(prev["index_jawaban"] ?? []);
+      } else {
+        selectedAnswers.clear();
       }
-
-      Navigator.pop(context);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ExerciseResultScreen(
-            userAnswers: [result],
-            topicId: widget.topicId,
-            topicTitle: widget.topicTitle,
-            totalExercise: widget.totalExercise,
-            totalLesson: widget.totalLesson,
-          ),
-        ),
-      );
-    } catch (e) {
-      Logger().e("Error submitting exercise: $e");
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
+    } else {
+      selectedAnswer = null;
+      selectedAnswers.clear();
     }
   }
 
-  void _nextQuestion(dynamic questions) {
+  void _nextQuestion(List<Map<String, dynamic>> questions) {
     if (currentQuestionIndex < questions.length - 1) {
       setState(() {
         currentQuestionIndex++;
-
-        if (jawabanUser[currentQuestionIndex] != null) {
-          selectedAnswer = jawabanUser[currentQuestionIndex]["index_jawaban"];
-          if (jawabanUser[currentQuestionIndex]["type"] == "multiple_answer") {
-            logger.i(selectedAnswers);
-            selectedAnswers.clear();
-            selectedAnswers
-                .addAll(jawabanUser[currentQuestionIndex]["index_jawaban"]);
-            logger.i(selectedAnswers);
-          }
-        } else {
-          selectedAnswer = null;
-          selectedAnswers.clear();
-        }
-
-        _scrollToCurrentQuestion();
+        _loadPreviousAnswer();
       });
+      _scrollToCurrentQuestion();
     }
   }
 
@@ -112,42 +72,16 @@ class ExerciseScreenState extends State<ExerciseScreen> {
     if (currentQuestionIndex > 0) {
       setState(() {
         currentQuestionIndex--;
-
-        if (jawabanUser[currentQuestionIndex] != null) {
-          selectedAnswer = jawabanUser[currentQuestionIndex]["index_jawaban"];
-          if (jawabanUser[currentQuestionIndex]["type"] == "multiple_answer") {
-            logger.i(selectedAnswers);
-            selectedAnswers.clear();
-            selectedAnswers
-                .addAll(jawabanUser[currentQuestionIndex]["index_jawaban"]);
-            logger.i(selectedAnswers);
-          }
-        } else {
-          selectedAnswer = null;
-          selectedAnswers.clear();
-        }
-        _scrollToCurrentQuestion();
+        _loadPreviousAnswer();
       });
+      _scrollToCurrentQuestion();
     }
   }
 
   void _goToQuestion(int index) {
     setState(() {
       currentQuestionIndex = index;
-
-      if (jawabanUser[currentQuestionIndex] != null) {
-        selectedAnswer = jawabanUser[currentQuestionIndex]["index_jawaban"];
-        if (jawabanUser[currentQuestionIndex]["type"] == "multiple_answer") {
-          logger.i(selectedAnswers);
-          selectedAnswers.clear();
-          selectedAnswers
-              .addAll(jawabanUser[currentQuestionIndex]["index_jawaban"]);
-          logger.i(jawabanUser[currentQuestionIndex]);
-        }
-      } else {
-        selectedAnswer = null;
-        selectedAnswers.clear();
-      }
+      _loadPreviousAnswer();
     });
     _scrollToCurrentQuestion();
   }
@@ -160,171 +94,135 @@ class ExerciseScreenState extends State<ExerciseScreen> {
     );
   }
 
+  Future<void> _submitExercise() async {
+    setState(() => isLoading = true);
+
+    try {
+      final result = await ExerciseService()
+          .submitExercise(widget.exerciseId, jawabanUser);
+      logger.i("Submit result: $result");
+
+      if (result["achievement"] != null &&
+          (result["achievement"] as List).isNotEmpty) {
+        await _showPopUpAchievement(result["achievement"]);
+      }
+
+      if (mounted) {
+        Navigator.pop(context); // close dialog if still open
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ExerciseResultScreen(
+              userAnswers: [result],
+              topicId: widget.topicId,
+              topicTitle: widget.topicTitle,
+              totalExercise: widget.totalExercise,
+              totalLesson: widget.totalLesson,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      logger.e("Submit error: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Gagal submit: $e")),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => isLoading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // final question = questions[currentQuestionIndex];
-    // int exp = question['exp'];
-    // int pts = question['pts'];
-
     return FutureBuilder<Map<String, dynamic>>(
       future: _questionsFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
-
         if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         }
-
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No questions available.'));
+          return const Center(child: Text('Tidak ada soal tersedia'));
         }
 
-        final response = snapshot.data!;
-        final questionsData = response["questions"];
+        final data = snapshot.data!;
+        final questionsData = data["questions"] as List<dynamic>? ?? [];
 
-        List<Map<String, dynamic>> questions = [];
-        for (int i = 0; i < questionsData.length; i++) {
-          var question = questionsData[i];
-          if (question["type"] == "multiple_choice") {
-            List<Map<String, dynamic>> options = [];
-            question["answers"].forEach((answer) {
-              var option = {"id": answer["ID"], "text": answer["content"]};
-              options.add(option);
-            });
-            var q = {
-              'id': question["ID"],
-              'question': question["content"],
-              'options': options,
-              'correctAnswer': 1,
-              'explanation': question["feedback"],
-              'exp': question["exp"],
-              'pts': question["point"],
-              'type': question["type"]
-            };
-            questions.add(q);
-          } else if (question["type"] == "true_false") {
-            var q = {
-              'id': question["ID"],
-              'question': question["content"],
-              'options': ["True", "False"],
-              'correctAnswer': 0,
-              'explanation': question["feedback"],
-              'exp': question["exp"],
-              'pts': question["point"],
-              'type': question["type"]
-            };
-            questions.add(q);
-          } else if (question["type"] == "essay") {
-            var q = {
-              'id': question["ID"],
-              'question': question["content"],
-              'correctAnswer': 0,
-              'explanation': question["feedback"],
-              'exp': question["exp"],
-              'pts': question["point"],
-              'type': question["type"]
-            };
-            questions.add(q);
-          } else if (question["type"] == "short_answer") {
-            var q = {
-              'id': question["ID"],
-              'question': question["content"],
-              'correctAnswer': '-',
-              'explanation': question["feedback"],
-              'exp': question["exp"],
-              'pts': question["point"],
-              'type': 'shortAnswer'
-            };
-            questions.add(q);
-          } else if (question["type"] == "multiple_answer") {
-            List<Map<String, dynamic>> options = [];
-            question["answers"].forEach((answer) {
-              var option = {"id": answer["ID"], "text": answer["content"]};
-              options.add(option);
-            });
-            var q = {
-              'id': question["ID"],
-              'question': question["content"],
-              'options': options,
-              'correctAnswer': 1,
-              'explanation': question["feedback"],
-              'exp': question["exp"],
-              'pts': question["point"],
-              'type': "multiple_answer"
-            };
-            questions.add(q);
-          } else if (question["type"] == "matching") {
+        final List<Map<String, dynamic>> questions = [];
+
+        for (final raw in questionsData) {
+          final q = raw as Map<String, dynamic>;
+          final type = q["type"] as String?;
+
+          Map<String, dynamic> parsed = {
+            'id': q["ID"],
+            'question': q["content"],
+            'explanation': q["feedback"],
+            'exp': q["exp"] ?? 0,
+            'pts': q["point"] ?? 0,
+            'type': type,
+          };
+
+          if (type == "multiple_choice" || type == "multiple_answer") {
+            final opts = <Map<String, dynamic>>[];
+            for (final ans in (q["answers"] as List? ?? [])) {
+              opts.add({
+                "id": ans["ID"],
+                "text": ans["content"],
+              });
+            }
+            parsed['options'] = opts;
+          } else if (type == "true_false") {
+            parsed['options'] = ["True", "False"];
+          } else if (type == "matching") {
             List<String> keywords = [];
-            List<String> explanations = [];
-            Set<String> uniqueExplanations = {};
+            final Set<String> uniqueExp = {};
 
-            // Try to parse content as JSON if it's a string
-            dynamic matchingData = question["content"];
-            if (matchingData is String) {
+            dynamic contentData = q["content"];
+            if (contentData is String) {
               try {
-                matchingData = jsonDecode(matchingData);
-              } catch (e) {
-                // If not JSON, treat as regular content
-                logger.w("Failed to parse matching content as JSON: $e");
-                matchingData = [];
-              }
+                contentData = jsonDecode(contentData);
+              } catch (_) {}
             }
 
-            // Extract from parsed data
-            if (matchingData is List) {
-              matchingData.forEach((item) {
+            if (contentData is List) {
+              for (final item in contentData) {
                 if (item is Map) {
                   if (item["keyword"] != null) {
                     keywords.add(item["keyword"].toString());
                   }
                   if (item["explanation"] != null) {
-                    uniqueExplanations.add(item["explanation"].toString());
+                    uniqueExp.add(item["explanation"].toString());
                   }
                 }
-              });
+              }
             }
 
-            // Also try from answers if keywords still empty
-            if (keywords.isEmpty && question["answers"] != null) {
-              question["answers"].forEach((answer) {
-                if (answer["keyword"] != null) {
-                  keywords.add(answer["keyword"].toString());
+            if (keywords.isEmpty) {
+              for (final ans in (q["answers"] as List? ?? [])) {
+                if (ans["keyword"] != null) {
+                  keywords.add(ans["keyword"].toString());
                 }
-                if (answer["explanation"] != null) {
-                  uniqueExplanations.add(answer["explanation"].toString());
+                if (ans["explanation"] != null) {
+                  uniqueExp.add(ans["explanation"].toString());
                 }
-              });
+              }
             }
 
-            explanations = uniqueExplanations.toList();
-
-            // Debug logging
-            logger.i("Matching keywords: $keywords");
-            logger.i("Matching explanations: $explanations");
-
-            var q = {
-              'id': question["ID"],
-              'question': question["content"],
-              'keywords': keywords,
-              'explanations': explanations,
-              'correctAnswer': 1,
-              'explanation': question["feedback"],
-              'exp': question["exp"],
-              'pts': question["point"],
-              'type': "matching"
-            };
-            questions.add(q);
+            parsed['keywords'] = keywords;
+            parsed['explanations'] = uniqueExp.toList();
           }
+
+          questions.add(parsed);
         }
 
-        // logger.i(questions);
-
-        final question = questions[currentQuestionIndex];
-
-        int exp = question['exp'];
-        int pts = question['pts'];
+        final currentQuestion = questions[currentQuestionIndex];
+        final exp = currentQuestion['exp'] as int;
+        final pts = currentQuestion['pts'] as int;
 
         return Scaffold(
           appBar: AppBar(
@@ -343,9 +241,10 @@ class ExerciseScreenState extends State<ExerciseScreen> {
                   child: Text(
                     '+$exp exp',
                     style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontSize: 13),
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -359,9 +258,10 @@ class ExerciseScreenState extends State<ExerciseScreen> {
                   child: Text(
                     '+$pts pts',
                     style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontSize: 13),
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
                 const Spacer(),
@@ -376,10 +276,9 @@ class ExerciseScreenState extends State<ExerciseScreen> {
                     ),
                     child: const Row(
                       children: [
-                        Text(
-                          'Exit',
-                          style: TextStyle(color: Colors.white, fontSize: 17),
-                        ),
+                        Text('Exit',
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 17)),
                         SizedBox(width: 4),
                         Icon(Icons.exit_to_app, color: Colors.white),
                       ],
@@ -401,27 +300,26 @@ class ExerciseScreenState extends State<ExerciseScreen> {
                       controller: _scrollController,
                       scrollDirection: Axis.horizontal,
                       itemCount: questions.length,
-                      itemBuilder: (context, index) {
+                      itemBuilder: (context, i) {
+                        final active = i == currentQuestionIndex;
                         return GestureDetector(
-                          onTap: () => _goToQuestion(index),
+                          onTap: () => _goToQuestion(i),
                           child: Container(
                             margin: const EdgeInsets.symmetric(horizontal: 5),
                             width: 50,
                             height: 50,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: index == currentQuestionIndex
+                              color: active
                                   ? const Color(0xFF6FBAFF)
                                   : Colors.grey[300],
                             ),
                             alignment: Alignment.center,
                             child: Text(
-                              '${index + 1}',
+                              '${i + 1}',
                               style: TextStyle(
                                 fontSize: 18,
-                                color: index == currentQuestionIndex
-                                    ? Colors.white
-                                    : Colors.black,
+                                color: active ? Colors.white : Colors.black,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -431,49 +329,49 @@ class ExerciseScreenState extends State<ExerciseScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  if (question['type'] != 'matching')
-                    Html(data: question["question"], style: {
-                      "p": Style(
-                          fontSize: FontSize(18), textAlign: TextAlign.justify),
-                    }),
-                  if (question['type'] != 'matching')
+                  if (currentQuestion['type'] != 'matching')
+                    Html(
+                      data: currentQuestion['question'] ?? '',
+                      style: {
+                        "p": Style(
+                            fontSize: FontSize(18),
+                            textAlign: TextAlign.justify),
+                      },
+                    ),
+                  if (currentQuestion['type'] != 'matching')
                     const SizedBox(height: 20),
-                  _buildOptions(questions),
-                  const SizedBox(height: 20),
+                  _buildQuestionContent(currentQuestion, questions),
+                  const SizedBox(height: 30),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       ElevatedButton.icon(
                         onPressed:
                             currentQuestionIndex > 0 ? _previousQuestion : null,
-                        icon: const Icon(
-                          Icons.arrow_back,
-                          color: Color(0xFFFFFFFF),
-                        ),
-                        label: const Text(
-                          'Previous',
-                          style: TextStyle(color: Color(0xFFFFFFFF)),
-                        ),
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        label: const Text('Previous',
+                            style: TextStyle(color: Colors.white)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: currentQuestionIndex > 0
                               ? const Color(0xFF6FBAFF)
-                              : Colors.grey[400],
+                              : Colors.grey,
                         ),
                       ),
                       ElevatedButton.icon(
                         onPressed: currentQuestionIndex < questions.length - 1
                             ? () => _nextQuestion(questions)
-                            : () => _showSubmitDialog(),
+                            : _showSubmitDialog,
                         icon: Icon(
-                            currentQuestionIndex < questions.length - 1
-                                ? Icons.arrow_forward
-                                : Icons.check,
-                            color: const Color(0xFFFFFFFF)),
+                          currentQuestionIndex < questions.length - 1
+                              ? Icons.arrow_forward
+                              : Icons.check,
+                          color: Colors.white,
+                        ),
                         label: Text(
                           currentQuestionIndex < questions.length - 1
                               ? 'Next'
                               : 'Submit',
-                          style: const TextStyle(color: Color(0xFFFFFFFF)),
+                          style: const TextStyle(color: Colors.white),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
@@ -484,7 +382,6 @@ class ExerciseScreenState extends State<ExerciseScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
                 ],
               ),
             ),
@@ -494,21 +391,90 @@ class ExerciseScreenState extends State<ExerciseScreen> {
     );
   }
 
-  Widget _buildMatching(dynamic question) {
-    final List<String> keywords = question['keywords'] ?? [];
-    final List<String> explanations = question['explanations'] ?? [];
+  Widget _buildQuestionContent(
+      Map<String, dynamic> question, List<Map<String, dynamic>> questions) {
+    final type = question['type'] as String?;
+
+    if (type == 'matching') {
+      return _buildMatching(question);
+    }
+
+    if (type == 'essay' || type == 'shortAnswer') {
+      final controller =
+          TextEditingController(text: selectedAnswer as String? ?? '');
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: TextField(
+          controller: controller,
+          maxLines: type == 'essay' ? 5 : 1,
+          decoration: InputDecoration(
+            hintText: "Masukkan jawaban Anda...",
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+          onChanged: (value) {
+            selectedAnswer = value;
+            _saveUserAnswer(currentQuestionIndex, value, 0, question);
+          },
+        ),
+      );
+    }
+
+    final options = question['options'] as List<dynamic>? ?? [];
+
+    if (options.isEmpty) {
+      return const Text("Tidak ada opsi tersedia",
+          style: TextStyle(color: Colors.red));
+    }
+
+    if (type == 'true_false') {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(
+          options.length,
+          (i) => _buildTrueFalseCard(question, i, options[i] as String),
+        ),
+      );
+    }
+
+    if (type == 'multiple_answer') {
+      return SizedBox(
+        height: MediaQuery.of(context).size.height * 0.5,
+        child: ListView.builder(
+          itemCount: options.length,
+          itemBuilder: (context, i) => _buildCheckboxOption(
+              question, i, (options[i] as Map)["text"] as String),
+        ),
+      );
+    }
+
+    // default: multiple choice
+    return Column(
+      children: List.generate(
+        options.length,
+        (i) => _buildOptionCard(
+            question, i, (options[i] as Map)["text"] as String),
+      ),
+    );
+  }
+
+  Widget _buildMatching(Map<String, dynamic> question) {
+    final keywords = List<String>.from(question['keywords'] ?? []);
+    final explanations = List<String>.from(question['explanations'] ?? []);
 
     if (jawabanUser[currentQuestionIndex] == null) {
       jawabanUser[currentQuestionIndex] = {
-        "question_id": question["id"],
-        "answers": List<Map<String, dynamic>>.filled(explanations.length, {}),
-        "type": "matching"
+        'question_id': question['id'],
+        'type': 'matching',
+        'answers':
+            List.generate(explanations.length, (_) => <String, dynamic>{}),
       };
     }
 
+    final answers = jawabanUser[currentQuestionIndex]['answers']
+        as List<Map<String, dynamic>>;
+
     return Column(
       children: [
-        // Header
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
@@ -518,11 +484,8 @@ class ExerciseScreenState extends State<ExerciseScreen> {
           child: const Row(
             children: [
               Expanded(
-                child: Text(
-                  'Explanation',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
+                  child: Text('Explanation',
+                      style: TextStyle(fontWeight: FontWeight.bold))),
               SizedBox(
                 width: 140,
                 child: Text(
@@ -535,17 +498,17 @@ class ExerciseScreenState extends State<ExerciseScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        // Matching Items - Display Explanation on Left, Keyword Dropdown on Right
         ListView.builder(
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           itemCount: explanations.length,
-          itemBuilder: (context, index) {
+          itemBuilder: (context, i) {
             return _buildMatchingCard(
-              question,
-              index,
-              explanations[index],
-              keywords,
+              question: question,
+              index: i,
+              explanation: explanations[i],
+              keywords: keywords,
+              answers: answers,
             );
           },
         ),
@@ -553,15 +516,25 @@ class ExerciseScreenState extends State<ExerciseScreen> {
     );
   }
 
-  Widget _buildMatchingCard(
-    dynamic question,
-    int index,
-    String explanation,
-    List<String> keywords,
-  ) {
-    final answers = jawabanUser[currentQuestionIndex]?["answers"]
-        as List<Map<String, dynamic>>?;
-    String? selectedKeyword = answers?[index]?['keyword'];
+  Widget _buildMatchingCard({
+    required Map<String, dynamic> question,
+    required int index,
+    required String explanation,
+    required List<String> keywords,
+    required List<Map<String, dynamic>> answers,
+  }) {
+    // Ambil keyword yang tersimpan, default ke null (bukan string kosong)
+    String? selectedKeyword;
+    if (index < answers.length) {
+      final saved = answers[index]['keyword'] as String?;
+      // Hanya gunakan kalau benar-benar ada dan tidak kosong
+      if (saved != null && saved.trim().isNotEmpty) {
+        selectedKeyword = saved.trim();
+      }
+    }
+
+    // Pastikan keywords tidak punya duplikat (Flutter tidak suka)
+    final uniqueKeywords = keywords.toSet().toList();
 
     return Container(
       margin: const EdgeInsets.only(top: 10),
@@ -569,7 +542,6 @@ class ExerciseScreenState extends State<ExerciseScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.transparent),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -581,57 +553,54 @@ class ExerciseScreenState extends State<ExerciseScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Explanation Text (Left Side)
           Expanded(
             child: Html(
               data: '${index + 1}. $explanation',
               style: {
-                "p": Style(
-                  fontSize: FontSize(13),
-                  textAlign: TextAlign.justify,
-                ),
+                "p":
+                    Style(fontSize: FontSize(13), textAlign: TextAlign.justify),
               },
             ),
           ),
           const SizedBox(width: 12),
-          // Keyword Dropdown (Right Side)
           SizedBox(
             width: 140,
-            child: DropdownButtonFormField<String>(
+            child: DropdownButtonFormField<String?>(
+              // Gunakan String? agar null diperbolehkan (artinya "belum dipilih")
               value: selectedKeyword,
-              hint: const Text('Select'),
-              items: keywords
-                  .map((kw) => DropdownMenuItem<String>(
-                        value: kw,
-                        child: Text(
-                          kw,
-                          style: const TextStyle(fontSize: 13),
-                        ),
-                      ))
-                  .toList(),
+              hint: const Text('Pilih keyword'),
+              isExpanded: true,
+              // Tambahkan item null sebagai placeholder "belum dipilih"
+              items: [
+                const DropdownMenuItem<String?>(
+                  value: null,
+                  child: Text('Pilih keyword',
+                      style: TextStyle(color: Colors.grey)),
+                ),
+                ...uniqueKeywords.map((kw) => DropdownMenuItem<String?>(
+                      value: kw.trim(),
+                      child:
+                          Text(kw.trim(), style: const TextStyle(fontSize: 13)),
+                    )),
+              ],
               onChanged: (value) {
-                if (value != null) {
-                  setState(() {
-                    final answers = jawabanUser[currentQuestionIndex]
-                        ?["answers"] as List<Map<String, dynamic>>?;
-                    if (answers != null && index < answers.length) {
-                      // Save pair: {keyword: selected, explanation: static}
-                      answers[index] = {
-                        'keyword': value,
-                        'explanation': explanation,
-                      };
-                      _saveUserAnswer(currentQuestionIndex, '', 0, question);
-                    }
-                  });
-                }
+                setState(() {
+                  // Simpan null kalau user memilih "Pilih keyword"
+                  answers[index] = {
+                    'keyword': value?.trim(),
+                    'explanation': explanation,
+                  };
+                  _saveUserAnswer(currentQuestionIndex, '', 0, question);
+                });
               },
               decoration: InputDecoration(
                 isDense: true,
                 filled: true,
                 fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               ),
             ),
           ),
@@ -641,8 +610,7 @@ class ExerciseScreenState extends State<ExerciseScreen> {
   }
 
   Widget _buildOptionCard(dynamic question, int index, String text) {
-    bool isSelected = selectedAnswer == index;
-
+    final isSelected = selectedAnswer == index;
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -658,10 +626,9 @@ class ExerciseScreenState extends State<ExerciseScreen> {
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              blurRadius: 5,
-              spreadRadius: 1,
-            )
+                color: Colors.grey.withOpacity(0.2),
+                blurRadius: 5,
+                spreadRadius: 1),
           ],
         ),
         child: Row(
@@ -671,19 +638,17 @@ class ExerciseScreenState extends State<ExerciseScreen> {
               child: Text(
                 String.fromCharCode(65 + index),
                 style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.black,
-                  fontWeight: FontWeight.bold,
-                ),
+                    color: isSelected ? Colors.white : Colors.black,
+                    fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
-              // Wrap Html with Expanded to give it space
               child: Html(
                 data: text,
                 style: {
                   "p": Style(
-                      textAlign: TextAlign.justify, fontSize: FontSize(16)),
+                      textAlign: TextAlign.justify, fontSize: FontSize(16))
                 },
               ),
             ),
@@ -693,336 +658,8 @@ class ExerciseScreenState extends State<ExerciseScreen> {
     );
   }
 
-  void _saveUserAnswer(
-      int indexSoal, String answer, int indexJawaban, dynamic question) {
-    // jawabanUser[indexSoal] = answer;
-
-    if (question["type"] == "multiple_choice") {
-      Map<String, dynamic> detailJawaban = {
-        "question_id": question["id"],
-        "answer_id": question["options"][indexJawaban]["id"],
-        "answer_text": question["options"][indexJawaban]["text"],
-        "index_jawaban": indexJawaban,
-        "type": question["type"]
-      };
-      jawabanUser[indexSoal] = detailJawaban;
-    } else if (question["type"] == "true_false") {
-      Map<String, dynamic> detailJawaban = {
-        "question_id": question["id"],
-        "answer_text": question['options'][indexJawaban] as String,
-        "index_jawaban": indexJawaban,
-        "type": question["type"]
-      };
-      jawabanUser[indexSoal] = detailJawaban;
-    } else if (question["type"] == "essay" ||
-        question["type"] == "shortAnswer") {
-      Map<String, dynamic> detailJawaban = {
-        "question_id": question["id"],
-        "index_jawaban": answer,
-        "type": question["type"]
-      };
-      jawabanUser[indexSoal] = detailJawaban;
-    } else if (question["type"] == "multiple_answer") {
-      List<Map<String, dynamic>> answers = [];
-      List<int> indexJawaban = [];
-      if (selectedAnswers.isNotEmpty) {
-        selectedAnswers.forEach((ans) {
-          answers.add({
-            "answer_id": question["options"][ans]["id"],
-            "answer_text": question["options"][ans]["text"],
-          });
-          indexJawaban.add(ans);
-        });
-      }
-      Map<String, dynamic> detailJawaban = {
-        "question_id": question["id"],
-        "answers": answers,
-        "index_jawaban": indexJawaban,
-        "type": question["type"]
-      };
-      jawabanUser[indexSoal] = detailJawaban;
-    } else if (question["type"] == "matching") {
-      List<Map<String, dynamic>> matchingAnswers = [];
-      if (jawabanUser[indexSoal] != null &&
-          jawabanUser[indexSoal]["answers"] != null) {
-        matchingAnswers = jawabanUser[indexSoal]["answers"];
-      }
-      Map<String, dynamic> detailJawaban = {
-        "question_id": question["id"],
-        "answers": matchingAnswers,
-        "type": question["type"],
-        "index_jawaban": 0,
-      };
-      jawabanUser[indexSoal] = detailJawaban;
-    }
-  }
-
-  void _showSubmitDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          title: const Center(
-            child: Text(
-              'Submit',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 10),
-              Image.asset(
-                'assets/icons/exit_icon.png',
-                height: 80,
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Are you sure to submit the answer?',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14),
-              ),
-            ],
-          ),
-          actionsAlignment: MainAxisAlignment.spaceEvenly,
-          actions: [
-            TextButton(
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.grey[300],
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                'Cancel',
-                style:
-                    TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-              ),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              onPressed: isLoading
-                  ? null
-                  : () async {
-                      setState(() {
-                        isLoading = true;
-                      });
-
-                      await _submitExercise();
-
-                      setState(() {
-                        isLoading = false;
-                      });
-                    },
-              child: isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : const Text(
-                      'Yes, Submit',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showExitConfirmationDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          title: const Center(
-            child: Text(
-              'Want to Quit ?',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 10),
-              Image.asset(
-                'assets/icons/exit_icon.png',
-                height: 80,
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Your progress will not be saved and you will not get the XP',
-                textAlign: TextAlign.left,
-                style: TextStyle(fontSize: 14),
-              ),
-            ],
-          ),
-          actionsAlignment: MainAxisAlignment.spaceEvenly,
-          actions: [
-            TextButton(
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.grey[300],
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                'Cancel',
-                style:
-                    TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-              ),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              onPressed: () {
-                Navigator.pop(context); // Tutup dialog
-                Navigator.pop(context); // Kembali ke halaman sebelumnya
-              },
-              child: const Text(
-                'Yes, Quit',
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildOptions(dynamic questions) {
-    final question = questions[currentQuestionIndex];
-    final String type = question['type'];
-    final options = question['options'] ?? []; // Pastikan options tidak null
-
-    if (type == 'matching') {
-      return _buildMatching(question);
-    }
-
-    if (type == 'essay') {
-      TextEditingController textController = TextEditingController();
-
-      if (selectedAnswer != null) {
-        textController.text = selectedAnswer;
-      }
-
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: TextField(
-          controller: textController,
-          maxLines: 5,
-          decoration: InputDecoration(
-            hintText: "Masukkan jawaban Anda...",
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          onChanged: (value) {
-            selectedAnswer = value;
-            _saveUserAnswer(currentQuestionIndex, selectedAnswer, 0, question);
-          },
-        ),
-      );
-    }
-
-    if (type == 'shortAnswer') {
-      TextEditingController textController = TextEditingController();
-
-      if (selectedAnswer != null) {
-        textController.text = selectedAnswer;
-      }
-
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: TextField(
-          controller: textController,
-          maxLines: 1, // Biar textarea lebih besar
-          decoration: InputDecoration(
-            hintText: "Masukkan jawaban Anda...",
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          onChanged: (value) {
-            selectedAnswer = value;
-            _saveUserAnswer(currentQuestionIndex, selectedAnswer, 0, question);
-          },
-        ),
-      );
-    }
-
-    if (options.isEmpty) {
-      return const Text("No options available",
-          style: TextStyle(color: Colors.red));
-    }
-
-    if (type == 'true_false') {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(options.length, (index) {
-          return _buildTrueFalseCard(question, index, options[index]);
-        }),
-      );
-    } else if (type == 'multiple_answer') {
-      return SizedBox(
-        height: MediaQuery.of(context).size.height *
-            0.5, // Maksimal 50% tinggi layar
-        child: ListView.builder(
-          itemCount: options.length,
-          itemBuilder: (context, index) {
-            return _buildCheckboxOption(
-                question, index, options[index]["text"]);
-          },
-        ),
-      );
-    } else {
-      return Column(
-        children: List.generate(options.length, (index) {
-          return _buildOptionCard(question, index, options[index]["text"]);
-        }),
-      );
-    }
-  }
-
   Widget _buildCheckboxOption(dynamic question, int index, String text) {
-    bool isSelected = selectedAnswers.contains(index);
+    final isSelected = selectedAnswers.contains(index);
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -1042,32 +679,26 @@ class ExerciseScreenState extends State<ExerciseScreen> {
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              blurRadius: 5,
-              spreadRadius: 1,
-            )
+                color: Colors.grey.withOpacity(0.2),
+                blurRadius: 5,
+                spreadRadius: 1),
           ],
         ),
         child: Row(
           children: [
             Checkbox(
               value: isSelected,
-              onChanged: (bool? value) {
+              onChanged: (v) {
                 setState(() {
-                  if (value == true) {
-                    selectedAnswers.add(index);
-                  } else {
-                    selectedAnswers.remove(index);
-                  }
+                  if (v == true) selectedAnswers.add(index);
+                  if (v == false) selectedAnswers.remove(index);
                 });
               },
             ),
             const SizedBox(width: 10),
             Expanded(
                 child: Html(
-              data: text,
-              style: {"p": Style(fontSize: FontSize(16))},
-            )),
+                    data: text, style: {"p": Style(fontSize: FontSize(16))})),
           ],
         ),
       ),
@@ -1075,8 +706,7 @@ class ExerciseScreenState extends State<ExerciseScreen> {
   }
 
   Widget _buildTrueFalseCard(dynamic question, int index, String text) {
-    bool isSelected = selectedAnswer == index;
-
+    final isSelected = selectedAnswer == index;
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -1085,63 +715,244 @@ class ExerciseScreenState extends State<ExerciseScreen> {
         });
       },
       child: Container(
-        width: 142, // Ukuran kartu biar pas berdampingan
+        width: 142,
         height: 142,
         margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         decoration: BoxDecoration(
           color: isSelected ? Colors.blue.withOpacity(0.7) : Colors.white,
           borderRadius: BorderRadius.circular(15),
           border: Border.all(
-            color: isSelected ? Colors.blue : Colors.white,
-            width: 2,
-          ),
+              color: isSelected ? Colors.blue : Colors.white, width: 2),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              blurRadius: 5,
-              spreadRadius: 1,
-            ),
+                color: Colors.grey.withOpacity(0.2),
+                blurRadius: 5,
+                spreadRadius: 1),
           ],
         ),
         child: Center(
           child: Text(
             text,
             style: TextStyle(
-              fontSize: 18,
-              color: isSelected ? Colors.white : Colors.black,
-            ),
+                fontSize: 18, color: isSelected ? Colors.white : Colors.black),
           ),
         ),
       ),
     );
   }
 
-  Future<void> _showPopUpAchievement(List<dynamic> achievements) async {
-    return showDialog(
+  void _saveUserAnswer(int qIndex, String answerText, int answerIndex,
+      Map<String, dynamic> question) {
+    final type = question['type'] as String?;
+
+    Map<String, dynamic>? entry;
+
+    if (type == "multiple_choice") {
+      entry = {
+        "question_id": question['id'],
+        "answer_id": question['options'][answerIndex]['id'],
+        "answer_text": question['options'][answerIndex]['text'],
+        "index_jawaban": answerIndex,
+        "type": type,
+      };
+    } else if (type == "true_false") {
+      entry = {
+        "question_id": question['id'],
+        "answer_text": question['options'][answerIndex],
+        "index_jawaban": answerIndex,
+        "type": type,
+      };
+    } else if (type == "essay" || type == "shortAnswer") {
+      entry = {
+        "question_id": question['id'],
+        "answer_text": answerText,
+        "type": type,
+      };
+    } else if (type == "multiple_answer") {
+      final List<Map<String, dynamic>> selected = [];
+      final List<int> indices = [];
+
+      for (final idx in selectedAnswers) {
+        selected.add({
+          "answer_id": question['options'][idx]['id'],
+          "answer_text": question['options'][idx]['text'],
+        });
+        indices.add(idx);
+      }
+
+      entry = {
+        "question_id": question['id'],
+        "answers": selected,
+        "index_jawaban": indices,
+        "type": type,
+      };
+    } else if (type == "matching") {
+      final rawAnswers =
+          jawabanUser[qIndex]?['answers'] as List<dynamic>? ?? [];
+      final List<Map<String, dynamic>> submitted = [];
+
+      for (final p in rawAnswers) {
+        final kw = (p['keyword'] as String?)?.trim() ?? '';
+        final exp = (p['explanation'] as String?)?.trim() ?? '';
+
+        // Kirim semua, meskipun keyword kosong (backend bisa handle)
+        submitted.add({
+          "explanation": exp,
+          "keyword": kw,
+        });
+      }
+
+      entry = {
+        "question_id": question['id'],
+        "answers": submitted,
+        "type": type,
+      };
+    }
+
+    if (entry != null) {
+      jawabanUser[qIndex] = entry;
+    }
+  }
+
+  void _showSubmitDialog() {
+    showDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("Achievement Unlocked!"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: achievements.map((ach) {
-              return ListTile(
-                leading: Icon(Icons.emoji_events, color: Colors.amber),
-                title: Text(ach["title"]),
-                subtitle: Text(ach["description"]),
-              );
-            }).toList(),
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: const Center(
+            child: Text('Submit',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18))),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 10),
+            Image.asset('assets/icons/exit_icon.png', height: 80),
+            const SizedBox(height: 20),
+            const Text('Are you sure to submit the answer?',
+                textAlign: TextAlign.center, style: TextStyle(fontSize: 14)),
+          ],
+        ),
+        actionsAlignment: MainAxisAlignment.spaceEvenly,
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.grey[300],
+              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel',
+                style: TextStyle(
+                    color: Colors.black, fontWeight: FontWeight.bold)),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text("OK"),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: isLoading
+                ? null
+                : () async {
+                    Navigator.of(ctx).pop();
+                    await _submitExercise();
+                  },
+            child: isLoading
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        strokeWidth: 2),
+                  )
+                : const Text('Yes, Submit',
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showExitConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: const Center(
+            child: Text('Want to Quit ?',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18))),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 10),
+            Image.asset('assets/icons/exit_icon.png', height: 80),
+            const SizedBox(height: 20),
+            const Text(
+              'Your progress will not be saved and you will not get the XP',
+              textAlign: TextAlign.left,
+              style: TextStyle(fontSize: 14),
             ),
           ],
-        );
-      },
+        ),
+        actionsAlignment: MainAxisAlignment.spaceEvenly,
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.grey[300],
+              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel',
+                style: TextStyle(
+                    color: Colors.black, fontWeight: FontWeight.bold)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.pop(context);
+            },
+            child: const Text('Yes, Quit',
+                style: TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showPopUpAchievement(List<dynamic> achievements) async {
+    await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Achievement Unlocked!"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: achievements.map((ach) {
+            return ListTile(
+              leading: const Icon(Icons.emoji_events, color: Colors.amber),
+              title: Text(ach["title"] ?? "Achievement"),
+              subtitle: Text(ach["description"] ?? ""),
+            );
+          }).toList(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
     );
   }
 }
