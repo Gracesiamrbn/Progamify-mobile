@@ -4,7 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:progamify/api/auth_service.dart';
 
 class ExerciseService {
-  final String baseUrl = dotenv.env["BASE_URL_API"] ?? "http://194.163.40.203:8080/api";
+  final String baseUrl =
+      dotenv.env["BASE_URL_API"] ?? "http://194.163.40.203:8080/api";
   final AuthService authService = AuthService();
 
   Future<Map<String, dynamic>> getExercise(int id) async {
@@ -52,36 +53,50 @@ class ExerciseService {
   Map<String, dynamic> convertJawabanUser(Map<int, dynamic> jawabanUser) {
     Map<String, dynamic> converted = {};
     jawabanUser.forEach((key, value) {
-      if (value["type"] == "multiple_choice") {
-        converted[key.toString()] = {
-          "question_id": value["question_id"],
-          "answer_id": value["answer_id"],
-          "answer_text": value["answer_text"].toString(),
-          "index_jawaban": value["index_jawaban"],
-        };
-      } else if (value["type"] == "true_false") {
-        converted[key.toString()] = {
-          "question_id": value["question_id"],
-          "answer_text": value["answer_text"].toString(),
-          "index_jawaban": value["index_jawaban"],
-        };
-      } else if (value["type"] == "essay" || value["type"] == "shortAnswer") {
-        converted[key.toString()] = {
-          "question_id": value["question_id"],
-          "index_jawaban": value["index_jawaban"].toString(),
-        };
-      } else if (value["type"] == "multiple_answer") {
-        converted[key.toString()] = {
-          "question_id": value["question_id"],
-          "answers": value["answers"],
-          "index_jawaban": value["index_jawaban"],
-        };
-      } else if (value["type"] == "matching") {
-        converted[key.toString()] = {
-          "question_id": value["question_id"],
-          "answers": value["answers"],
-          "index_jawaban": value["index_jawaban"] ?? 0,
-        };
+      final String? type = value["type"] as String?;
+
+      switch (type) {
+        case "multiple_choice":
+          converted[key.toString()] = {
+            "question_id": value["question_id"],
+            "answer_id": value["answer_id"],
+            "answer_text": value["answer_text"]?.toString() ?? "",
+            "index_jawaban": value["index_jawaban"],
+          };
+          break;
+        case "true_false":
+          converted[key.toString()] = {
+            "question_id": value["question_id"],
+            "answer_text": value["answer_text"]?.toString() ?? "",
+            "index_jawaban": value["index_jawaban"],
+          };
+          break;
+        case "essay":
+        case "short_answer":
+          // both essay and short_answer use the same backend field
+          converted[key.toString()] = {
+            "question_id": value["question_id"],
+            // server expects the written text for open questions
+            "answer_text": value["answer_text"]?.toString() ?? "",
+          };
+          break;
+        case "multiple_answer":
+          converted[key.toString()] = {
+            "question_id": value["question_id"],
+            "answers": value["answers"],
+            "index_jawaban": value["index_jawaban"],
+          };
+          break;
+        case "matching":
+          converted[key.toString()] = {
+            "question_id": value["question_id"],
+            "answers": value["answers"],
+            "index_jawaban": value["index_jawaban"] ?? 0,
+          };
+          break;
+        default:
+          // unknown type, ignore
+          break;
       }
     });
     return converted;

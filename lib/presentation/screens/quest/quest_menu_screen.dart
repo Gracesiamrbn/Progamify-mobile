@@ -353,55 +353,55 @@ class _QuestTabState extends State<QuestTab> {
           ),
           const SizedBox(height: 15),
           // Matching Challenge Button
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const MatchingScreen(),
-                ),
-              );
-            },
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.blue[300]!, Colors.blue[600]!],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.blue.withOpacity(0.3),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.games, color: Colors.white, size: 22),
-                      const SizedBox(width: 10),
-                      const Text(
-                        'Matching Challenge',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Icon(Icons.arrow_forward, color: Colors.white, size: 20),
-                ],
-              ),
-            ),
-          ),
+          // GestureDetector(
+          //   onTap: () {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(
+          //         builder: (context) => const MatchingScreen(),
+          //       ),
+          //     );
+          //   },
+          //   child: Container(
+          //     margin: const EdgeInsets.only(bottom: 10),
+          //     padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          //     decoration: BoxDecoration(
+          //       gradient: LinearGradient(
+          //         colors: [Colors.blue[300]!, Colors.blue[600]!],
+          //         begin: Alignment.topLeft,
+          //         end: Alignment.bottomRight,
+          //       ),
+          //       borderRadius: BorderRadius.circular(8),
+          //       boxShadow: [
+          //         BoxShadow(
+          //           color: Colors.blue.withOpacity(0.3),
+          //           blurRadius: 4,
+          //           offset: const Offset(0, 2),
+          //         ),
+          //       ],
+          //     ),
+          //     child: const Row(
+          //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //       children: [
+          //         Row(
+          //           children: [
+          //             Icon(Icons.games, color: Colors.white, size: 22),
+          //             SizedBox(width: 10),
+          //             Text(
+          //               'Matching Challenge',
+          //               style: TextStyle(
+          //                 color: Colors.white,
+          //                 fontWeight: FontWeight.bold,
+          //                 fontSize: 15,
+          //               ),
+          //             ),
+          //           ],
+          //         ),
+          //         Icon(Icons.arrow_forward, color: Colors.white, size: 20),
+          //       ],
+          //     ),
+          //   ),
+          // ),
           const SizedBox(height: 10),
           Align(
             alignment: Alignment.bottomRight,
@@ -467,6 +467,7 @@ class _BadgesTabState extends State<BadgesTab> {
     _badgesFuture = BadgesService().getBadges();
   }
 
+  @override
   Widget build(BuildContext context) {
     // Daftar badge default (jika belum diperoleh)
     final List<Map<String, dynamic>> defaultBadges = [

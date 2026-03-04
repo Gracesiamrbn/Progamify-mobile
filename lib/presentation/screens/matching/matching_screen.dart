@@ -146,7 +146,7 @@ class _MatchingScreenState extends State<MatchingScreen> {
           SizedBox(
             width: 140,
             child: DropdownButtonFormField<String>(
-              value: userAnswers[index],
+              initialValue: userAnswers[index],
               hint: const Text('Select'),
               items: options
                   .map(
@@ -180,8 +180,8 @@ class _MatchingScreenState extends State<MatchingScreen> {
 
   /// REWARD
   Widget _rewardGain() {
-    return Row(
-      children: const [
+    return const Row(
+      children: [
         Text(
           'Reward Gain',
           style: TextStyle(fontWeight: FontWeight.bold),

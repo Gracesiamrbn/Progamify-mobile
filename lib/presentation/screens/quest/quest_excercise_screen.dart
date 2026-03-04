@@ -142,7 +142,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
       List<dynamic> badges, int index, List<dynamic> achievements) {
     if (index >= badges.length) {
       log.i("Semua badge telah ditampilkan.");
-      if (achievements != null && achievements.isNotEmpty) {
+      if (achievements.isNotEmpty) {
         print("Menampilkan achievements...");
         print('achievements: $achievements');
         _showAchievement(achievements);
@@ -299,15 +299,13 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               return _buildLoadingScreen();
             }
 
-            if (snapshot.hasError) {
+            // Handle case where the backend returns "record not found" or
+            // simply there is no quest to display. Instead of surfacing an
+            // error to the user we show a dedicated screen with a message and
+            // keep the exit button available.
+            if (snapshot.hasError || !snapshot.hasData) {
               _stopSoundEffect();
-              return Center(
-                  child: Text('Snapshot hasError: ${snapshot.error}'));
-            }
-
-            if (!snapshot.hasData || snapshot.hasError) {
-              _stopSoundEffect();
-              return const Center(child: Text('No questions available.'));
+              return _buildEmptyQuestScreen();
             } else {
               _stopSoundEffect();
 
@@ -538,6 +536,56 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  /// When there is no quest data (e.g. record not found) we present a
+  /// simple screen informing the user and still allow them to exit the flow.
+  Widget _buildEmptyQuestScreen() {
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: const Color(0xFFE7F4E8),
+        elevation: 0,
+        title: Row(
+          children: [
+            const Spacer(),
+            GestureDetector(
+              onTap: () {
+                _showExitConfirmationDialog();
+              },
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Row(
+                  children: [
+                    Text(
+                      'Exit',
+                      style: TextStyle(color: Colors.white, fontSize: 17),
+                    ),
+                    SizedBox(width: 4),
+                    Icon(Icons.exit_to_app, color: Colors.white),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      body: Center(
+        child: Text(
+          'Pertanyaan kosong',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.black54,
+          ),
+        ),
       ),
     );
   }
@@ -1513,12 +1561,12 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
     } else if (question["type"] == "multiple_answer") {
       List<Map<String, dynamic>> answers = [];
       if (selectedAnswers.isNotEmpty) {
-        selectedAnswers.forEach((ans) {
+        for (var ans in selectedAnswers) {
           answers.add({
             "answer_id": question["options"][ans]["id"],
             // "answer_text": question["options"][ans]["text"],
           });
-        });
+        }
       }
       Map<String, dynamic> detailJawaban = {
         "question_id": question["id"],
@@ -1653,7 +1701,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
 
                         Future.delayed(const Duration(milliseconds: 300), () {
                           // Added a null check for badges and check if it's not empty
-                          if (badges != null && badges.isNotEmpty) {
+                          if (badges.isNotEmpty) {
                             _showBadges(badges, 0, achievements);
                           }
                         });

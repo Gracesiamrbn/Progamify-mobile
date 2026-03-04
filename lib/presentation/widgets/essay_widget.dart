@@ -5,14 +5,15 @@ class EssayWidget extends StatelessWidget {
   final Question question;
   final TextEditingController _controller = TextEditingController();
 
-  EssayWidget({required this.question});
+  EssayWidget({super.key, required this.question});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(question.questionText, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Text(question.questionText,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         TextField(
           controller: _controller,
           maxLines: 5,

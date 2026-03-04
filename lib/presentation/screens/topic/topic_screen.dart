@@ -27,7 +27,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
   }
 
   Future<void> _fetchTopics() async {
-    final String? _authToken = await _authService.getToken();
+    final String? authToken = await _authService.getToken();
 
     try {
       final String baseUrl =
@@ -35,7 +35,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
       final response = await http.get(
         Uri.parse('$baseUrl/topics'),
         headers: {
-          'Authorization': 'Bearer $_authToken',
+          'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json',
         },
       );

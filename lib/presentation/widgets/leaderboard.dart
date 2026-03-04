@@ -29,7 +29,7 @@ class Leaderboard extends StatelessWidget {
   Widget _buildTopThree() {
     return Column(
       children: [
-        Text(
+        const Text(
           'Leaderboard',
           style: TextStyle(
             fontSize: 22,
@@ -64,7 +64,8 @@ class Leaderboard extends StatelessWidget {
           child: Image.asset(image, fit: BoxFit.cover),
         ),
         const SizedBox(height: 5),
-        Text(name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+        Text(name,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
       ],
     );
   }
@@ -80,11 +81,13 @@ class Leaderboard extends StatelessWidget {
         break;
       case 1:
         bgColor = Colors.grey.shade300;
-        rankStyle = const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue);
+        rankStyle = const TextStyle(
+            fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue);
         break;
       case 2:
         bgColor = Colors.brown.shade400;
-        rankStyle = const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red);
+        rankStyle = const TextStyle(
+            fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red);
         break;
       default:
         bgColor = index % 2 == 0 ? Colors.brown.shade100 : Colors.white;

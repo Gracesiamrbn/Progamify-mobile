@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ReviewExerciseScreen extends StatefulWidget {
+  const ReviewExerciseScreen({super.key});
+
   @override
   _ReviewExerciseScreenState createState() => _ReviewExerciseScreenState();
 }

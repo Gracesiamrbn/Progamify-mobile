@@ -12,7 +12,7 @@ class PublicBadgeScreen extends StatefulWidget {
 }
 
 class _PublicBadgeScreenState extends State<PublicBadgeScreen> {
-  bool _isLoading = true;
+  final bool _isLoading = true;
   late Future<List<Map<String, dynamic>>> _badgesFuture;
 
   @override

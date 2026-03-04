@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:progamify/api/user_service.dart';
 import 'package:progamify/utils/util.dart';
 import '../../widgets/profile_header.dart';

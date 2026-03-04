@@ -194,7 +194,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   child: SingleChildScrollView(
                     // Allows the content within to scroll
                     child: ConstrainedBox(
-                      constraints: BoxConstraints(),
+                      constraints: const BoxConstraints(),
                       child: Padding(
                         padding: const EdgeInsets.all(20),
                         child: Column(

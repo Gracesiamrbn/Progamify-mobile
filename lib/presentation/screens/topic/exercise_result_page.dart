@@ -11,9 +11,15 @@ class ExerciseResultScreen extends StatefulWidget {
   final String? topicTitle;
   final int? totalLesson;
   final int? totalExercise;
+
+  /// Map of the answers that the user submitted locally.  Use this when the
+  /// server response does not include the detailed answer payload.
+  final Map<int, dynamic>? submittedAnswers;
+
   const ExerciseResultScreen(
       {super.key,
       required this.userAnswers,
+      this.submittedAnswers,
       // required this.exerciseTitle,
       this.topicId,
       this.topicTitle,
@@ -69,15 +75,17 @@ class ExerciseResultScreenState extends State<ExerciseResultScreen> {
         if (!didPop) {
           if (widget.topicId != null && widget.topicId != 0) {
             Navigator.pop(context);
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => TopicDetailScreen(
-                      topicId: widget.topicId!,
-                      topicTitle: widget.topicTitle ?? "",
-                      totalExercise: widget.totalExercise ?? 0,
-                      totalLesson: widget.totalLesson ?? 0)),
-            );
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => TopicDetailScreen(
+                        topicId: widget.topicId!,
+                        topicTitle: widget.topicTitle ?? "",
+                        totalExercise: widget.totalExercise ?? 0,
+                        totalLesson: widget.totalLesson ?? 0)),
+              );
+            });
           } else {
             Navigator.pop(context);
           }
@@ -92,15 +100,17 @@ class ExerciseResultScreenState extends State<ExerciseResultScreen> {
             onPressed: () {
               if (widget.topicId != null && widget.topicId != 0) {
                 Navigator.pop(context);
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => TopicDetailScreen(
-                          topicId: widget.topicId!,
-                          topicTitle: widget.topicTitle ?? "",
-                          totalExercise: widget.totalExercise ?? 0,
-                          totalLesson: widget.totalLesson ?? 0)),
-                );
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => TopicDetailScreen(
+                            topicId: widget.topicId!,
+                            topicTitle: widget.topicTitle ?? "",
+                            totalExercise: widget.totalExercise ?? 0,
+                            totalLesson: widget.totalLesson ?? 0)),
+                  );
+                });
               } else {
                 Navigator.pop(context);
               }
@@ -239,6 +249,7 @@ class ExerciseResultScreenState extends State<ExerciseResultScreen> {
                               builder: (context) => ExerciseViewScreen(
                                 exerciseId: result["exercise_id"],
                                 userAnswers: result,
+                                originalAnswers: widget.submittedAnswers,
                               ),
                             ),
                           );

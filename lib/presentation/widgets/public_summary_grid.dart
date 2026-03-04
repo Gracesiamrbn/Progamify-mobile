@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:lottie/lottie.dart';
 import 'package:progamify/presentation/screens/profile/public_achievement_screen.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 
@@ -172,8 +171,7 @@ class _PublicSummaryGridState extends State<PublicSummaryGrid> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Hero(
-                              tag: achievement[
-                                  "id"]!, 
+                              tag: achievement["id"]!,
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(50),
                                 child: SvgPicture.asset(
@@ -333,11 +331,10 @@ class _PopupScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Hero(
-                    tag: achievement["id"]!, 
+                    tag: achievement["id"]!,
                     child: SvgPicture.asset(
                       achievement["picture"]!,
-                      width:
-                          210,
+                      width: 210,
                       height: 210,
                     ),
                   ),

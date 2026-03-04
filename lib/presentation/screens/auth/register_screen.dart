@@ -175,10 +175,12 @@ class RegisterScreenState extends State<RegisterScreen> {
                         onToggleObscure: () =>
                             setState(() => _isObscure = !_isObscure),
                         validator: (value) {
-                          if (value == null || value.isEmpty)
+                          if (value == null || value.isEmpty) {
                             return 'Please confirm your password';
-                          if (value != _passwordController.text)
+                          }
+                          if (value != _passwordController.text) {
                             return 'Passwords do not match';
+                          }
                           return null;
                         },
                       ),

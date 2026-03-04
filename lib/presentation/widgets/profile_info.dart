@@ -77,7 +77,7 @@ class ProfileInfo extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => MarketScreen(),
+                    builder: (context) => const MarketScreen(),
                   ),
                 );
               },
@@ -91,7 +91,7 @@ class ProfileInfo extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => VoucherScreen(),
+                    builder: (context) => const VoucherScreen(),
                   ),
                 );
               },

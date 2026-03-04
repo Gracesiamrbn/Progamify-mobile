@@ -97,6 +97,10 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   Future<void> _submitExercise() async {
     setState(() => isLoading = true);
 
+    // debug log of answers being sent
+    logger.i(
+        'Submitting answers for exercise ${widget.exerciseId}: $jawabanUser');
+
     try {
       final result = await ExerciseService()
           .submitExercise(widget.exerciseId, jawabanUser);
@@ -114,6 +118,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
           MaterialPageRoute(
             builder: (_) => ExerciseResultScreen(
               userAnswers: [result],
+              submittedAnswers: jawabanUser,
               topicId: widget.topicId,
               topicTitle: widget.topicTitle,
               totalExercise: widget.totalExercise,
@@ -341,7 +346,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                   if (currentQuestion['type'] != 'matching')
                     const SizedBox(height: 20),
                   _buildQuestionContent(currentQuestion, questions),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 40),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -382,6 +387,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
@@ -394,38 +400,98 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   Widget _buildQuestionContent(
       Map<String, dynamic> question, List<Map<String, dynamic>> questions) {
     final type = question['type'] as String?;
+    logger.i("Rendering soal tipe: $type | ID: ${question['id']}");
 
+    // 1. Matching
     if (type == 'matching') {
       return _buildMatching(question);
     }
 
-    if (type == 'essay' || type == 'shortAnswer') {
-      final controller =
-          TextEditingController(text: selectedAnswer as String? ?? '');
+    // 2. Essay & Short Answer (tidak pakai options)
+    if (type == 'essay' || type == 'short_answer') {
+      // Ambil jawaban sebelumnya jika ada
+      final initialValue =
+          (jawabanUser[currentQuestionIndex]?['answer_text'] as String?) ?? '';
+
+      final controller = TextEditingController(text: initialValue);
+
+      // Auto-save saat mengetik
+      controller.addListener(() {
+        _saveUserAnswer(
+            currentQuestionIndex, controller.text.trim(), 0, question);
+      });
+
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: TextField(
-          controller: controller,
-          maxLines: type == 'essay' ? 5 : 1,
-          decoration: InputDecoration(
-            hintText: "Masukkan jawaban Anda...",
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-          ),
-          onChanged: (value) {
-            selectedAnswer = value;
-            _saveUserAnswer(currentQuestionIndex, value, 0, question);
-          },
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              type == 'essay' ? 'Jawaban Essay' : 'Jawaban Singkat',
+              style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: controller,
+              maxLines: type == 'essay' ? 6 : 2,
+              minLines: type == 'essay' ? 4 : 1,
+              textAlignVertical: TextAlignVertical.top,
+              decoration: InputDecoration(
+                hintText: type == 'essay'
+                    ? 'Tulis jawaban essay'
+                    : 'Tulis jawaban singkat',
+                hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade400),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade400),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide:
+                      const BorderSide(color: Color(0xFF6FBAFF), width: 2),
+                ),
+                filled: true,
+                fillColor: Colors.grey.shade50,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+              style: const TextStyle(fontSize: 15),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              type == 'essay'
+                  ? 'Petunjuk: Jawaban harus terstruktur, mendetail, dan menggunakan contoh jika perlu'
+                  : 'Petunjuk: Jawaban harus singkat, tepat, dan langsung ke inti',
+              style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+            ),
+          ],
         ),
       );
     }
 
+    // 3. Untuk tipe lain: ambil options
     final options = question['options'] as List<dynamic>? ?? [];
 
+    // 4. Jika options kosong → baru tampilkan pesan error
     if (options.isEmpty) {
-      return const Text("Tidak ada opsi tersedia",
-          style: TextStyle(color: Colors.red));
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: Text(
+          "Tidak ada opsi tersedia untuk tipe soal ini",
+          style: TextStyle(
+              color: Colors.red, fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      );
     }
 
+    // 5. True/False, Multiple Answer, Multiple Choice (tetap seperti sebelumnya)
     if (type == 'true_false') {
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -442,12 +508,15 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
         child: ListView.builder(
           itemCount: options.length,
           itemBuilder: (context, i) => _buildCheckboxOption(
-              question, i, (options[i] as Map)["text"] as String),
+            question,
+            i,
+            (options[i] as Map)["text"] as String,
+          ),
         ),
       );
     }
 
-    // default: multiple choice
+    // Default: multiple choice
     return Column(
       children: List.generate(
         options.length,
@@ -523,17 +592,14 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     required List<String> keywords,
     required List<Map<String, dynamic>> answers,
   }) {
-    // Ambil keyword yang tersimpan, default ke null (bukan string kosong)
     String? selectedKeyword;
     if (index < answers.length) {
       final saved = answers[index]['keyword'] as String?;
-      // Hanya gunakan kalau benar-benar ada dan tidak kosong
       if (saved != null && saved.trim().isNotEmpty) {
         selectedKeyword = saved.trim();
       }
     }
 
-    // Pastikan keywords tidak punya duplikat (Flutter tidak suka)
     final uniqueKeywords = keywords.toSet().toList();
 
     return Container(
@@ -566,11 +632,9 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
           SizedBox(
             width: 140,
             child: DropdownButtonFormField<String?>(
-              // Gunakan String? agar null diperbolehkan (artinya "belum dipilih")
-              value: selectedKeyword,
+              initialValue: selectedKeyword,
               hint: const Text('Pilih keyword'),
               isExpanded: true,
-              // Tambahkan item null sebagai placeholder "belum dipilih"
               items: [
                 const DropdownMenuItem<String?>(
                   value: null,
@@ -585,7 +649,6 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
               ],
               onChanged: (value) {
                 setState(() {
-                  // Simpan null kalau user memilih "Pilih keyword"
                   answers[index] = {
                     'keyword': value?.trim(),
                     'explanation': explanation,
@@ -762,10 +825,10 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
         "index_jawaban": answerIndex,
         "type": type,
       };
-    } else if (type == "essay" || type == "shortAnswer") {
+    } else if (type == "essay" || type == "short_answer") {
       entry = {
         "question_id": question['id'],
-        "answer_text": answerText,
+        "answer_text": answerText.trim(),
         "type": type,
       };
     } else if (type == "multiple_answer") {
@@ -795,7 +858,6 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
         final kw = (p['keyword'] as String?)?.trim() ?? '';
         final exp = (p['explanation'] as String?)?.trim() ?? '';
 
-        // Kirim semua, meskipun keyword kosong (backend bisa handle)
         submitted.add({
           "explanation": exp,
           "keyword": kw,
@@ -811,6 +873,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
 
     if (entry != null) {
       jawabanUser[qIndex] = entry;
+      logger.i('Saved answer for question index $qIndex: $entry');
     }
   }
 
