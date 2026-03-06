@@ -37,6 +37,28 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
 
   final logger = Logger();
 
+  // helper to convert markdown-style backticks into HTML code/pre blocks and
+  // escape special characters so that spacing is preserved when rendered by
+  // flutter_html.  This also handles inline code segments.
+  String _formatHtml(String raw) {
+    if (raw.isEmpty) return '';
+    String result = raw;
+    // block code (```...```) possibly with language specifier on first line
+    result = result.replaceAllMapped(
+        RegExp(r'```(?:\w*\n)?([\s\S]*?)```'), (m) {
+      final code = m[1] ?? '';
+      final encoded = const HtmlEscape().convert(code);
+      return '<pre><code>$encoded</code></pre>';
+    });
+    // inline code surrounded by single backticks
+    result = result.replaceAllMapped(RegExp(r'`([^`]+)`'), (m) {
+      final code = m[1] ?? '';
+      final encoded = const HtmlEscape().convert(code);
+      return '<code>$encoded</code>';
+    });
+    return result;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -336,11 +358,14 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                   const SizedBox(height: 20),
                   if (currentQuestion['type'] != 'matching')
                     Html(
-                      data: currentQuestion['question'] ?? '',
+                      data: _formatHtml(currentQuestion['question'] ?? ''),
                       style: {
                         "p": Style(
                             fontSize: FontSize(18),
                             textAlign: TextAlign.justify),
+                        // ensure code blocks preserve whitespace
+                        "pre": Style(whiteSpace: WhiteSpace.pre, fontFamily: 'monospace', fontSize: FontSize(14)),
+                        "code": Style(whiteSpace: WhiteSpace.pre, fontFamily: 'monospace', backgroundColor: Colors.grey.shade200),
                       },
                     ),
                   if (currentQuestion['type'] != 'matching')
@@ -621,10 +646,12 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
         children: [
           Expanded(
             child: Html(
-              data: '${index + 1}. $explanation',
+              data: _formatHtml('${index + 1}. $explanation'),
               style: {
                 "p":
                     Style(fontSize: FontSize(13), textAlign: TextAlign.justify),
+                "pre": Style(whiteSpace: WhiteSpace.pre, fontFamily: 'monospace', fontSize: FontSize(12)),
+                "code": Style(whiteSpace: WhiteSpace.pre, fontFamily: 'monospace', backgroundColor: Colors.grey.shade200),
               },
             ),
           ),
@@ -708,10 +735,12 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
             const SizedBox(width: 10),
             Expanded(
               child: Html(
-                data: text,
+                data: _formatHtml(text),
                 style: {
                   "p": Style(
-                      textAlign: TextAlign.justify, fontSize: FontSize(16))
+                      textAlign: TextAlign.justify, fontSize: FontSize(16)),
+                  "pre": Style(whiteSpace: WhiteSpace.pre, fontFamily: 'monospace', fontSize: FontSize(14)),
+                  "code": Style(whiteSpace: WhiteSpace.pre, fontFamily: 'monospace', backgroundColor: Colors.grey.shade200),
                 },
               ),
             ),
@@ -761,7 +790,12 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
             const SizedBox(width: 10),
             Expanded(
                 child: Html(
-                    data: text, style: {"p": Style(fontSize: FontSize(16))})),
+                    data: _formatHtml(text),
+                    style: {
+                      "p": Style(fontSize: FontSize(16)),
+                      "pre": Style(whiteSpace: WhiteSpace.pre, fontFamily: 'monospace', fontSize: FontSize(14)),
+                      "code": Style(whiteSpace: WhiteSpace.pre, fontFamily: 'monospace', backgroundColor: Colors.grey.shade200),
+                    })),
           ],
         ),
       ),

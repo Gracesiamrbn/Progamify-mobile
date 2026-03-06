@@ -16,7 +16,6 @@ class QuestExcerciseScreen extends StatefulWidget {
 }
 
 class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
-  // Quest
   int questId = 0;
   dynamic selectedAnswer;
   List<int> selectedAnswers = [];
@@ -25,9 +24,36 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
   late Future<Map<String, dynamic>> _questionsFuture;
   Map<String, dynamic>? result;
   final Logger log = Logger();
-
-  // Logger
   final logger = Logger();
+
+  // Escape karakter HTML secara manual (pengganti HtmlEscape yang
+  // tidak tersedia di Flutter's dart:convert)
+  String _escapeHtml(String text) {
+    return text
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+  }
+
+  // formatting helper
+  String _formatHtml(String raw) {
+    if (raw.isEmpty) return '';
+    String result = raw;
+    result =
+        result.replaceAllMapped(RegExp(r'```(?:\w*\n)?([\s\S]*?)```'), (m) {
+      final code = m[1] ?? '';
+      final encoded = _escapeHtml(code);
+      return '<pre><code>$encoded</code></pre>';
+    });
+    result = result.replaceAllMapped(RegExp(r'`([^`]+)`'), (m) {
+      final code = m[1] ?? '';
+      final encoded = _escapeHtml(code);
+      return '<code>$encoded</code>';
+    });
+    return result;
+  }
 
   // Timer
   int _seconds = 0;
@@ -99,7 +125,6 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
     });
     try {
       var response = await QuestService().submitQuest(questId, jawabanUser);
-      // _showSubmissionResult(response);
       _showResultDialog(
         context,
         result?["quest"]["is_correct"] ?? false,
@@ -124,7 +149,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
       userAnswers.clear();
       jawabanUser.clear();
       result = null;
-      _seconds = 0; // Will be reset when fetching new quest
+      _seconds = 0;
       _timer?.cancel();
       _questionsFuture = Future.delayed(const Duration(seconds: 2), () async {
         var data = await QuestService().getQuest(widget.userId);
@@ -299,10 +324,6 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               return _buildLoadingScreen();
             }
 
-            // Handle case where the backend returns "record not found" or
-            // simply there is no quest to display. Instead of surfacing an
-            // error to the user we show a dedicated screen with a message and
-            // keep the exit button available.
             if (snapshot.hasError || !snapshot.hasData) {
               _stopSoundEffect();
               return _buildEmptyQuestScreen();
@@ -312,8 +333,6 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               final response = snapshot.data!;
 
               questId = response["ID"];
-
-              final question = response["content"];
 
               final type = response["type"];
 
@@ -372,13 +391,10 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                 response["answers"].forEach((answer) {
                   var option = {"id": answer["ID"], "text": answer["content"]};
                   options.add(option);
-
-                  // Log setiap jawaban yang diproses
                   logger.d(
                       "Added answer option: ID=${answer["ID"]}, Text=${answer["content"]}");
                 });
 
-                // Log hasil list options setelah semua jawaban diproses
                 logger.i("Final options list: $options");
 
                 questions = {
@@ -392,7 +408,6 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                   'type': "multiple_answer"
                 };
 
-                // Log informasi akhir tentang pertanyaan yang diproses
                 logger.i(
                     "Question processed successfully: ID=${response["ID"]}, Type=multiple_answer");
               } else {
@@ -476,10 +491,18 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Html(data: response["content"], style: {
+                        Html(data: _formatHtml(response["content"]), style: {
                           "p": Style(
                               fontSize: FontSize(18),
                               textAlign: TextAlign.justify),
+                          "pre": Style(
+                              whiteSpace: WhiteSpace.pre,
+                              fontFamily: 'monospace',
+                              fontSize: FontSize(14)),
+                          "code": Style(
+                              whiteSpace: WhiteSpace.pre,
+                              fontFamily: 'monospace',
+                              backgroundColor: Colors.grey.shade200),
                         }),
                         const SizedBox(height: 20),
                         if (isPreview)
@@ -540,8 +563,6 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
     );
   }
 
-  /// When there is no quest data (e.g. record not found) we present a
-  /// simple screen informing the user and still allow them to exit the flow.
   Widget _buildEmptyQuestScreen() {
     return Scaffold(
       appBar: AppBar(
@@ -622,13 +643,8 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
     debugPrint("📌 resultnya di buildpreview: $result");
     final answer = result?['answer'] ?? {};
 
-    // final int? correctAnswerId = answer['correct_answer_id'];
     final int? correctAnswerIndex = answer['correct_answer_index'];
     final List<dynamic>? correctAnswersIndex = answer['correct_answers_index'];
-    // final List<int>? correctAnswers = answer['correct_answers'];
-    // final int? userAnswerId = answer['user_answer_id'];
-    // final int? userAnswerIndex = answer['user_answer_index'];
-    // final List<int>? userAnswers = answer['user_answers'];
     final String? textAnswer = answer['user_answer'];
     final String? explanation = answer['feedback'];
     final bool isCorrect = result['is_correct'];
@@ -712,7 +728,6 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                 border: Border.all(color: Colors.grey),
               ),
               child: Text('$correctAnswer')),
-          if (explanation != null) _buildExplanation(explanation),
           const SizedBox(height: 20),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -774,7 +789,6 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               style: TextStyle(color: Colors.red, fontSize: 16),
             ),
           ],
-          if (explanation != null) _buildExplanation(explanation),
           const SizedBox(height: 20),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -831,7 +845,6 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               style: TextStyle(color: Colors.red, fontSize: 16),
             ),
           ],
-          if (explanation != null) _buildExplanation(explanation),
           const SizedBox(height: 20),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -885,7 +898,6 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               "Jawaban Anda salah",
               style: TextStyle(color: Colors.red, fontSize: 16),
             ),
-          if (explanation != null) _buildExplanation(explanation),
           const SizedBox(height: 20),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -911,13 +923,6 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
     Color circleColor;
     Color borderColor;
 
-    // Debugging logs
-    // debugPrint("========== DEBUG: _buildOptionPreview ==========");
-    // debugPrint("Index: $index");
-    // debugPrint("Selected Answer: $selectedAnswer");
-    // debugPrint("Correct Answer ID: $correctAnswerIndex");
-    // debugPrint("isSelected: $isSelected, isCorrect: $isCorrect");
-
     if (isSelected) {
       bgColor = isCorrect ? const Color(0xFF44C4A1) : const Color(0xFFEB4747);
       circleColor =
@@ -939,9 +944,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: borderColor,
-        ),
+        border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.2),
@@ -963,8 +966,18 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
           Flexible(
             fit: FlexFit.loose,
             child: Html(
-              data: text,
-              style: {"p": Style(fontSize: FontSize(16))},
+              data: _formatHtml(text),
+              style: {
+                "p": Style(fontSize: FontSize(16)),
+                "pre": Style(
+                    whiteSpace: WhiteSpace.pre,
+                    fontFamily: 'monospace',
+                    fontSize: FontSize(14)),
+                "code": Style(
+                    whiteSpace: WhiteSpace.pre,
+                    fontFamily: 'monospace',
+                    backgroundColor: Colors.grey.shade200),
+              },
             ),
           ),
         ],
@@ -1015,21 +1028,31 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
         children: [
           Checkbox(
             value: isSelected,
-            onChanged: null, // Preview, jadi tidak bisa diubah
+            onChanged: null,
           ),
           const SizedBox(width: 10),
           CircleAvatar(
             backgroundColor: circleColor,
             child: Text(
-              String.fromCharCode(65 + index), // A, B, C, D...
+              String.fromCharCode(65 + index),
               style: const TextStyle(color: Colors.black),
             ),
           ),
           const SizedBox(width: 10),
           Expanded(
             child: Html(
-              data: text,
-              style: {"p": Style(fontSize: FontSize(16))},
+              data: _formatHtml(text),
+              style: {
+                "p": Style(fontSize: FontSize(16)),
+                "pre": Style(
+                    whiteSpace: WhiteSpace.pre,
+                    fontFamily: 'monospace',
+                    fontSize: FontSize(14)),
+                "code": Style(
+                    whiteSpace: WhiteSpace.pre,
+                    fontFamily: 'monospace',
+                    backgroundColor: Colors.grey.shade200),
+              },
             ),
           ),
         ],
@@ -1087,7 +1110,6 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
           color: Colors.blue,
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
-            // 🔥 Tambahkan shadow
             BoxShadow(
               color: Colors.grey.withOpacity(0.2),
               spreadRadius: 2,
@@ -1095,7 +1117,6 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               offset: const Offset(0, 3),
             ),
           ],
-          // border: Border.all(color: Colors.grey),
         ),
         child: Html(
           data: """
@@ -1142,32 +1163,6 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
       );
     }
 
-    if (type == 'shortAnswer') {
-      TextEditingController textController = TextEditingController();
-
-      if (selectedAnswer != null) {
-        textController.text = selectedAnswer;
-      }
-
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: TextField(
-          controller: textController,
-          maxLines: 1,
-          decoration: InputDecoration(
-            hintText: "Masukkan jawaban Anda...",
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          onChanged: (value) {
-            selectedAnswer = value;
-            _saveUserAnswer(selectedAnswer, 0, question);
-          },
-        ),
-      );
-    }
-
     if (options.isEmpty) {
       return const Text("No options available",
           style: TextStyle(color: Colors.red));
@@ -1182,8 +1177,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
       );
     } else if (type == 'multiple_answer') {
       return SizedBox(
-        height: MediaQuery.of(context).size.height *
-            0.5, // Maksimal 50% tinggi layar
+        height: MediaQuery.of(context).size.height * 0.5,
         child: ListView.builder(
           itemCount: options.length,
           itemBuilder: (context, index) {
@@ -1296,9 +1290,8 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
             const SizedBox(width: 10),
             Flexible(
               fit: FlexFit.loose,
-              // Wrap Html with Expanded to give it space
               child: Html(
-                data: text,
+                data: _formatHtml(text),
                 style: {
                   "p": Style(
                       textAlign: TextAlign.justify, fontSize: FontSize(16)),
@@ -1322,7 +1315,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
         });
       },
       child: Container(
-        width: 142, // Ukuran kartu biar pas berdampingan
+        width: 142,
         height: 142,
         margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         decoration: BoxDecoration(
@@ -1420,8 +1413,6 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                   result =
                       await QuestService().submitQuest(questId, jawabanUser);
 
-                  // Logger().i(result);
-
                   setState(() {
                     isPreview = true;
                   });
@@ -1514,8 +1505,8 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                 ),
               ),
               onPressed: () {
-                Navigator.pop(context); // Tutup dialog
-                Navigator.pop(context); // Kembali ke halaman sebelumnya
+                Navigator.pop(context);
+                Navigator.pop(context);
               },
               child: const Text(
                 'Yes, Quit',
@@ -1530,8 +1521,6 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
   }
 
   void _saveUserAnswer(String answer, int indexJawaban, dynamic question) {
-    // jawabanUser[indexSoal] = answer;
-
     if (question["type"] == "multiple_choice") {
       Map<String, dynamic> detailJawaban = {
         "question_id": question["id"],
@@ -1539,7 +1528,6 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
         "answer_text": question["options"][indexJawaban]["text"],
         "index_jawaban": indexJawaban
       };
-      // jawabanUser[indexSoal] = detailJawaban;
       jawabanUser = detailJawaban;
     } else if (question["type"] == "true_false") {
       Map<String, dynamic> detailJawaban = {
@@ -1547,7 +1535,6 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
         "answer_text": question["options"][indexJawaban],
         "index_jawaban": indexJawaban
       };
-      // jawabanUser[indexSoal] = detailJawaban;
       jawabanUser = detailJawaban;
     } else if (question["type"] == "essay" ||
         question["type"] == "shortAnswer") {
@@ -1556,7 +1543,6 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
         "index_jawaban": 0,
         "answer_text": answer,
       };
-      // jawabanUser[indexSoal] = detailJawaban;
       jawabanUser = detailJawaban;
     } else if (question["type"] == "multiple_answer") {
       List<Map<String, dynamic>> answers = [];
@@ -1564,7 +1550,6 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
         for (var ans in selectedAnswers) {
           answers.add({
             "answer_id": question["options"][ans]["id"],
-            // "answer_text": question["options"][ans]["text"],
           });
         }
       }
@@ -1573,11 +1558,8 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
         "answers": answers,
         "index_jawaban": selectedAnswers
       };
-      // jawabanUser[indexSoal] = detailJawaban;
       jawabanUser = detailJawaban;
     }
-
-    // logger.i(jawabanUser);
   }
 
   void _showLoadingDialog() {
@@ -1627,26 +1609,20 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
           body: SafeArea(
             child: Column(
               children: [
-                // Wrap the main content in a SingleChildScrollView for responsiveness
                 Expanded(
                   child: SingleChildScrollView(
-                    // <--- Added SingleChildScrollView here
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 10), // Optional: add some horizontal padding
+                        horizontal: 20, vertical: 10),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize
-                          .min, // Use min to let Column take only necessary space
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Lottie.asset(
                           isCorrect
                               ? 'assets/animation/Animation - 1742010178937.json'
                               : 'assets/animation/Animation - 1742010214972.json',
-                          width:
-                              275, // You might consider using a percentage of screen width or remove fixed width/height for more flexibility
-                          height:
-                              275, // and let it scale based on available space
+                          width: 275,
+                          height: 275,
                           fit: BoxFit.contain,
                         ),
                         const SizedBox(height: 20),
@@ -1663,14 +1639,10 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                         ),
                         if (isCorrect) ...[
                           const SizedBox(height: 20),
-                          // Use Wrap instead of Row for reward boxes to handle limited width
                           Wrap(
-                            // <--- Changed to Wrap
-                            alignment: WrapAlignment
-                                .center, // Center the items in the wrap
-                            spacing: 16.0, // Horizontal space between items
-                            runSpacing:
-                                16.0, // Vertical space between lines of items
+                            alignment: WrapAlignment.center,
+                            spacing: 16.0,
+                            runSpacing: 16.0,
                             children: [
                               _buildRewardBox(
                                   "Exp Gain",
@@ -1689,7 +1661,6 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                     ),
                   ),
                 ),
-                // The bottom button remains outside the scroll view so it's always visible
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: SizedBox(
@@ -1700,7 +1671,6 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                         Navigator.pop(context);
 
                         Future.delayed(const Duration(milliseconds: 300), () {
-                          // Added a null check for badges and check if it's not empty
                           if (badges.isNotEmpty) {
                             _showBadges(badges, 0, achievements);
                           }
@@ -1771,10 +1741,10 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
               children: [
                 Image.asset(
                   iconPath,
-                  width: 24, // Atur ukuran ikon
+                  width: 24,
                   height: 24,
                 ),
-                const SizedBox(width: 8), // Jarak antara ikon dan teks
+                const SizedBox(width: 8),
                 Text(
                   "$value",
                   style: const TextStyle(
@@ -1842,7 +1812,6 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                         ),
                         child: Column(
                           children: [
-                            // Bagian tengah tetap rata tengah
                             Expanded(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -1886,7 +1855,6 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                                 ],
                               ),
                             ),
-                            // Tombol di bawah
                             Align(
                               alignment: Alignment.bottomCenter,
                               child: SizedBox(

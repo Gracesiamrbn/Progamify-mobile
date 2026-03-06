@@ -28,6 +28,24 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
   late Future<Map<String, dynamic>> _questionsFuture;
   Map<int, dynamic> jawabanUser = {};
 
+  // same helper as in ExerciseScreen to render markdown-style code blocks
+  String _formatHtml(String raw) {
+    if (raw.isEmpty) return '';
+    String result = raw;
+    result = result.replaceAllMapped(
+        RegExp(r'```(?:\w*\n)?([\s\S]*?)```'), (m) {
+      final code = m[1] ?? '';
+      final encoded = const HtmlEscape().convert(code);
+      return '<pre><code>$encoded</code></pre>';
+    });
+    result = result.replaceAllMapped(RegExp(r'`([^`]+)`'), (m) {
+      final code = m[1] ?? '';
+      final encoded = const HtmlEscape().convert(code);
+      return '<code>$encoded</code>';
+    });
+    return result;
+  }
+
   final logger = Logger();
 
   @override
@@ -318,11 +336,13 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
                   // Soal (tampilan berbeda untuk matching)
                   if (question['type'] != 'matching') ...[
                     Html(
-                        data: question["question"] ?? "Soal tidak tersedia",
+                        data: _formatHtml(question["question"] ?? "Soal tidak tersedia"),
                         style: {
                           "p": Style(
                               fontSize: FontSize(18),
-                              textAlign: TextAlign.justify)
+                              textAlign: TextAlign.justify),
+                          "pre": Style(whiteSpace: WhiteSpace.pre, fontFamily: 'monospace', fontSize: FontSize(14)),
+                          "code": Style(whiteSpace: WhiteSpace.pre, fontFamily: 'monospace', backgroundColor: Colors.grey.shade200),
                         }),
                     const SizedBox(height: 20),
                   ] else ...[
@@ -707,8 +727,12 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
             children: [
               Expanded(
                   child: Html(
-                      data: "${i + 1}. ${explanations[i]}",
-                      style: {"p": Style(fontSize: FontSize(14))})),
+                      data: _formatHtml('${i + 1}. ${explanations[i]}'),
+                      style: {
+                        "p": Style(fontSize: FontSize(14)),
+                        "pre": Style(whiteSpace: WhiteSpace.pre, fontFamily: 'monospace', fontSize: FontSize(12)),
+                        "code": Style(whiteSpace: WhiteSpace.pre, fontFamily: 'monospace', backgroundColor: Colors.grey.shade200),
+                      })),
               const SizedBox(width: 10),
               Icon(isCorrect ? Icons.check_circle : Icons.cancel,
                   color: isCorrect ? Colors.green : Colors.red),
@@ -755,7 +779,12 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
           const SizedBox(width: 10),
           Expanded(
               child: Html(
-                  data: text, style: {"p": Style(fontSize: FontSize(16))})),
+                  data: _formatHtml(text),
+                  style: {
+                    "p": Style(fontSize: FontSize(16)),
+                    "pre": Style(whiteSpace: WhiteSpace.pre, fontFamily: 'monospace', fontSize: FontSize(14)),
+                    "code": Style(whiteSpace: WhiteSpace.pre, fontFamily: 'monospace', backgroundColor: Colors.grey.shade200),
+                  })),
         ],
       ),
     );
@@ -786,7 +815,12 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
           const SizedBox(width: 10),
           Expanded(
               child: Html(
-                  data: text, style: {"p": Style(fontSize: FontSize(16))})),
+                  data: _formatHtml(text),
+                  style: {
+                    "p": Style(fontSize: FontSize(16)),
+                    "pre": Style(whiteSpace: WhiteSpace.pre, fontFamily: 'monospace', fontSize: FontSize(14)),
+                    "code": Style(whiteSpace: WhiteSpace.pre, fontFamily: 'monospace', backgroundColor: Colors.grey.shade200),
+                  })),
         ],
       ),
     );
