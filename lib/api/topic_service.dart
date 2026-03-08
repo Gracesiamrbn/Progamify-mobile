@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:progamify/api/auth_service.dart';
@@ -29,8 +30,8 @@ class TopicService {
               'id': topic['id'],
               'title': topic['name'] ?? 'Untitled Topic',
               'sections': topic['total_lessons'] + topic['total_exercises'],
-              'completed':
-                  topic['total_take_lessons'] + topic['total_take_exercises'],
+              'completed': min<int>(topic['total_take_lessons'] as int, topic['total_lessons'] as int) +
+                  min<int>(topic['total_take_exercises'] as int, topic['total_exercises'] as int),
               'total_lessons': topic['total_lessons'],
               'total_exercises': topic['total_exercises'],
             };

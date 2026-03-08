@@ -334,7 +334,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     List<Map<String, dynamic>> userAnswers = [];
 
     if (isExercise && topic["isCompleted"]) {
-      Map<String, dynamic> result = exerciseTaken.firstWhere(
+      Map<String, dynamic> result = exerciseTaken.lastWhere(
         (map) => map["exercise_id"] == topic["id"],
         orElse: () => {},
       );

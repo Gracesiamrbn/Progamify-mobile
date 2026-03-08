@@ -25,15 +25,15 @@ class ExerciseViewScreen extends StatefulWidget {
 class ExerciseViewScreenState extends State<ExerciseViewScreen> {
   int currentQuestionIndex = 0;
   final ScrollController _scrollController = ScrollController();
-  late Future<Map<String, dynamic>> _questionsFuture;
+  List<Map<String, dynamic>> questions = [];
   Map<int, dynamic> jawabanUser = {};
 
   // same helper as in ExerciseScreen to render markdown-style code blocks
   String _formatHtml(String raw) {
     if (raw.isEmpty) return '';
     String result = raw;
-    result = result.replaceAllMapped(
-        RegExp(r'```(?:\w*\n)?([\s\S]*?)```'), (m) {
+    result =
+        result.replaceAllMapped(RegExp(r'```(?:\w*\n)?([\s\S]*?)```'), (m) {
       final code = m[1] ?? '';
       final encoded = const HtmlEscape().convert(code);
       return '<pre><code>$encoded</code></pre>';
@@ -51,7 +51,6 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
   @override
   void initState() {
     super.initState();
-    _questionsFuture = ExerciseService().getExercise(widget.exerciseId);
 
     // server might return the answers either as a map (keyed by question id)
     // or as a list of objects.  We want to build a lookup map so that
@@ -76,12 +75,154 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
             jawabanUser[key] = ans;
           }
         }
+      } else if (rawAnswers is String) {
+        try {
+          final decoded = jsonDecode(rawAnswers);
+          if (decoded is Map) {
+            jawabanUser = ExerciseService().convertJawabanUserStringToInt(
+                Map<String, dynamic>.from(decoded));
+          } else if (decoded is List) {
+            jawabanUser = {};
+            for (var ans in decoded) {
+              if (ans is Map && ans["question_id"] != null) {
+                final qid = ans["question_id"];
+                final key = qid is String ? int.tryParse(qid) ?? qid : qid;
+                jawabanUser[key] = ans;
+              }
+            }
+          }
+        } catch (e) {
+          jawabanUser = {};
+        }
       } else {
         jawabanUser = {};
       }
     }
 
     logger.i('jawaban user= $jawabanUser');
+    _prepareQuestions();
+  }
+
+  void _prepareQuestions() {
+    List<dynamic> questionsData = [];
+    dynamic rawAnswers = widget.userAnswers["answers"];
+    if (rawAnswers is String) {
+      try {
+        rawAnswers = jsonDecode(rawAnswers);
+      } catch (e) {}
+    }
+
+    // Extract question data directly from the submitted answers response.
+    // This allows us to review the exact questions that the user just answered.
+    if (rawAnswers is Map) {
+      var keys = rawAnswers.keys.toList();
+      keys.sort((a, b) {
+        var aInt = int.tryParse(a.toString()) ?? 0;
+        var bInt = int.tryParse(b.toString()) ?? 0;
+        return aInt.compareTo(bInt);
+      });
+      for (var k in keys) {
+        var ans = rawAnswers[k];
+        if (ans is Map && ans["question"] != null) {
+          questionsData.add(ans["question"]);
+        }
+      }
+    } else if (rawAnswers is List) {
+      for (var ans in rawAnswers) {
+        if (ans is Map && ans["question"] != null) {
+          questionsData.add(ans["question"]);
+        }
+      }
+    }
+
+    // fallback in case the rawAnswers strategy missed them
+    if (questionsData.isEmpty) {
+      for (var value in jawabanUser.values) {
+        if (value is Map && value["question"] != null) {
+          questionsData.add(value["question"]);
+        }
+      }
+    }
+
+    questions.clear();
+    for (int i = 0; i < questionsData.length; i++) {
+      var q = questionsData[i] as Map<String, dynamic>;
+      var type = q["type"] as String?;
+
+      Map<String, dynamic> parsed = {
+        'id': q["ID"],
+        'question': q["content"],
+        'explanation': q["feedback"] ?? "Tidak ada penjelasan.",
+        'exp': q["exp"] ?? 0,
+        'pts': q["point"] ?? 0,
+        'type': type,
+        'q_index': i,
+      };
+
+      if (type == "multiple_choice" || type == "multiple_answer") {
+        final opts = <Map<String, dynamic>>[];
+        for (var ans in (q["answers"] as List? ?? [])) {
+          opts.add({
+            "id": ans["ID"],
+            "text": ans["content"],
+            "is_correct": ans["is_correct"]
+          });
+        }
+        parsed['options'] = opts;
+      } else if (type == "true_false") {
+        parsed['options'] = ["True", "False"];
+      } else if (type == "essay" ||
+          type == 'shortAnswer' ||
+          type == 'short' ||
+          type == 'short_answer') {
+        if (q["answers"] != null) {
+          final opts = <Map<String, dynamic>>[];
+          for (var ans in (q["answers"] as List? ?? [])) {
+            opts.add({
+              "id": ans["ID"],
+              "text": ans["content"],
+              "is_correct": ans["is_correct"],
+            });
+          }
+          parsed['options'] = opts;
+        }
+      } else if (type == "matching") {
+        List<String> keywords = [];
+        Set<String> uniqueExp = {};
+
+        dynamic data = q["content"];
+        if (data is String) {
+          try {
+            data = jsonDecode(data);
+          } catch (_) {}
+        }
+        if (data is List) {
+          for (var item in data) {
+            if (item is Map) {
+              if (item["keyword"] != null) {
+                keywords.add(item["keyword"].toString());
+              }
+              if (item["explanation"] != null) {
+                uniqueExp.add(item["explanation"].toString());
+              }
+            }
+          }
+        }
+        if (keywords.isEmpty && q["answers"] != null) {
+          for (var ans in (q["answers"] as List? ?? [])) {
+            if (ans["keyword"] != null) {
+              keywords.add(ans["keyword"].toString());
+            }
+            if (ans["explanation"] != null) {
+              uniqueExp.add(ans["explanation"].toString());
+            }
+          }
+        }
+        parsed['keywords'] = keywords;
+        parsed['explanations'] = uniqueExp.toList();
+      }
+      questions.add(parsed);
+    }
   }
 
   void _nextQuestion(List<Map<String, dynamic>> questions) {
@@ -142,268 +283,188 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Map<String, dynamic>>(
-      future: _questionsFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError || !snapshot.hasData) {
-          return const Center(child: Text('Tidak ada soal tersedia'));
-        }
-
-        final questionsData = snapshot.data!["questions"] as List;
-        final List<Map<String, dynamic>> questions = [];
-
-        for (int i = 0; i < questionsData.length; i++) {
-          var q = questionsData[i] as Map<String, dynamic>;
-          var type = q["type"] as String?;
-
-          Map<String, dynamic> parsed = {
-            'id': q["ID"],
-            'question': q["content"],
-            'explanation': q["feedback"] ?? "Tidak ada penjelasan.",
-            'exp': q["exp"] ?? 0,
-            'pts': q["point"] ?? 0,
-            'type': type,
-            'q_index': i,
-          };
-
-          if (type == "multiple_choice" || type == "multiple_answer") {
-            final opts = <Map<String, dynamic>>[];
-            for (var ans in (q["answers"] as List? ?? [])) {
-              opts.add({
-                "id": ans["ID"],
-                "text": ans["content"],
-                "is_correct": ans["is_correct"]
-              });
-            }
-            parsed['options'] = opts;
-          } else if (type == "true_false") {
-            parsed['options'] = ["True", "False"];
-          } else if (type == "essay" ||
-              type == 'shortAnswer' ||
-              type == 'short' ||
-              type == 'short_answer') {
-            // some exercise definitions may include a single correct answer
-            // in the answers array even for essay/short answer types.
-            if (q["answers"] != null) {
-              final opts = <Map<String, dynamic>>[];
-              for (var ans in (q["answers"] as List? ?? [])) {
-                opts.add({
-                  "id": ans["ID"],
-                  "text": ans["content"],
-                  "is_correct": ans["is_correct"],
-                });
-              }
-              parsed['options'] = opts;
-            }
-          } else if (type == "matching") {
-            List<String> keywords = [];
-            Set<String> uniqueExp = {};
-
-            dynamic data = q["content"];
-            if (data is String) {
-              try {
-                data = jsonDecode(data);
-              } catch (_) {}
-            }
-            if (data is List) {
-              for (var item in data) {
-                if (item is Map) {
-                  if (item["keyword"] != null) {
-                    keywords.add(item["keyword"].toString());
-                  }
-                  if (item["explanation"] != null) {
-                    uniqueExp.add(item["explanation"].toString());
-                  }
-                }
-              }
-            }
-            if (keywords.isEmpty && q["answers"] != null) {
-              for (var ans in (q["answers"] as List? ?? [])) {
-                if (ans["keyword"] != null) {
-                  keywords.add(ans["keyword"].toString());
-                }
-                if (ans["explanation"] != null) {
-                  uniqueExp.add(ans["explanation"].toString());
-                }
-              }
-            }
-            parsed['keywords'] = keywords;
-            parsed['explanations'] = uniqueExp.toList();
-          }
-          questions.add(parsed);
-        }
-
-        final question = questions[currentQuestionIndex];
-        final userAnswer = _getUserAnswer(question['id']);
-        final expGained = userAnswer?["exp_gained"] ?? 0;
-        final pointGained = userAnswer?["point_gained"] ?? 0;
-
-        return Scaffold(
-          appBar: AppBar(
-            backgroundColor: Colors.blue,
-            elevation: 0,
-            automaticallyImplyLeading: false,
-            title: Row(
-              children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                  decoration: BoxDecoration(
-                      color: Colors.deepPurple,
-                      borderRadius: BorderRadius.circular(8)),
-                  child: Text('+$expGained exp',
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontSize: 13)),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                  decoration: BoxDecoration(
-                      color: Colors.orangeAccent,
-                      borderRadius: BorderRadius.circular(8)),
-                  child: Text('+$pointGained pts',
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontSize: 13)),
-                ),
-                const Spacer(),
-                GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
-                    decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(10)),
-                    child: const Row(children: [
-                      Text('Exit',
-                          style: TextStyle(color: Colors.white, fontSize: 17)),
-                      SizedBox(width: 4),
-                      Icon(Icons.exit_to_app, color: Colors.white),
-                    ]),
-                  ),
-                ),
-              ],
-            ),
+    if (questions.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.blue,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
           ),
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Navigator soal
-                  SizedBox(
-                    height: 50,
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      scrollDirection: Axis.horizontal,
-                      itemCount: questions.length,
-                      itemBuilder: (context, i) {
-                        bool active = i == currentQuestionIndex;
-                        return GestureDetector(
-                          onTap: () => _goToQuestion(i),
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 5),
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: active
-                                  ? const Color(0xFF6FBAFF)
-                                  : Colors.grey[300],
-                            ),
-                            alignment: Alignment.center,
-                            child: Text('${i + 1}',
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    color: active ? Colors.white : Colors.black,
-                                    fontWeight: FontWeight.bold)),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 20),
+          title: const Text('Review', style: TextStyle(color: Colors.white)),
+        ),
+        body: const Center(child: Text('Tidak ada soal tersedia')),
+      );
+    }
 
-                  // Soal (tampilan berbeda untuk matching)
-                  if (question['type'] != 'matching') ...[
-                    Html(
-                        data: _formatHtml(question["question"] ?? "Soal tidak tersedia"),
-                        style: {
-                          "p": Style(
-                              fontSize: FontSize(18),
-                              textAlign: TextAlign.justify),
-                          "pre": Style(whiteSpace: WhiteSpace.pre, fontFamily: 'monospace', fontSize: FontSize(14)),
-                          "code": Style(whiteSpace: WhiteSpace.pre, fontFamily: 'monospace', backgroundColor: Colors.grey.shade200),
-                        }),
-                    const SizedBox(height: 20),
-                  ] else ...[
-                    // when it's a matching question we don't want to dump the
-                    // JSON blob; just show an instruction instead
-                    const Text(
-                      'Pasangan keyword dan penjelasan',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
+    final question = questions[currentQuestionIndex];
+    final userAnswer = _getUserAnswer(question['id']);
+    final expGained = userAnswer?["exp_gained"] ?? 0;
+    final pointGained = userAnswer?["point_gained"] ?? 0;
 
-                  // Jawaban User
-                  _buildUserAnswer(question, userAnswer),
-
-                  const SizedBox(height: 30),
-
-                  // Penjelasan + Kunci Jawaban
-                  _buildExplanationWithAnswer(question, userAnswer),
-
-                  const SizedBox(height: 30),
-
-                  // Navigasi
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed:
-                            currentQuestionIndex > 0 ? _previousQuestion : null,
-                        icon: const Icon(Icons.arrow_back, color: Colors.white),
-                        label: const Text('Previous',
-                            style: TextStyle(color: Colors.white)),
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: currentQuestionIndex > 0
-                                ? const Color(0xFF6FBAFF)
-                                : Colors.grey),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: currentQuestionIndex < questions.length - 1
-                            ? () => _nextQuestion(questions)
-                            : null,
-                        icon: const Icon(Icons.arrow_forward,
-                            color: Colors.white),
-                        label: const Text('Next',
-                            style: TextStyle(color: Colors.white)),
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                currentQuestionIndex < questions.length - 1
-                                    ? const Color(0xFF6FBAFF)
-                                    : Colors.grey),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                ],
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.blue,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+              decoration: BoxDecoration(
+                  color: Colors.deepPurple,
+                  borderRadius: BorderRadius.circular(8)),
+              child: Text('+$expGained exp',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 13)),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+              decoration: BoxDecoration(
+                  color: Colors.orangeAccent,
+                  borderRadius: BorderRadius.circular(8)),
+              child: Text('+$pointGained pts',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 13)),
+            ),
+            const Spacer(),
+            GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
+                decoration: BoxDecoration(
+                    color: Colors.red, borderRadius: BorderRadius.circular(10)),
+                child: const Row(children: [
+                  Text('Exit',
+                      style: TextStyle(color: Colors.white, fontSize: 17)),
+                  SizedBox(width: 4),
+                  Icon(Icons.exit_to_app, color: Colors.white),
+                ]),
               ),
             ),
+          ],
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Navigator soal
+              SizedBox(
+                height: 50,
+                child: ListView.builder(
+                  controller: _scrollController,
+                  scrollDirection: Axis.horizontal,
+                  itemCount: questions.length,
+                  itemBuilder: (context, i) {
+                    bool active = i == currentQuestionIndex;
+                    return GestureDetector(
+                      onTap: () => _goToQuestion(i),
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 5),
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: active
+                              ? const Color(0xFF6FBAFF)
+                              : Colors.grey[300],
+                        ),
+                        alignment: Alignment.center,
+                        child: Text('${i + 1}',
+                            style: TextStyle(
+                                fontSize: 18,
+                                color: active ? Colors.white : Colors.black,
+                                fontWeight: FontWeight.bold)),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Soal (tampilan berbeda untuk matching)
+              if (question['type'] != 'matching') ...[
+                Html(
+                    data: _formatHtml(
+                        question["question"] ?? "Soal tidak tersedia"),
+                    style: {
+                      "p": Style(
+                          fontSize: FontSize(18), textAlign: TextAlign.justify),
+                      "pre": Style(
+                          whiteSpace: WhiteSpace.pre,
+                          fontFamily: 'monospace',
+                          fontSize: FontSize(14)),
+                      "code": Style(
+                          whiteSpace: WhiteSpace.pre,
+                          fontFamily: 'monospace',
+                          backgroundColor: Colors.grey.shade200),
+                    }),
+                const SizedBox(height: 20),
+              ] else ...[
+                // when it's a matching question we don't want to dump the
+                // JSON blob; just show an instruction instead
+                const Text(
+                  'Pasangan keyword dan penjelasan',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 20),
+              ],
+
+              // Jawaban User
+              _buildUserAnswer(question, userAnswer),
+
+              const SizedBox(height: 30),
+
+              // Penjelasan + Kunci Jawaban
+              _buildExplanationWithAnswer(question, userAnswer),
+
+              const SizedBox(height: 30),
+
+              // Navigasi
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed:
+                        currentQuestionIndex > 0 ? _previousQuestion : null,
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    label: const Text('Previous',
+                        style: TextStyle(color: Colors.white)),
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: currentQuestionIndex > 0
+                            ? const Color(0xFF6FBAFF)
+                            : Colors.grey),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: currentQuestionIndex < questions.length - 1
+                        ? () => _nextQuestion(questions)
+                        : null,
+                    icon: const Icon(Icons.arrow_forward, color: Colors.white),
+                    label: const Text('Next',
+                        style: TextStyle(color: Colors.white)),
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            currentQuestionIndex < questions.length - 1
+                                ? const Color(0xFF6FBAFF)
+                                : Colors.grey),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -455,7 +516,23 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
     if (options.isEmpty) return const SizedBox.shrink();
 
     if (type == 'true_false') {
-      final idx = userAnswer?["user_answer_index"] as int? ?? -1;
+      int idx = -1;
+      final rawIdx =
+          userAnswer?["user_answer_index"] ?? userAnswer?["index_jawaban"];
+      if (rawIdx != null) {
+        idx = int.tryParse(rawIdx.toString()) ?? -1;
+      }
+      if (idx == -1 && userAnswer != null) {
+        final text = userAnswer["answer_text"]?.toString().toLowerCase();
+        if (text != null && text.isNotEmpty) {
+          if (text == "true" || text == "benar") {
+            idx = 0;
+          } else if (text == "false" || text == "salah") {
+            idx = 1;
+          }
+        }
+      }
+
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: List.generate(
@@ -466,9 +543,23 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
     }
 
     if (type == 'multiple_answer') {
-      final selectedRaw = userAnswer?["user_answer_index"];
-      final selected =
-          (selectedRaw is List) ? selectedRaw.cast<int>() : <int>[];
+      final selectedRaw =
+          userAnswer?["user_answer_index"] ?? userAnswer?["index_jawaban"];
+      List<int> selected = [];
+      if (selectedRaw is List) {
+        selected =
+            selectedRaw.map((e) => int.tryParse(e.toString()) ?? -1).toList();
+      }
+      if (selected.isEmpty && userAnswer != null) {
+        final answerIds = userAnswer["answers"];
+        if (answerIds is List && answerIds.isNotEmpty) {
+          for (int i = 0; i < options.length; i++) {
+            if (options[i] is Map && answerIds.contains(options[i]["id"])) {
+              selected.add(i);
+            }
+          }
+        }
+      }
 
       return Column(
         children: List.generate(
@@ -484,7 +575,25 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
     }
 
     // multiple_choice
-    final idx = userAnswer?["user_answer_index"] as int? ?? -1;
+    int idx = -1;
+    final rawIdx =
+        userAnswer?["user_answer_index"] ?? userAnswer?["index_jawaban"];
+    if (rawIdx != null) {
+      idx = int.tryParse(rawIdx.toString()) ?? -1;
+    }
+
+    if (idx == -1 && userAnswer != null) {
+      final answerId = userAnswer["user_answer_id"] ?? userAnswer["answer_id"];
+      if (answerId != null) {
+        for (int i = 0; i < options.length; i++) {
+          if (options[i] is Map && options[i]["id"] == answerId) {
+            idx = i;
+            break;
+          }
+        }
+      }
+    }
+
     return Column(
       children: List.generate(
           options.length,
@@ -729,10 +838,16 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
                   child: Html(
                       data: _formatHtml('${i + 1}. ${explanations[i]}'),
                       style: {
-                        "p": Style(fontSize: FontSize(14)),
-                        "pre": Style(whiteSpace: WhiteSpace.pre, fontFamily: 'monospace', fontSize: FontSize(12)),
-                        "code": Style(whiteSpace: WhiteSpace.pre, fontFamily: 'monospace', backgroundColor: Colors.grey.shade200),
-                      })),
+                    "p": Style(fontSize: FontSize(14)),
+                    "pre": Style(
+                        whiteSpace: WhiteSpace.pre,
+                        fontFamily: 'monospace',
+                        fontSize: FontSize(12)),
+                    "code": Style(
+                        whiteSpace: WhiteSpace.pre,
+                        fontFamily: 'monospace',
+                        backgroundColor: Colors.grey.shade200),
+                  })),
               const SizedBox(width: 10),
               Icon(isCorrect ? Icons.check_circle : Icons.cancel,
                   color: isCorrect ? Colors.green : Colors.red),
@@ -748,14 +863,62 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
     );
   }
 
-  // Widget pendukung lainnya tetap sama seperti sebelumnya
+  // Widget pendukung lainnya
   Widget _buildOptionCard(dynamic question, int index, String text,
       {int? selectedIndex}) {
     final isSelected = selectedIndex == index;
-    final isCorrect =
-        _getUserAnswer(question['id'])?["correct_answer_index"] == index;
-    final bgColor =
-        isSelected ? (isCorrect ? Colors.green : Colors.red) : Colors.white;
+    final userAnswer = _getUserAnswer(question['id']);
+
+    bool isCorrect = false;
+    final options = question['options'] as List<dynamic>? ?? [];
+    if (index >= 0 && index < options.length) {
+      final opt = options[index];
+      if (opt is Map) {
+        if (opt["is_correct"] == true || opt["is_correct"] == 1) {
+          isCorrect = true;
+        } else if (opt["id"] != null &&
+            opt["id"] == userAnswer?["correct_answer_id"]) {
+          isCorrect = true;
+        }
+      }
+    }
+
+    if (!isCorrect && userAnswer?["correct_answer_index"] == index) {
+      isCorrect = true;
+    }
+
+    Color bgColor = Colors.white;
+    Color textColor = Colors.black;
+    bool isActive = false;
+
+    if (userAnswer == null) {
+      // In history mode, highlight correct option
+      if (isCorrect) {
+        bgColor = Colors.green;
+        textColor = Colors.white;
+        isActive = true;
+      }
+    } else {
+      // Review mode with available user answer
+      if (isSelected && userAnswer["is_correct"] == true ||
+          userAnswer["is_correct"] == 1) {
+        isCorrect = true;
+      } else if (isSelected &&
+          (userAnswer["is_correct"] == false ||
+              userAnswer["is_correct"] == 0)) {
+        isCorrect = false;
+      }
+
+      if (isSelected) {
+        bgColor = isCorrect ? Colors.green : Colors.red;
+        textColor = Colors.white;
+        isActive = true;
+      } else if (isCorrect) {
+        bgColor = Colors.green;
+        textColor = Colors.white;
+        isActive = true;
+      }
+    }
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 6),
@@ -769,22 +932,24 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
       child: Row(
         children: [
           CircleAvatar(
-              backgroundColor: isSelected
-                  ? (isCorrect ? Colors.green : Colors.red)
-                  : Colors.grey.shade400,
+              backgroundColor: isActive ? bgColor : Colors.grey.shade400,
               child: Text(String.fromCharCode(65 + index),
                   style: TextStyle(
-                      color: isSelected ? Colors.white : Colors.black,
+                      color: isActive ? textColor : Colors.black,
                       fontWeight: FontWeight.bold))),
           const SizedBox(width: 10),
           Expanded(
-              child: Html(
-                  data: _formatHtml(text),
-                  style: {
-                    "p": Style(fontSize: FontSize(16)),
-                    "pre": Style(whiteSpace: WhiteSpace.pre, fontFamily: 'monospace', fontSize: FontSize(14)),
-                    "code": Style(whiteSpace: WhiteSpace.pre, fontFamily: 'monospace', backgroundColor: Colors.grey.shade200),
-                  })),
+              child: Html(data: _formatHtml(text), style: {
+            "p": Style(fontSize: FontSize(16)),
+            "pre": Style(
+                whiteSpace: WhiteSpace.pre,
+                fontFamily: 'monospace',
+                fontSize: FontSize(14)),
+            "code": Style(
+                whiteSpace: WhiteSpace.pre,
+                fontFamily: 'monospace',
+                backgroundColor: Colors.grey.shade200),
+          })),
         ],
       ),
     );
@@ -792,13 +957,35 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
 
   Widget _buildCheckboxOption(dynamic question, int index, String text,
       {bool isSelected = false}) {
-    final correctIndices =
-        (_getUserAnswer(question['id'])?["correct_answer_index"] as List?)
-                ?.cast<int>() ??
-            [];
-    final isCorrect = correctIndices.contains(index);
-    final bgColor =
-        isSelected ? (isCorrect ? Colors.green : Colors.red) : Colors.white;
+    final userAnswer = _getUserAnswer(question['id']);
+    bool isCorrect = false;
+
+    final options = question['options'] as List<dynamic>? ?? [];
+    if (index >= 0 && index < options.length) {
+      final opt = options[index];
+      if (opt is Map && (opt["is_correct"] == true || opt["is_correct"] == 1)) {
+        isCorrect = true;
+      }
+    }
+
+    if (!isCorrect) {
+      final correctIndices =
+          (userAnswer?["correct_answer_index"] as List?)?.cast<int>() ?? [];
+      if (correctIndices.contains(index)) {
+        isCorrect = true;
+      }
+    }
+
+    Color bgColor = Colors.white;
+    if (userAnswer == null) {
+      if (isCorrect) bgColor = Colors.green;
+    } else {
+      if (isSelected) {
+        bgColor = isCorrect ? Colors.green : Colors.red;
+      } else if (isCorrect) {
+        bgColor = Colors.green;
+      }
+    }
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 6),
@@ -814,13 +1001,17 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
           Checkbox(value: isSelected, onChanged: null),
           const SizedBox(width: 10),
           Expanded(
-              child: Html(
-                  data: _formatHtml(text),
-                  style: {
-                    "p": Style(fontSize: FontSize(16)),
-                    "pre": Style(whiteSpace: WhiteSpace.pre, fontFamily: 'monospace', fontSize: FontSize(14)),
-                    "code": Style(whiteSpace: WhiteSpace.pre, fontFamily: 'monospace', backgroundColor: Colors.grey.shade200),
-                  })),
+              child: Html(data: _formatHtml(text), style: {
+            "p": Style(fontSize: FontSize(16)),
+            "pre": Style(
+                whiteSpace: WhiteSpace.pre,
+                fontFamily: 'monospace',
+                fontSize: FontSize(14)),
+            "code": Style(
+                whiteSpace: WhiteSpace.pre,
+                fontFamily: 'monospace',
+                backgroundColor: Colors.grey.shade200),
+          })),
         ],
       ),
     );
@@ -829,10 +1020,40 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
   Widget _buildTrueFalseCard(dynamic question, int index, String text,
       {int? selectedIndex}) {
     final isSelected = selectedIndex == index;
-    final isCorrect =
-        _getUserAnswer(question['id'])?["correct_answer_index"] == index;
-    final bgColor =
-        isSelected ? (isCorrect ? Colors.green : Colors.red) : Colors.white;
+    final userAnswer = _getUserAnswer(question['id']);
+
+    bool isCorrect = false;
+    final options = question['options'] as List<dynamic>? ?? [];
+    if (index >= 0 && index < options.length) {
+      final opt = options[index];
+      if (opt is Map && (opt["is_correct"] == true || opt["is_correct"] == 1)) {
+        isCorrect = true;
+      }
+    }
+
+    if (!isCorrect && userAnswer?["correct_answer_index"] == index) {
+      isCorrect = true;
+    }
+
+    Color bgColor = Colors.white;
+    if (userAnswer == null) {
+      if (isCorrect) bgColor = Colors.green;
+    } else {
+      if (isSelected && userAnswer["is_correct"] == true ||
+          userAnswer["is_correct"] == 1) {
+        isCorrect = true;
+      } else if (isSelected &&
+          (userAnswer["is_correct"] == false ||
+              userAnswer["is_correct"] == 0)) {
+        isCorrect = false;
+      }
+
+      if (isSelected) {
+        bgColor = isCorrect ? Colors.green : Colors.red;
+      } else if (isCorrect) {
+        bgColor = Colors.green;
+      }
+    }
 
     return Container(
       width: 142,
@@ -842,15 +1063,15 @@ class ExerciseViewScreenState extends State<ExerciseViewScreen> {
           color: bgColor,
           borderRadius: BorderRadius.circular(15),
           border: Border.all(
-              color: isSelected
-                  ? (isCorrect ? Colors.green : Colors.red)
-                  : Colors.white,
+              color: (bgColor != Colors.white) ? bgColor : Colors.white,
               width: 2)),
       child: Center(
           child: Text(text,
               style: TextStyle(
                   fontSize: 18,
-                  color: isSelected ? Colors.white : Colors.black))),
+                  color: (bgColor != Colors.white)
+                      ? Colors.white
+                      : Colors.black))),
     );
   }
 }

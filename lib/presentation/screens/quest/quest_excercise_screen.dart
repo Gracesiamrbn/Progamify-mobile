@@ -6,6 +6,7 @@ import 'package:progamify/api/quest_service.dart';
 import 'package:logger/logger.dart';
 import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
+import 'dart:convert';
 
 class QuestExcerciseScreen extends StatefulWidget {
   final int userId;
@@ -410,6 +411,52 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
 
                 logger.i(
                     "Question processed successfully: ID=${response["ID"]}, Type=multiple_answer");
+              } else if (type == "matching") {
+                List<String> keywords = [];
+                final Set<String> uniqueExp = {};
+
+                dynamic contentData = response["content"];
+                if (contentData is String) {
+                  try {
+                    contentData = jsonDecode(contentData);
+                  } catch (_) {}
+                }
+
+                if (contentData is List) {
+                  for (final item in contentData) {
+                    if (item is Map) {
+                      if (item["keyword"] != null) {
+                        keywords.add(item["keyword"].toString());
+                      }
+                      if (item["explanation"] != null) {
+                        uniqueExp.add(item["explanation"].toString());
+                      }
+                    }
+                  }
+                }
+
+                if (keywords.isEmpty) {
+                  for (final ans in (response["answers"] as List? ?? [])) {
+                    if (ans["keyword"] != null) {
+                      keywords.add(ans["keyword"].toString());
+                    }
+                    if (ans["explanation"] != null) {
+                      uniqueExp.add(ans["explanation"].toString());
+                    }
+                  }
+                }
+
+                questions = {
+                  'id': response["ID"],
+                  'question': response["content"],
+                  'keywords': keywords,
+                  'explanations': uniqueExp.toList(),
+                  'correctAnswer': 0,
+                  'explanation': response["feedback"],
+                  'exp': response["exp"],
+                  'pts': response["point"],
+                  'type': "matching"
+                };
               } else {
                 logger.w("Unknown question type: ${response["type"]}");
               }
@@ -612,6 +659,19 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
   }
 
   Widget _buildAnswerMode(Map<String, dynamic> questions) {
+    bool canSubmit = false;
+    final type = questions['type'];
+    
+    if (type == 'matching') {
+      // For matching, check if all explanations have keywords selected
+      final answers = jawabanUser['answers'] as List<Map<String, dynamic>>? ?? [];
+      final explanations = questions['explanations'] as List<String>? ?? [];
+      canSubmit = answers.length == explanations.length && 
+                  answers.every((answer) => answer['keyword'] != null && answer['keyword'].toString().trim().isNotEmpty);
+    } else {
+      canSubmit = (selectedAnswer != null) || (selectedAnswers.isNotEmpty);
+    }
+    
     return Column(
       children: [
         _buildOptions(questions),
@@ -621,7 +681,7 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
             backgroundColor: Colors.blue,
             minimumSize: const Size(double.infinity, 50),
           ),
-          onPressed: ((selectedAnswer != null) || (selectedAnswers.isNotEmpty))
+          onPressed: canSubmit
               ? () => _showConfirmationDialog(questions)
               : null,
           child: const Text(
@@ -786,6 +846,59 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
             const SizedBox(height: 10),
             const Text(
               "Jawaban Anda salah :(",
+              style: TextStyle(color: Colors.red, fontSize: 16),
+            ),
+          ],
+          const SizedBox(height: 20),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              minimumSize: const Size(double.infinity, 50),
+            ),
+            onPressed: _takeAnotherQuest,
+            child: const Text(
+              'Ambil Quest Lain',
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+          ),
+        ],
+      );
+    } else if (type == 'matching') {
+      return Column(
+        children: [
+          _buildMatchingPreview(question, result),
+          if (isCorrect) ...[
+            const SizedBox(height: 10),
+            const Text(
+              "Jawaban Anda benar !",
+              style: TextStyle(color: Colors.green, fontSize: 16),
+            ),
+            const SizedBox(height: 5),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("+$rewardExp",
+                    style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.purple)),
+                const SizedBox(width: 5),
+                Image.asset('assets/icons/exp_point.png',
+                    width: 20, height: 20),
+                const SizedBox(width: 10),
+                Text("+$rewardPoint",
+                    style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amber)),
+                const SizedBox(width: 5),
+                Image.asset('assets/icons/coin.png', width: 20, height: 20),
+              ],
+            ),
+          ] else ...[
+            const SizedBox(height: 10),
+            const Text(
+              "Jawaban Anda salah :( ",
               style: TextStyle(color: Colors.red, fontSize: 16),
             ),
           ],
@@ -1060,6 +1173,212 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
     );
   }
 
+  Widget _buildMatching(Map<String, dynamic> question) {
+    final keywords = List<String>.from(question['keywords'] ?? []);
+    final explanations = List<String>.from(question['explanations'] ?? []);
+
+    if (!jawabanUser.containsKey('answers') || jawabanUser['answers'] == null) {
+      jawabanUser = {
+        'question_id': question['id'],
+        'type': 'matching',
+        'answers': List.generate(explanations.length, (_) => <String, dynamic>{}),
+      };
+    }
+
+    final answers = jawabanUser['answers'] as List<Map<String, dynamic>>;
+
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Row(
+            children: [
+              Expanded(
+                  child: Text('Explanation',
+                      style: TextStyle(fontWeight: FontWeight.bold))),
+              SizedBox(
+                width: 140,
+                child: Text(
+                  'Keyword',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        ListView.builder(
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemCount: explanations.length,
+          itemBuilder: (context, i) {
+            return _buildMatchingCard(
+              question: question,
+              index: i,
+              explanation: explanations[i],
+              keywords: keywords,
+              answers: answers,
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMatchingCard({
+    required Map<String, dynamic> question,
+    required int index,
+    required String explanation,
+    required List<String> keywords,
+    required List<Map<String, dynamic>> answers,
+  }) {
+    String? selectedKeyword;
+    if (index < answers.length) {
+      final saved = answers[index]['keyword'] as String?;
+      if (saved != null && saved.trim().isNotEmpty) {
+        selectedKeyword = saved.trim();
+      }
+    }
+
+    final uniqueKeywords = keywords.toSet().toList();
+
+    return Container(
+      margin: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Html(
+              data: _formatHtml('${index + 1}. $explanation'),
+              style: {
+                "p": Style(
+                    fontSize: FontSize(13), textAlign: TextAlign.justify),
+                "pre": Style(
+                    whiteSpace: WhiteSpace.pre,
+                    fontFamily: 'monospace',
+                    fontSize: FontSize(12)),
+                "code": Style(
+                    whiteSpace: WhiteSpace.pre,
+                    fontFamily: 'monospace',
+                    backgroundColor: Colors.grey.shade200),
+              },
+            ),
+          ),
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 140,
+            child: DropdownButtonFormField<String?>(
+              initialValue: selectedKeyword,
+              hint: const Text('Pilih keyword'),
+              isExpanded: true,
+              items: [
+                const DropdownMenuItem<String?>(
+                  value: null,
+                  child: Text('Pilih keyword',
+                      style: TextStyle(color: Colors.grey)),
+                ),
+                ...uniqueKeywords.map((kw) => DropdownMenuItem<String?>(
+                      value: kw.trim(),
+                      child: Text(kw.trim(),
+                          style: const TextStyle(fontSize: 13)),
+                    )),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  answers[index] = {
+                    'keyword': value?.trim(),
+                    'explanation': explanation,
+                  };
+                  _saveUserAnswer(value ?? '', 0, question);
+                });
+              },
+              decoration: InputDecoration(
+                isDense: true,
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8)),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMatchingPreview(dynamic question, dynamic result) {
+    final keywords = List<String>.from(question['keywords'] ?? []);
+    final explanations = List<String>.from(question['explanations'] ?? []);
+    final answers = jawabanUser['answers'] as List<Map<String, dynamic>>? ?? [];
+
+    return Column(
+      children: List.generate(explanations.length, (i) {
+        final correctKeyword = keywords.length > i ? keywords[i] : "Tidak tersedia";
+        final userMatch = i < answers.length ? answers[i] : <String, dynamic>{};
+        final userKeyword = (userMatch["keyword"] as String?)?.trim() ?? "Tidak dijawab";
+        final isCorrect = userKeyword == correctKeyword;
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: isCorrect
+                ? Colors.green.withOpacity(0.15)
+                : Colors.red.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+                color: isCorrect ? Colors.green : Colors.red, width: 2),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                  child: Html(
+                      data: _formatHtml('${i + 1}. ${explanations[i]}'),
+                      style: {
+                        "p": Style(fontSize: FontSize(14)),
+                        "pre": Style(
+                            whiteSpace: WhiteSpace.pre,
+                            fontFamily: 'monospace',
+                            fontSize: FontSize(12)),
+                        "code": Style(
+                            whiteSpace: WhiteSpace.pre,
+                            fontFamily: 'monospace',
+                            backgroundColor: Colors.grey.shade200),
+                      })),
+              const SizedBox(width: 10),
+              Icon(isCorrect ? Icons.check_circle : Icons.cancel,
+                  color: isCorrect ? Colors.green : Colors.red),
+              const SizedBox(width: 8),
+              Text(userKeyword,
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: isCorrect ? Colors.green : Colors.red)),
+            ],
+          ),
+        );
+      }),
+    );
+  }
+
   Widget _buildTrueFalsePreview(
       dynamic question, int index, String text, int? correctAnswerIndex) {
     bool isSelected = selectedAnswer == index;
@@ -1142,6 +1461,10 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
   Widget _buildOptions(dynamic question) {
     final String type = question['type'];
     final options = question['options'] ?? [];
+
+    if (type == 'matching') {
+      return _buildMatching(question);
+    }
 
     if (type == 'essay' || type == 'shortAnswer') {
       return Padding(
@@ -1406,7 +1729,19 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
                 ),
               ),
               onPressed: () async {
-                if (selectedAnswer != null || selectedAnswers.isNotEmpty) {
+                bool canSubmit = false;
+                final type = questions['type'];
+                
+                if (type == 'matching') {
+                  final answers = jawabanUser['answers'] as List<Map<String, dynamic>>? ?? [];
+                  final explanations = questions['explanations'] as List<String>? ?? [];
+                  canSubmit = answers.length == explanations.length && 
+                              answers.every((answer) => answer['keyword'] != null && answer['keyword'].toString().trim().isNotEmpty);
+                } else {
+                  canSubmit = (selectedAnswer != null) || (selectedAnswers.isNotEmpty);
+                }
+                
+                if (canSubmit) {
                   _timer?.cancel();
                   _showLoadingDialog();
 
@@ -1559,6 +1894,9 @@ class QuestExcerciseScreenState extends State<QuestExcerciseScreen> {
         "index_jawaban": selectedAnswers
       };
       jawabanUser = detailJawaban;
+    } else if (question["type"] == "matching") {
+      // For matching, jawabanUser is already set in _buildMatching
+      // No need to do anything here
     }
   }
 

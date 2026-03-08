@@ -44,7 +44,7 @@ class ExerciseResultScreenState extends State<ExerciseResultScreen> {
 
   Future<void> fetchExerciseData() async {
     try {
-      final id = widget.userAnswers[0]['exercise_id'];
+      final id = widget.userAnswers.last['exercise_id'];
       final data = await ExerciseService().getExercise(id);
       setState(() {
         exerciseData = data;
@@ -59,7 +59,7 @@ class ExerciseResultScreenState extends State<ExerciseResultScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, dynamic> result = widget.userAnswers[0];
+    final Map<String, dynamic> result = widget.userAnswers.last;
 
     Logger().i(result);
 

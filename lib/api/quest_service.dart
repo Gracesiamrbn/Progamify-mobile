@@ -73,6 +73,13 @@ class QuestService {
         "index_jawaban": jawabanUser["index_jawaban"].toString(),
       };
     } else if (jawabanUser["type"] == "multiple_answer") {}
+    else if (jawabanUser["type"] == "matching") {
+      return {
+        "question_id": jawabanUser["question_id"],
+        "answers": jawabanUser["answers"],
+        "index_jawaban": jawabanUser["index_jawaban"] ?? 0,
+      };
+    }
     return jawabanUser;
   }
 

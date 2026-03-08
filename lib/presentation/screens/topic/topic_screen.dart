@@ -6,6 +6,7 @@ import 'package:progamify/api/topic_service.dart';
 import 'topic_detail_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:math';
 
 class TopicsScreen extends StatefulWidget {
   const TopicsScreen({super.key});
@@ -50,8 +51,8 @@ class _TopicsScreenState extends State<TopicsScreen> {
                     'title': topic['name'] ?? 'Untitled Topic',
                     'sections':
                         topic['total_lessons'] + topic['total_exercises'],
-                    'completed': topic['total_take_lessons'] +
-                        topic['total_take_exercises'],
+                    'completed': min<int>(topic['total_take_lessons'] as int, topic['total_lessons'] as int) +
+                        min<int>(topic['total_take_exercises'] as int, topic['total_exercises'] as int),
                     'total_lessons': topic['total_lessons'],
                     'total_exercises': topic['total_exercises']
                   })
