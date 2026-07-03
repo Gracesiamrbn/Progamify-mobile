@@ -8,10 +8,11 @@ class ExerciseService {
       dotenv.env["BASE_URL_API"] ?? "http://194.163.40.203:8080/api";
   final AuthService authService = AuthService();
 
-  Future<Map<String, dynamic>> getExercise(int id) async {
+  Future<Map<String, dynamic>> getExercise(int id, {bool all = false}) async {
     String? token = await authService.getToken();
+    final String url = all ? '$baseUrl/exercises/$id?all=true' : '$baseUrl/exercises/$id';
     final response = await http.get(
-      Uri.parse('$baseUrl/exercises/$id'),
+      Uri.parse(url),
       headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
